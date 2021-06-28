@@ -11,13 +11,12 @@ The basic definitions are used from `Uniswap V3 Whitepaper <https://uniswap.org/
 The pool is assumed to contain ``X`` and ``Y`` tokens and lower ``x`` and ``y`` are the amounts of the tokens respectively.
 
 portfolio
-~~~~~~~~~
+---------
 
 .. automodule:: strategy.portfolio
-    :members:
 
 uni
-~~~
+---
 
 .. automodule:: strategy.uni
     :members:

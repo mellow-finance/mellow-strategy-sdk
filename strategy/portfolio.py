@@ -1,6 +1,11 @@
 """
 ``portfolio`` module contains basic definitions for positions and composite positions (portfolio)
 on Uniswap V3
+
+class Position
+~~~~~~~~~~~~~~
+.. autoclass:: Position
+    :members:
 """
 
 from strategy.uni import y_per_l

@@ -1,6 +1,4 @@
-API
+Strategy
 ========
 
-strategy
---------
 .. automodule:: strategy
