@@ -7,6 +7,7 @@ class PositionHistory
     :members:
 """
 
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,18 +20,6 @@ class PositionHistory:
     Each time ``snapshot`` method is called it remembers current state in time.
     All tracked values then can be accessed via ``data`` method that will return a ``pandas`` Dataframe.
     Or can be plotted using ``plot`` method.
-
-    The list of tracked values:
-        - `a` - Left bound of liquidity interval (price)
-        - `b` - Right bound of liquidity interval (price)
-        - `c` - Current price
-        - `fee_per_l` - fees that could ber earned available per unit of liquidity at current time
-        - `l` - Liquidity of the position
-        - `al` - Active liquidity of the position (i.e. `l` when `c` is in (a, b), 0 o/w)
-        - `fee` - fee earned at current time
-        - `fees` - cumulative fees earned at current time
-        - `y` - value of the position denominated in ``Y`` token
-        - `y_and_fees` - `y` + `fees`
     """
 
     def __init__(self, pos: Position):
@@ -51,26 +40,55 @@ class PositionHistory:
         self._data = pd.DataFrame([], cols=self.cols, index=pd.DatetimeIndex())
         self.fees = 0
 
-    def snapshot(self, t, price, fee_per_l):
+    def snapshot(self, t: datetime, c: float, fee_per_l: float):
+        """
+        Write current state
+
+        :param t: Time for state snapshot
+        :param c: Price at time ``t``
+        :param fee_per_l: Total fees at Uniswap V3 pool per total liquidity at time ``t``
+        """
         self._data.loc[t] = [np.nan] * len(self.cols)
-        self._data["c"][t] = price
+        self._data["c"][t] = c
         self._data["fee_per_l"][t] = fee_per_l
         self._data["l"][t] = self.pos.l
-        self._data["al"][t] = self.pos.active_l(price)
-        self._data["y"][t] = self.pos.y(price)
+        self._data["al"][t] = self.pos.active_l(c)
+        self._data["y"][t] = self.pos.y(c)
         self._data["a"][t] = self.pos.a()
         self._data["b"][t] = self.pos.b()
-        self._data["il"][t] = self.pos.il(price)
-        fee = self.pos.active_l(price) * fee_per_l
+        self._data["il"][t] = self.pos.il(c)
+        fee = self.pos.active_l(c) * fee_per_l
         self.fees += fee
         self._data["fee"][t] = fee
         self._data["fees"][t] = self.fees
         self._data["y_and_fees"][t] = self.data["y"][t] + self.fees
 
-    def data(self):
+    def data(self) -> pd.DataFrame:
+        """
+        Tracking data
+
+        The list of tracked values:
+
+        - `a` - Left bound of liquidity interval (price)
+        - `b` - Right bound of liquidity interval (price)
+        - `c` - Current price
+        - `fee_per_l` - fees that could ber earned available per unit of liquidity at current time
+        - `l` - Liquidity of the position
+        - `al` - Active liquidity of the position (i.e. `l` when `c` is in (a, b), 0 o/w)
+        - `fee` - fee earned at current time
+        - `fees` - cumulative fees earned at current time
+        - `y` - value of the position denominated in ``Y`` token
+        - `y_and_fees` - `y` + `fees`
+        """
         return self._data
 
     def plot(self, sizex=20, sizey=10):
+        """
+        Plot tracking data
+
+        :param sizex: `x` size of one chart
+        :param sizey: `y` size of one chart
+        """
         fig, axes = plt.subplots(5, 2, figsize=(sizex, sizey))
         axes[0, 0].plot(self.data["c"], color="#00bb00")
         axes[0, 0].plot(self.data["a"], color="#0000bb")
