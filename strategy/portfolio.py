@@ -2,17 +2,6 @@
 ``portfolio`` module contains basic definitions for positions and composite positions (portfolio)
 on Uniswap V3
 
-class Position
-~~~~~~~~~~~~~~
-.. autoclass:: Position
-    :members:
-
-class Portfolio
-~~~~~~~~~~~~~~~
-.. autoclass:: Portfolio
-    :members:
-    :show-inheritance:
-
 """
 
 from typing import List
