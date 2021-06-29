@@ -6,8 +6,17 @@ class Position
 ~~~~~~~~~~~~~~
 .. autoclass:: Position
     :members:
+
+class Portfolio
+~~~~~~~~~~~~~~~
+.. autoclass:: Portfolio
+    :members:
+    :show-inheritance:
+
 """
 
+from typing import List
+import numpy as np
 from strategy.uni import y_per_l
 
 
@@ -81,9 +90,9 @@ class Position:
         """
         return self._a
 
-    def a(self, new_a: float, c: float):
+    def set_a(self, new_a: float, c: float):
         """
-        Sets the new left interval bound. The position is fully withdrawn and then deposited in the new interval.
+        Sets the new left interval bound. The position is fully withdrawn and then deposited into the new interval.
 
         :param new_a: New Left price bound value
         :param c: Current price
@@ -99,9 +108,9 @@ class Position:
 
         return self._b
 
-    def b(self, new_b: float, c: float):
+    def set_b(self, new_b: float, c: float):
         """
-        Sets the new right interval bound. The position is fully withdrawn and then deposited in the new interval.
+        Sets the new right interval bound. The position is fully withdrawn and then deposited into the new interval.
 
         :param new_a: New right price bound value
         :param c: Current price
@@ -134,3 +143,91 @@ class Position:
 
     def __str__(self):
         return f"(a: {self.a}, b: {self.b}, l: {self.l})"
+
+
+class Portfolio(Position):
+    """
+    ``Portfolio`` is a container for several open positions.
+    It also conforms to ``Position`` interface, aggregating all positions values.
+    Note that children positions of ``Portfolio`` can also be other ``Portfolio`` objects.
+    """
+
+    def __init__(self, positions: List[Position] = []):
+        self._positions = {pos.id: pos for pos in positions}
+
+    def add_position(self, position: Position):
+        """
+        Adds position to portfolio
+
+        :param position: Position to add
+        """
+        self._positions[position.id] = position
+
+    def remove_position(self, position_id: str):
+        """
+        Removes a position from portfolio
+
+        :param position_id: Id of the position to remove
+        """
+        del self._positions[position_id]
+
+    def positions(self) -> List[Position]:
+        """
+        A set of all open positions
+
+        :return: a list of open positions.
+        """
+        return self._positions.values()
+
+    def position(self, id: str) -> Position:
+        """
+        A position with specified ``id``
+
+        :param id: Id of the position
+        :returns: A position with that id. Raises a KeyError if id is not found.
+        """
+        return self._positions[id]
+
+    def deposit(self, с: float, y: float) -> float:
+        res = 0
+        total_y = self.y(с)
+        for pos in self.positions():
+            res += pos.deposit(с, pos.y(с) / total_y * y)
+        return res
+
+    def withdraw(self, с: float, l: float) -> float:
+        res = 0
+        total_l = self.l()
+        for pos in self.positions():
+            res += pos.withdraw(с, pos.l() / total_l * l)
+        return res
+
+    def y(self, с: float) -> float:
+        res = 0
+        [res := res + pos.y(с) for pos in self.positions()]
+        return res
+
+    def il(self, с: float) -> float:
+        res = 0
+        [res := res + pos.il(с) for pos in self.positions()]
+        return res
+
+    def a(self) -> float:
+        res = np.infty
+        [res := np.min(res, pos.a()) for pos in self.positions()]
+        return res
+
+    def b(self) -> float:
+        res = 0
+        [res := np.max(res, pos.b()) for pos in self.positions()]
+        return res
+
+    def l(self) -> float:
+        res = 0
+        [res := res + pos.l() for pos in self.positions()]
+        return res
+
+    def active_l(self) -> float:
+        res = 0
+        [res := res + pos.active_l() for pos in self.positions()]
+        return res
