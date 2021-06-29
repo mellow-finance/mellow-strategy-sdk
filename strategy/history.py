@@ -1,10 +1,5 @@
 """
 ``history`` module models Portfolio and Position spanning over time
-
-class PositionHistory
-~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: PositionHistory
-    :members:
 """
 
 from datetime import datetime

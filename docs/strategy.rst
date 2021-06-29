@@ -8,6 +8,6 @@ Strategy
    :maxdepth: 2
    :caption: Strategy modules
 
-   portfolio
-   history
-   uni
+   strategy/portfolio
+   strategy/history
+   strategy/uni

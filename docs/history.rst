@@ -1,3 +1,0 @@
-history
--------
-.. automodule:: strategy.history
