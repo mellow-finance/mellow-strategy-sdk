@@ -15,6 +15,10 @@ portfolio
 
 .. automodule:: strategy.portfolio
 
+history
+-------
+.. automodule:: strategy.history
+
 uni
 ---
 
