@@ -47,7 +47,7 @@ class RawData:
         return pd.read_csv(StringIO(csv_string))
 
 
-data = PoolData(Pool.ETHWBTC, Frequency.HOUR)
+data = RawData(Pool.ETHWBTC, Frequency.HOUR)
 print(data.burns)
 print(data.mints)
 print(data.swaps)
