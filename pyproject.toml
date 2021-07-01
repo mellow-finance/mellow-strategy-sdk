@@ -1,0 +1,18 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "strategy"
+dist-name = "mellow-strategy-sdk"
+author = "Alex K"
+author-email = "ak@mellow.finance"
+home-page = "https://github.com/mellow-finance/mellow-strategy-sdk"
+classifiers = [ "License :: OSI Approved :: MIT License",]
+description-file = "README.md"
+requires-python=">=3.5"
+requires=["numpy", "pandas","matplotlib"]
+
+[tool.flit.sdist]
+include = ["src/"]
+
