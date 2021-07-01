@@ -36,7 +36,7 @@ class PositionHistory:
         ]
         self._data = pd.DataFrame([], columns=self.cols)
 
-    def snapshot(self, t: datetime, c: float, fee_per_l: float):
+    def snapshot(self, t: datetime, c: Decimal, fee_per_l: Decimal):
         """
         Write current state
 
