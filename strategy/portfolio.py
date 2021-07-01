@@ -4,8 +4,10 @@ on Uniswap V3
 
 """
 
+from datetime import datetime
 from typing import List
 import numpy as np
+import pandas as pd
 from strategy.uni import y_per_l
 
 
@@ -177,6 +179,9 @@ class Portfolio(Position):
         """
         return self._positions[id]
 
+    def position_ids(self) -> List[str]:
+        return self._positions.keys()
+
     def deposit(self, с: float, y: float) -> float:
         res = 0
         total_y = self.y(с)
@@ -220,3 +225,16 @@ class Portfolio(Position):
         res = 0
         [res := res + pos.active_l() for pos in self.positions()]
         return res
+
+
+class AbstractStrategy:
+    def __init__(self):
+        self._portfolio = Portfolio()
+
+    def rebalance(
+        self, t: datetime, prices: pd.Series, fees0: pd.Series, fees1: pd.Series
+    ):
+        raise NotImplemented
+
+    def portfolio(self):
+        return self._portfolio

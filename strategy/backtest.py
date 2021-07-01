@@ -3,10 +3,11 @@
 """
 
 from datetime import datetime
+from strategy.data import PoolData
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from strategy.portfolio import Position, Portfolio
+from strategy.portfolio import AbstractStrategy, Position, Portfolio
 
 
 class PositionHistory:
@@ -33,7 +34,6 @@ class PositionHistory:
             "fee_per_l",
         ]
         self._data = pd.DataFrame([], cols=self.cols, index=pd.DatetimeIndex())
-        self.fees = 0
 
     def snapshot(self, t: datetime, c: float, fee_per_l: float):
         """
@@ -53,9 +53,7 @@ class PositionHistory:
         self._data["b"][t] = self.pos.b()
         self._data["il"][t] = self.pos.il(c)
         fee = self.pos.active_l(c) * fee_per_l
-        self.fees += fee
         self._data["fee"][t] = fee
-        self._data["fees"][t] = self.fees
         self._data["y_and_fees"][t] = self.data["y"][t] + self.fees
 
     def data(self) -> pd.DataFrame:
@@ -107,19 +105,54 @@ class PositionHistory:
         axes[4, 0].set_title("Impermanent loss")
 
 
-class PortfolioHistory(PositionHistory):
-    def __init__(self, portfolio: Portfolio, index: pd.Index):
-        self._portfolio_history = PositionHistory(portfolio, index)
-        self._position_history = [
-            PortfolioHistory(pos, index) for pos in portfolio.positions()
-        ]
+class PortfolioHistory:
+    def __init__(self, portfolio: Portfolio):
+        self._portfolio = portfolio
+        self._portfolio_history = PositionHistory(portfolio)
+        self._positions_history = {}
 
     def snapshot(self, t, price, fee_per_l):
-        self._position.snapshot(t, price, fee_per_l)
-        for pos in self._positions:
-            pos.snapshot(t, price, fee_per_l)
+        self._portfolio_history.snapshot(t, price, fee_per_l)
+        for id in self._portfolio.position_ids():
+            pos = self.position(id)
+            if id not in self._positions_history:
+                self._positions_history[id] = PositionHistory(pos)
+            hist = self._positions_history[id]
+            hist.snapshot(price, fee_per_l)
 
     def plot(self, sizex=20, sizey=10):
-        self._position.plot(sizex, sizey)
-        for pos in self._positions:
+        self._portfolio_history.plot(sizex, sizey)
+        for pos in self._positions_history.values():
             pos.plot(sizex, sizey)
+
+
+class Backtest:
+    def __init__(self, strategy: AbstractStrategy):
+        self._strategy = strategy
+        self._history = None
+
+    def run(self, pool_data: PoolData):
+        portfolio = self._strategy.portfolio()
+        self._history = PortfolioHistory(portfolio)
+
+        data = pool_data.data()
+        fee = float(pool_data.pool().fee.value) / 100000
+        for t in data.index:
+            self._strategy.rebalance(
+                t, data["c"], data["vol0"] * fee, data["vol1"] * fee
+            )
+            c = data["c"][t]
+            fee0 = data["vol0"][t] * fee
+            fee1 = data["vol1"][t] * fee
+            fee = fee0 * c + fee1
+            l = pool_data.liquidity(t, c)
+            fee_per_l = fee / l
+            self._history.snapshot(t, c, fee_per_l)
+
+    def history(self):
+        return self._history
+
+    def plot(self, sizex=20, sizey=10):
+        if not self._history:
+            raise Exception("Please call `run` method first")
+        self._history.plot(sizex=sizex, sizey=sizey)

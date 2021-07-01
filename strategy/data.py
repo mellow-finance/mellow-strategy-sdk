@@ -96,17 +96,20 @@ class PoolData:
         df["l"] = raw_data.swaps["liquidity"].transform(
             lambda x: Decimal(x) / 10 ** liquidity_decimals_diff
         )
-        self.data = pd.DataFrame()
+        self._data = pd.DataFrame()
         mean = lambda x: np.nan if len(x) == 0 else Decimal(np.mean(x))
         sum = lambda x: np.sum(x)
-        self.data["c"] = df["c"].resample(freq.value).agg(mean).ffill()
-        self.data["c_inv"] = 1 / self.data["c"]
-        self.data["vol0"] = df["vol0"].resample(freq.value).agg(sum)
-        self.data["vol1"] = df["vol1"].resample(freq.value).agg(sum)
-        self.data["l"] = df["l"].resample(freq.value).agg(mean)
+        self._data["c"] = df["c"].resample(freq.value).agg(mean).ffill()
+        self._data["c_inv"] = 1 / self._data["c"]
+        self._data["vol0"] = df["vol0"].resample(freq.value).agg(sum)
+        self._data["vol1"] = df["vol1"].resample(freq.value).agg(sum)
+        self._data["l"] = df["l"].resample(freq.value).agg(mean)
 
     def pool(self) -> Pool:
         return self._pool
+
+    def data(self) -> pd.DataFrame:
+        return self._data
 
     def liquidity(self, t: datetime, c: float):
         res = 0
@@ -133,23 +136,23 @@ class PoolData:
             f"Stats for {self._pool.token0().value} - {self._pool.token1().value} pool",
             fontsize=16,
         )
-        axes[0, 0].plot(self.data["c"], color="#bb6600")
+        axes[0, 0].plot(self._data["c"], color="#bb6600")
         axes[0, 0].set_title(
             f"Price {self._pool.token1().value} / {self._pool.token0().value}"
         )
         axes[0, 0].tick_params(axis="x", labelrotation=45)
-        axes[0, 1].plot(self.data["c_inv"], color="#00bbbb")
+        axes[0, 1].plot(self._data["c_inv"], color="#00bbbb")
         axes[0, 1].set_title(
             f"Price {self._pool.token0().value} / {self._pool.token1().value}"
         )
         axes[0, 1].tick_params(axis="x", labelrotation=45)
-        axes[1, 0].plot(self.data["vol0"], color="#bb6600")
+        axes[1, 0].plot(self._data["vol0"], color="#bb6600")
         axes[1, 0].set_title(f"Trading volume {self._pool.token0().value}")
         axes[1, 0].tick_params(axis="x", labelrotation=45)
-        axes[1, 1].plot(self.data["vol1"], color="#00bbbb")
+        axes[1, 1].plot(self._data["vol1"], color="#00bbbb")
         axes[1, 1].set_title(f"Trading volume {self._pool.token1().value}")
         axes[1, 1].tick_params(axis="x", labelrotation=45)
-        axes[2, 0].plot(self.data["l"], color="#0000bb")
+        axes[2, 0].plot(self._data["l"], color="#0000bb")
         axes[2, 0].set_title(f"Liquidity dynamics")
         axes[2, 0].tick_params(axis="x", labelrotation=45)
 
@@ -162,15 +165,15 @@ class PoolData:
         )
 
         liq_start = int(
-            np.log(float(self.data["c"].min() / Decimal(10 ** decimals_diff) / 2))
+            np.log(float(self._data["c"].min() / Decimal(10 ** decimals_diff) / 2))
             / np.log(1.0001)
         )
         liq_end = int(
-            np.log(float(self.data["c"].max() / Decimal(10 ** decimals_diff) * 2))
+            np.log(float(self._data["c"].max() / Decimal(10 ** decimals_diff) * 2))
             / np.log(1.0001)
         )
         liq_x = np.linspace(liq_start, liq_end, 200)
-        t = self.data.index[-1]
+        t = self._data.index[-1]
         axes[2, 1].plot(
             [1.0001 ** x * 10 ** decimals_diff for x in liq_x],
             [current_liquidity.at(x) / 10 ** liquidity_decimals_diff for x in liq_x],
