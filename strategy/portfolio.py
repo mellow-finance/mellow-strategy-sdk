@@ -147,8 +147,12 @@ class Portfolio(Position):
     Note that children positions of ``Portfolio`` can also be other ``Portfolio`` objects.
     """
 
-    def __init__(self, positions: List[Position] = []):
+    def __init__(self, id: str = "Portfolio", positions: List[Position] = []):
         self._positions = {pos.id: pos for pos in positions}
+        self._id = id
+
+    def id(self):
+        return self._id
 
     def add_position(self, position: Position):
         """

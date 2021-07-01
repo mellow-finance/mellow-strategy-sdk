@@ -55,7 +55,8 @@ class PositionHistory:
         self._data["il"][t] = self._pos.il(c)
         fee = self._pos.active_l(c) * fee_per_l
         self._data["fee"][t] = fee
-        self._data["y_and_fees"][t] = self._data["y"][t] + self._data["fee"].sum()
+        self._data["fees"][t] = self._data["fee"].sum()
+        self._data["y_and_fees"][t] = self._data["y"][t] + self._data["fees"][t]
 
     def data(self) -> pd.DataFrame:
         """
@@ -84,26 +85,39 @@ class PositionHistory:
         :param sizey: `y` size of one chart
         """
         fig, axes = plt.subplots(5, 2, figsize=(sizex, sizey))
+        fig.suptitle(
+            f"Stats for {self._pos.id()}",
+            fontsize=16,
+        )
         axes[0, 0].plot(self._data["c"], color="#00bb00")
         axes[0, 0].plot(self._data["a"], color="#0000bb")
         axes[0, 0].plot(self._data["b"], color="#0000bb")
+        axes[0, 0].tick_params(axis="x", labelrotation=45)
         axes[0, 0].set_title("Price and bounds")
         axes[0, 1].plot(self._data["fee_per_l"], color="#777777")
         axes[0, 1].set_title("Fee per liquidity unit")
-        axes[1, 0].plot(self._data["al"], color="#0000bb")
+        axes[0, 1].tick_params(axis="x", labelrotation=45)
+        axes[1, 0].plot(self._data["al"], color="#00bbbb")
         axes[1, 0].set_title("Active liquidity")
-        axes[1, 1].plot(self._data["l"], color="#0000bb")
+        axes[1, 0].tick_params(axis="x", labelrotation=45)
+        axes[1, 1].plot(self._data["l"], color="#00bbbb")
         axes[1, 1].set_title("Liquidity")
+        axes[1, 1].tick_params(axis="x", labelrotation=45)
         axes[2, 0].plot(self._data["y"], color="#0000bb")
         axes[2, 0].set_title("Y value")
+        axes[2, 0].tick_params(axis="x", labelrotation=45)
         axes[2, 1].plot(self._data["y_and_fees"], color="#0000bb")
         axes[2, 1].set_title("Y value + fees")
+        axes[2, 1].tick_params(axis="x", labelrotation=45)
         axes[3, 0].plot(self._data["fee"], color="#0000bb")
         axes[3, 0].set_title("Current fees")
+        axes[3, 0].tick_params(axis="x", labelrotation=45)
         axes[3, 1].plot(self._data["fees"], color="#0000bb")
         axes[3, 1].set_title("Accumulated fees")
-        axes[4, 0].plot(self._data["il"], color="#0000bb")
+        axes[3, 1].tick_params(axis="x", labelrotation=45)
+        axes[4, 0].plot(self._data["il"], color="#bb00bb")
         axes[4, 0].set_title("Impermanent loss")
+        axes[4, 0].tick_params(axis="x", labelrotation=45)
 
 
 class PortfolioHistory:
