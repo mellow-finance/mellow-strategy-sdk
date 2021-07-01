@@ -1,11 +1,12 @@
 import sys
 import os
 
-sys.path.append(os.path.abspath("../src"))
+root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(root)
 
 
 import subprocess
-from primitives import Pool, POOLS
+from strategy.primitives import Pool, POOLS
 
 user = os.getenv("USER")
 host = os.getenv("HOST")
