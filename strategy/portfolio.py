@@ -5,7 +5,7 @@ on Uniswap V3
 """
 
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 import numpy as np
 import pandas as pd
 from strategy.uni import y_per_l
@@ -170,13 +170,15 @@ class Portfolio(Position):
         """
         return self._positions.values()
 
-    def position(self, id: str) -> Position:
+    def position(self, id: str) -> Optional[Position]:
         """
         A position with specified ``id``
 
         :param id: Id of the position
-        :returns: A position with that id. Raises a KeyError if id is not found.
+        :returns: A position with that id. None if id not found.
         """
+        if not id in self._positions:
+            return None
         return self._positions[id]
 
     def position_ids(self) -> List[str]:
