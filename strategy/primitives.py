@@ -3,6 +3,17 @@ from functools import total_ordering
 from typing import KeysView
 
 
+class Frequency(Enum):
+    BLOCK = "15S"
+    MINUTE = "min"
+    MINUTE5 = "5min"
+    MINUTE15 = "15min"
+    HOUR = "H"
+    DAY = "D"
+    WEEK = "W"
+    MONTH = "M"
+
+
 class Fee(Enum):
     LOW = 500
     MIDDLE = 3000
