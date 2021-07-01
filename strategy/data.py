@@ -1,13 +1,6 @@
-from enum import Enum
-from io import StringIO
 import pandas as pd
 import os
-
-
-class Pool(Enum):
-    ETHWBTC = "ETHWBTC"
-    ETHUSDC = "ETHUSDC"
-    USDTUSDC = "USDTUSDC"
+from strategy.primitives import Pool
 
 
 class RawData:
@@ -61,4 +54,4 @@ class RawData:
         host = (
             os.getenv("AWS_DATA_HOST") or "mellow-uni-data.s3.us-east-2.amazonaws.com"
         )
-        return f"https://{host}/{kind}-{self._pool.value}.csv"
+        return f"https://{host}/{kind}-{self._pool.name()}.csv"
