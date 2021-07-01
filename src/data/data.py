@@ -10,17 +10,6 @@ class Pool(Enum):
     USDTUSDC = "USDTUSDC"
 
 
-class Frequency(Enum):
-    BLOCK = "15S"
-    MINUTE = "min"
-    MINUTE5 = "5min"
-    MINUTE15 = "15min"
-    HOUR = "H"
-    DAY = "D"
-    WEEK = "W"
-    MONTH = "M"
-
-
 class RawData:
     def __init__(self, pool: Pool):
         self._pool = pool
