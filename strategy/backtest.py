@@ -47,7 +47,7 @@ class PositionHistory:
         self._data.loc[t] = [np.nan] * len(self.cols)
         self._data["c"][t] = c
         self._data["fee_per_l"][t] = fee_per_l
-        self._data["l"][t] = self._pos.l
+        self._data["l"][t] = self._pos.l()
         self._data["al"][t] = self._pos.active_l(c)
         self._data["y"][t] = self._pos.y(c)
         self._data["a"][t] = self._pos.a()
@@ -55,7 +55,7 @@ class PositionHistory:
         self._data["il"][t] = self._pos.il(c)
         fee = self._pos.active_l(c) * fee_per_l
         self._data["fee"][t] = fee
-        self._data["y_and_fees"][t] = self.data["y"][t] + self.fees
+        self._data["y_and_fees"][t] = self._data["y"][t] + self._data["fee"].sum()
 
     def data(self) -> pd.DataFrame:
         """
@@ -84,25 +84,25 @@ class PositionHistory:
         :param sizey: `y` size of one chart
         """
         fig, axes = plt.subplots(5, 2, figsize=(sizex, sizey))
-        axes[0, 0].plot(self.data["c"], color="#00bb00")
-        axes[0, 0].plot(self.data["a"], color="#0000bb")
-        axes[0, 0].plot(self.data["b"], color="#0000bb")
+        axes[0, 0].plot(self._data["c"], color="#00bb00")
+        axes[0, 0].plot(self._data["a"], color="#0000bb")
+        axes[0, 0].plot(self._data["b"], color="#0000bb")
         axes[0, 0].set_title("Price and bounds")
-        axes[0, 1].plot(self.data["fee_per_l"], color="#777777")
+        axes[0, 1].plot(self._data["fee_per_l"], color="#777777")
         axes[0, 1].set_title("Fee per liquidity unit")
-        axes[1, 0].plot(self.data["al"], color="#0000bb")
+        axes[1, 0].plot(self._data["al"], color="#0000bb")
         axes[1, 0].set_title("Active liquidity")
-        axes[1, 1].plot(self.data["l"], color="#0000bb")
+        axes[1, 1].plot(self._data["l"], color="#0000bb")
         axes[1, 1].set_title("Liquidity")
-        axes[2, 0].plot(self.data["y"], color="#0000bb")
+        axes[2, 0].plot(self._data["y"], color="#0000bb")
         axes[2, 0].set_title("Y value")
-        axes[2, 1].plot(self.data["y_and_fees"], color="#0000bb")
+        axes[2, 1].plot(self._data["y_and_fees"], color="#0000bb")
         axes[2, 1].set_title("Y value + fees")
-        axes[3, 0].plot(self.data["fee"], color="#0000bb")
+        axes[3, 0].plot(self._data["fee"], color="#0000bb")
         axes[3, 0].set_title("Current fees")
-        axes[3, 1].plot(self.data["fees"], color="#0000bb")
+        axes[3, 1].plot(self._data["fees"], color="#0000bb")
         axes[3, 1].set_title("Accumulated fees")
-        axes[4, 0].plot(self.data["il"], color="#0000bb")
+        axes[4, 0].plot(self._data["il"], color="#0000bb")
         axes[4, 0].set_title("Impermanent loss")
 
 
@@ -115,11 +115,11 @@ class PortfolioHistory:
     def snapshot(self, t, price, fee_per_l):
         self._portfolio_history.snapshot(t, price, fee_per_l)
         for id in self._portfolio.position_ids():
-            pos = self.position(id)
+            pos = self._portfolio.position(id)
             if id not in self._positions_history:
                 self._positions_history[id] = PositionHistory(pos)
             hist = self._positions_history[id]
-            hist.snapshot(price, fee_per_l)
+            hist.snapshot(t, price, fee_per_l)
 
     def plot(self, sizex=20, sizey=10):
         self._portfolio_history.plot(sizex, sizey)
