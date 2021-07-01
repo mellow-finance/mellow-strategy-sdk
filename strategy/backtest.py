@@ -3,6 +3,7 @@
 """
 
 from datetime import datetime
+from decimal import Decimal
 from strategy.data import PoolData
 import numpy as np
 import pandas as pd
@@ -33,7 +34,7 @@ class PositionHistory:
             "c",
             "fee_per_l",
         ]
-        self._data = pd.DataFrame([], cols=self.cols, index=pd.DatetimeIndex())
+        self._data = pd.DataFrame([], columns=self.cols)
 
     def snapshot(self, t: datetime, c: float, fee_per_l: float):
         """
@@ -46,13 +47,13 @@ class PositionHistory:
         self._data.loc[t] = [np.nan] * len(self.cols)
         self._data["c"][t] = c
         self._data["fee_per_l"][t] = fee_per_l
-        self._data["l"][t] = self.pos.l
-        self._data["al"][t] = self.pos.active_l(c)
-        self._data["y"][t] = self.pos.y(c)
-        self._data["a"][t] = self.pos.a()
-        self._data["b"][t] = self.pos.b()
-        self._data["il"][t] = self.pos.il(c)
-        fee = self.pos.active_l(c) * fee_per_l
+        self._data["l"][t] = self._pos.l
+        self._data["al"][t] = self._pos.active_l(c)
+        self._data["y"][t] = self._pos.y(c)
+        self._data["a"][t] = self._pos.a()
+        self._data["b"][t] = self._pos.b()
+        self._data["il"][t] = self._pos.il(c)
+        fee = self._pos.active_l(c) * fee_per_l
         self._data["fee"][t] = fee
         self._data["y_and_fees"][t] = self.data["y"][t] + self.fees
 
@@ -136,7 +137,7 @@ class Backtest:
         self._history = PortfolioHistory(portfolio)
 
         data = pool_data.data()
-        fee = float(pool_data.pool().fee.value) / 100000
+        fee = Decimal(pool_data.pool().fee().value) / 100000
         for t in data.index:
             self._strategy.rebalance(
                 t, data["c"], data["vol0"] * fee, data["vol1"] * fee

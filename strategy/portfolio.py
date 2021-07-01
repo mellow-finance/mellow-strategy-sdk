@@ -28,6 +28,9 @@ class Position:
         self._bi_y = 0
         self._bi_x = 0
 
+    def id(self) -> str:
+        return self._id
+
     def deposit(self, c: float, y: float) -> float:
         """
         Adds ``y`` tokens to position. Tokens are assumed to be converted to token ``X``
@@ -38,8 +41,8 @@ class Position:
         :return: Liquidity added
         """
 
-        delta_l = y / y_per_l(self.a, self.b, c)
-        self.l += delta_l
+        delta_l = y / y_per_l(self._a, self._b, c)
+        self._l += delta_l
         self._bi_x += y / c / 2
         self._bi_y += y / 2
         return delta_l
@@ -53,8 +56,8 @@ class Position:
         :param l: Amount of liquidity to withdraw
         :return: amount of ``Y`` token after withdrawal
         """
-        self.l -= l
-        delta_y = l * y_per_l(self.a, self.b, c)
+        self._l -= l
+        delta_y = l * y_per_l(self._a, self._b, c)
         self._bi_x -= delta_y / c / 2
         self._bi_y -= delta_y / 2
         return delta_y
@@ -67,7 +70,7 @@ class Position:
         :return: amount of ``Y`` token if the position is fully withdrawn
         """
 
-        return self.l * y_per_l(self.a, self.b, c)
+        return self._l * y_per_l(self._a, self._b, c)
 
     def l(self) -> float:
         """
@@ -88,7 +91,7 @@ class Position:
         :param new_a: New Left price bound value
         :param c: Current price
         """
-        y = self.withdraw(c, self.l)
+        y = self.withdraw(c, self._l)
         self._a = new_a
         self.deposit(c, y)
 
@@ -107,7 +110,7 @@ class Position:
         :param c: Current price
         """
 
-        y = self.withdraw(c, self.l)
+        y = self.withdraw(c, self._l)
         self._b = new_b
         self.deposit(c, y)
 
@@ -118,8 +121,8 @@ class Position:
         :param c: Current price
         :return: The amount of liquidity or 0 if price is out of (a, b) bounds
         """
-        if c <= self.b and c >= self.a:
-            return self.l
+        if c <= self._b and c >= self._a:
+            return self._l
         return 0
 
     def il(self, c: float) -> float:
@@ -133,7 +136,7 @@ class Position:
         return bicurrency_payoff - self.y(c)
 
     def __str__(self):
-        return f"(a: {self.a}, b: {self.b}, l: {self.l})"
+        return f"(a: {self._a}, b: {self._b}, l: {self._l})"
 
 
 class Portfolio(Position):
@@ -152,7 +155,7 @@ class Portfolio(Position):
 
         :param position: Position to add
         """
-        self._positions[position.id] = position
+        self._positions[position.id()] = position
 
     def remove_position(self, position_id: str):
         """
@@ -223,9 +226,9 @@ class Portfolio(Position):
         [res := res + pos.l() for pos in self.positions()]
         return res
 
-    def active_l(self) -> float:
+    def active_l(self, c: float) -> float:
         res = 0
-        [res := res + pos.active_l() for pos in self.positions()]
+        [res := res + pos.active_l(c) for pos in self.positions()]
         return res
 
 
