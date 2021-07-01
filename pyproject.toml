@@ -11,7 +11,7 @@ home-page = "https://github.com/mellow-finance/mellow-strategy-sdk"
 classifiers = [ "License :: OSI Approved :: MIT License",]
 description-file = "README.md"
 requires-python=">=3.5"
-requires=["numpy", "pandas", "matplotlib"]
+requires=["numpy", "pandas", "matplotlib", "intervaltree"]
 
 [tool.flit.sdist]
 exclude = ["docs/", "scripts/", "examples/"]

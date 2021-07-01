@@ -1,6 +1,5 @@
 from enum import Enum
 from functools import total_ordering
-from typing import KeysView
 
 
 class Frequency(Enum):
@@ -29,6 +28,9 @@ class Token(Enum):
 
     def address(self):
         return TOKEN_DETAILS[self.value]["address"]
+
+    def decimals(self) -> int:
+        return TOKEN_DETAILS[self.value]["decimals"]
 
     def _is_valid_operand(self, other):
         return isinstance(other, Token)
@@ -85,21 +87,25 @@ TOKEN_DETAILS = {
         "name": "WBTC",
         "description": "Wrapped BTC",
         "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+        "decimals": 8,
     },
     Token.USDC.value: {
         "name": "USDC",
         "description": "USD Coin",
         "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 6,
     },
     Token.WETH.value: {
         "name": "WETH",
         "description": "Wrapped Ether",
         "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "decimals": 18,
     },
     Token.USDT.value: {
         "name": "USDT",
         "description": "Tether USD",
         "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        "decimals": 6,
     },
 }
 
