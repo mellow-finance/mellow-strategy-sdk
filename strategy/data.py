@@ -174,11 +174,11 @@ class PoolData:
         )
 
         liq_start = int(
-            np.log(float(self._data["c"].min() / Decimal(10 ** decimals_diff) / 2))
+            np.log(float(self._data["c"].min() / 10 ** decimals_diff / 2))
             / np.log(1.0001)
         )
         liq_end = int(
-            np.log(float(self._data["c"].max() / Decimal(10 ** decimals_diff) * 2))
+            np.log(float(self._data["c"].max() / 10 ** decimals_diff * 2))
             / np.log(1.0001)
         )
         liq_x = np.linspace(liq_start, liq_end, 200)
