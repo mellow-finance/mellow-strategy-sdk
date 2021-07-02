@@ -3,7 +3,6 @@
 """
 
 from datetime import datetime
-from decimal import Decimal
 from strategy.data import PoolData
 import numpy as np
 import pandas as pd
@@ -36,7 +35,7 @@ class PositionHistory:
         ]
         self._data = pd.DataFrame([], columns=self.cols)
 
-    def snapshot(self, t: datetime, c: Decimal, fee_per_l: Decimal):
+    def snapshot(self, t: datetime, c: float, fee_per_l: float):
         """
         Write current state
 
@@ -151,7 +150,7 @@ class Backtest:
         self._history = PortfolioHistory(portfolio)
 
         data = pool_data.data()
-        fee = Decimal(pool_data.pool().fee().value) / 100000
+        fee = float(pool_data.pool().fee().value) / 100000
         for t in data.index:
             self._strategy.rebalance(
                 t, data["c"], data["vol0"] * fee, data["vol1"] * fee

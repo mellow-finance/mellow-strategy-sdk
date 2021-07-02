@@ -104,6 +104,11 @@ class PoolData:
         self._data["vol0"] = df["vol0"].resample(freq.value).agg(sum)
         self._data["vol1"] = df["vol1"].resample(freq.value).agg(sum)
         self._data["l"] = df["l"].resample(freq.value).agg(mean)
+        self._data["c"] = self._data["c"].transform(lambda x: float(x))
+        self._data["c_inv"] = self._data["c_inv"].transform(lambda x: float(x))
+        self._data["vol0"] = self._data["vol0"].transform(lambda x: float(x))
+        self._data["vol1"] = self._data["vol1"].transform(lambda x: float(x))
+        self._data["l"] = self._data["l"].transform(lambda x: float(x))
 
     def pool(self) -> Pool:
         return self._pool
@@ -114,15 +119,19 @@ class PoolData:
     def liquidity(self, t: datetime, c: float):
         res = 0
         for idx, mint in self._mints.iterrows():
+            # if idx > t:
+            #     break
             if mint["tick_lower"] <= c and mint["tick_upper"] >= c:
                 res += mint["amount"]
         for idx, burn in self._burns.iterrows():
+            # if idx > t:
+            #     break
             if burn["tick_lower"] <= c and burn["tick_upper"] >= c:
                 res -= burn["amount"]
         liquidity_decimals_diff = int(
             (self._pool.token0().decimals() + self._pool.token1().decimals()) / 2
         )
-        return Decimal(res) / 10 ** liquidity_decimals_diff
+        return res / 10 ** liquidity_decimals_diff
 
     def plot(self, sizex=20, sizey=30):
         """

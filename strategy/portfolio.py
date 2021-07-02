@@ -5,7 +5,6 @@ on Uniswap V3
 """
 
 from datetime import datetime
-from decimal import Decimal
 from typing import List, Optional
 import numpy as np
 import pandas as pd
@@ -21,18 +20,18 @@ class Position:
     :param b: Right bound of the interval (price)
     """
 
-    def __init__(self, id: str, a: Decimal, b: Decimal):
+    def __init__(self, id: str, a: float, b: float):
         self._id = id
         self._a = a
         self._b = b
-        self._l = Decimal(0)
-        self._bi_y = Decimal(0)
-        self._bi_x = Decimal(0)
+        self._l = float(0)
+        self._bi_y = float(0)
+        self._bi_x = float(0)
 
     def id(self) -> str:
         return self._id
 
-    def deposit(self, c: Decimal, y: Decimal) -> Decimal:
+    def deposit(self, c: float, y: float) -> float:
         """
         Adds ``y`` tokens to position. Tokens are assumed to be converted to token ``X``
         so that ``x`` / ``y`` ratio is optimal with no slippage and invested into uniV3 pool
@@ -44,11 +43,11 @@ class Position:
 
         delta_l = y / y_per_l(self._a, self._b, c)
         self._l += delta_l
-        self._bi_x += y / c / Decimal(2)
-        self._bi_y += y / Decimal(2)
+        self._bi_x += y / c / float(2)
+        self._bi_y += y / float(2)
         return delta_l
 
-    def withdraw(self, c: Decimal, l: Decimal) -> Decimal:
+    def withdraw(self, c: float, l: float) -> float:
         """
         Withdraws ``l`` liquidity from the position. UniV3 returns ``X`` and ``Y`` tokens and all ``X`` tokens
         are converted to ``Y`` tokens at current price with no slippage.
@@ -63,7 +62,7 @@ class Position:
         self._bi_y -= delta_y / 2
         return delta_y
 
-    def y(self, c: Decimal) -> Decimal:
+    def y(self, c: float) -> float:
         """
         The value of the current position denominated in ``Y`` token. Doesn't include fees collected.
 
@@ -73,19 +72,19 @@ class Position:
 
         return self._l * y_per_l(self._a, self._b, c)
 
-    def l(self) -> Decimal:
+    def l(self) -> float:
         """
         Current liquidity
         """
         return self._l
 
-    def a(self) -> Decimal:
+    def a(self) -> float:
         """
         Left bound of the price interval
         """
         return self._a
 
-    def set_a(self, new_a: Decimal, c: Decimal):
+    def set_a(self, new_a: float, c: float):
         """
         Sets the new left interval bound. The position is fully withdrawn and then deposited into the new interval.
 
@@ -96,14 +95,14 @@ class Position:
         self._a = new_a
         self.deposit(c, y)
 
-    def b(self) -> Decimal:
+    def b(self) -> float:
         """
         Right bound of the price interval
         """
 
         return self._b
 
-    def set_b(self, new_b: Decimal, c: Decimal):
+    def set_b(self, new_b: float, c: float):
         """
         Sets the new right interval bound. The position is fully withdrawn and then deposited into the new interval.
 
@@ -115,7 +114,7 @@ class Position:
         self._b = new_b
         self.deposit(c, y)
 
-    def active_l(self, c: Decimal) -> Decimal:
+    def active_l(self, c: float) -> float:
         """
         The amount of currently active liquidity
 
@@ -124,9 +123,9 @@ class Position:
         """
         if c <= self._b and c >= self._a:
             return self._l
-        return Decimal(0)
+        return float(0)
 
-    def il(self, c: Decimal) -> Decimal:
+    def il(self, c: float) -> float:
         """
         The amount of current impermanent loss
 
@@ -192,47 +191,47 @@ class Portfolio(Position):
     def position_ids(self) -> List[str]:
         return self._positions.keys()
 
-    def deposit(self, с: Decimal, y: Decimal) -> Decimal:
-        res = Decimal(0)
+    def deposit(self, с: float, y: float) -> float:
+        res = float(0)
         total_y = self.y(с)
         for pos in self.positions():
             res += pos.deposit(с, pos.y(с) / total_y * y)
         return res
 
-    def withdraw(self, с: Decimal, l: Decimal) -> Decimal:
-        res = Decimal(0)
+    def withdraw(self, с: float, l: float) -> float:
+        res = float(0)
         total_l = self.l()
         for pos in self.positions():
             res += pos.withdraw(с, pos.l() / total_l * l)
         return res
 
-    def y(self, с: Decimal) -> Decimal:
-        res = Decimal(0)
+    def y(self, с: float) -> float:
+        res = float(0)
         [res := res + pos.y(с) for pos in self.positions()]
         return res
 
-    def il(self, с: Decimal) -> Decimal:
-        res = Decimal(0)
+    def il(self, с: float) -> float:
+        res = float(0)
         [res := res + pos.il(с) for pos in self.positions()]
         return res
 
-    def a(self) -> Decimal:
+    def a(self) -> float:
         res = np.infty
         [res := min(res, pos.a()) for pos in self.positions()]
         return res
 
-    def b(self) -> Decimal:
-        res = Decimal(0)
+    def b(self) -> float:
+        res = float(0)
         [res := max(res, pos.b()) for pos in self.positions()]
         return res
 
-    def l(self) -> Decimal:
-        res = Decimal(0)
+    def l(self) -> float:
+        res = float(0)
         [res := res + pos.l() for pos in self.positions()]
         return res
 
-    def active_l(self, c: Decimal) -> Decimal:
-        res = Decimal(0)
+    def active_l(self, c: float) -> float:
+        res = float(0)
         [res := res + pos.active_l(c) for pos in self.positions()]
         return res
 

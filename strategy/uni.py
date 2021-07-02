@@ -2,10 +2,10 @@
 ``uni`` module contains helper functions for math in Uniswap V3 pools.
 """
 
-from decimal import Decimal
+import numpy as np
 
 
-def y_per_l(a, b, c):
+def y_per_l(a: float, b: float, c: float) -> float:
     """
     Amount of ``Y`` token equivalent to a unit of liquidity.
 
@@ -16,14 +16,10 @@ def y_per_l(a, b, c):
               and sell ``x`` at price `c` with no slippage
     """
     mc = min(max(a, c), b)
-    return (
-        c * (1 / Decimal.sqrt(mc) - 1 / Decimal.sqrt(b))
-        + Decimal.sqrt(mc)
-        - Decimal.sqrt(a)
-    )
+    return c * (1 / np.sqrt(mc) - 1 / np.sqrt(b)) + np.sqrt(mc) - np.sqrt(a)
 
 
-def l_per_y(a, b, c):
+def l_per_y(a: float, b: float, c: float) -> float:
     """
     Amount of liquidity equivalent to a unit of token ``Y``.
 
