@@ -55,11 +55,11 @@ class PositionHistory:
         self._data["c"][t] = c
         self._data["pool_l"][t] = pool_l
         self._data["pool_fee"][t] = pool_fee
-        self._data["l"][t] = self._pos.l()
+        self._data["l"][t] = self._pos.l
         self._data["al"][t] = self._pos.active_l(c)
         self._data["y"][t] = self._pos.y(c)
-        self._data["a"][t] = self._pos.a()
-        self._data["b"][t] = self._pos.b()
+        self._data["a"][t] = self._pos.a
+        self._data["b"][t] = self._pos.b
         self._data["il"][t] = self._pos.il(c)
         l = self._pos.active_l(c)
         total_l = l + pool_l
@@ -73,6 +73,7 @@ class PositionHistory:
         self._data["pool_fees"][t] = self.pool_fees
         self._data["y_and_fees"][t] = self._data["y"][t] + self._data["fees"][t]
 
+    @property
     def data(self) -> pd.DataFrame:
         """
         Tracking data
@@ -101,7 +102,7 @@ class PositionHistory:
         """
         fig, axes = plt.subplots(5, 2, figsize=(sizex, sizey))
         fig.suptitle(
-            f"Stats for {self._pos.id()}",
+            f"Stats for {self._pos.id}",
             fontsize=16,
         )
         axes[0, 0].plot(self._data["c"], color="#00bb00")
@@ -141,7 +142,7 @@ class PortfolioHistory:
 
     def snapshot(self, t: datetime, c: float, pool_fee: float, pool_l: float):
         self._portfolio_history.snapshot(t, c, pool_fee, pool_l)
-        for id in self._portfolio.position_ids():
+        for id in self._portfolio.position_ids:
             pos = self._portfolio.position(id)
             if id not in self._positions_history:
                 self._positions_history[id] = PositionHistory(pos)
@@ -165,11 +166,11 @@ class Backtest:
         start: Optional[str] = None,
         finish: Optional[str] = None,
     ):
-        portfolio = self._strategy.portfolio()
+        portfolio = self._strategy.portfolio
         self._history = PortfolioHistory(portfolio)
 
-        data = pool_data.data()
-        fee = float(pool_data.pool().fee().value) / 100000
+        data = pool_data.data
+        fee = float(pool_data.pool.fee.value) / 100000
         index = data[start:finish].index
         for i in range(1, len(index)):
             t = index[i]
@@ -186,6 +187,7 @@ class Backtest:
             l = pool_data.liquidity(t, c)
             self._history.snapshot(t, c, fee, l)
 
+    @property
     def history(self):
         return self._history
 

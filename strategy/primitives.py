@@ -26,9 +26,11 @@ class Token(Enum):
     USDC = "USDC"
     USDT = "USDT"
 
+    @property
     def address(self):
         return TOKEN_DETAILS[self.value]["address"]
 
+    @property
     def decimals(self) -> int:
         return TOKEN_DETAILS[self.value]["decimals"]
 
@@ -66,18 +68,23 @@ class Pool:
         if not self._address:
             raise KeyError("Pool not found")
 
+    @property
     def name(self) -> str:
         return f"{self._token0.value}-{self._token1.value}-{self._fee.value}"
 
+    @property
     def address(self) -> str:
         return self._address
 
+    @property
     def token0(self) -> Token:
         return self._token0
 
+    @property
     def token1(self) -> Token:
         return self._token1
 
+    @property
     def fee(self) -> Fee:
         return self._fee
 

@@ -29,6 +29,7 @@ class Position:
         self._bi_y = float(0)
         self._bi_x = float(0)
 
+    @property
     def id(self) -> str:
         return self._id
 
@@ -44,8 +45,8 @@ class Position:
 
         delta_l = y / y_per_l(self._a, self._b, c)
         self._l += delta_l
-        self._bi_x += y / c / float(2)
-        self._bi_y += y / float(2)
+        self._bi_x += y / c / 2
+        self._bi_y += y / 2
         return delta_l
 
     def withdraw(self, c: float, l: float) -> float:
@@ -73,12 +74,14 @@ class Position:
 
         return self._l * y_per_l(self._a, self._b, c)
 
+    @property
     def l(self) -> float:
         """
         Current liquidity
         """
         return self._l
 
+    @property
     def a(self) -> float:
         """
         Left bound of the price interval
@@ -96,6 +99,7 @@ class Position:
         self._a = new_a
         self.deposit(c, y)
 
+    @property
     def b(self) -> float:
         """
         Right bound of the price interval
@@ -151,6 +155,7 @@ class Portfolio(Position):
         self._positions = {pos.id: pos for pos in positions}
         self._id = id
 
+    @property
     def id(self):
         return self._id
 
@@ -160,7 +165,7 @@ class Portfolio(Position):
 
         :param position: Position to add
         """
-        self._positions[position.id()] = position
+        self._positions[position.id] = position
 
     def remove_position(self, position_id: str):
         """
@@ -170,6 +175,7 @@ class Portfolio(Position):
         """
         del self._positions[position_id]
 
+    @property
     def positions(self) -> List[Position]:
         """
         A set of all open positions
@@ -189,51 +195,55 @@ class Portfolio(Position):
             return None
         return self._positions[id]
 
+    @property
     def position_ids(self) -> List[str]:
         return self._positions.keys()
 
     def deposit(self, с: float, y: float) -> float:
         res = float(0)
         total_y = self.y(с)
-        for pos in self.positions():
+        for pos in self.positions:
             res += pos.deposit(с, pos.y(с) / total_y * y)
         return res
 
     def withdraw(self, с: float, l: float) -> float:
         res = float(0)
-        total_l = self.l()
-        for pos in self.positions():
-            res += pos.withdraw(с, pos.l() / total_l * l)
+        total_l = self.l
+        for pos in self.positions:
+            res += pos.withdraw(с, pos.l / total_l * l)
         return res
 
     def y(self, с: float) -> float:
         res = float(0)
-        [res := res + pos.y(с) for pos in self.positions()]
+        [res := res + pos.y(с) for pos in self.positions]
         return res
 
     def il(self, с: float) -> float:
         res = float(0)
-        [res := res + pos.il(с) for pos in self.positions()]
+        [res := res + pos.il(с) for pos in self.positions]
         return res
 
+    @property
     def a(self) -> float:
         res = np.infty
-        [res := min(res, pos.a()) for pos in self.positions()]
+        [res := min(res, pos.a) for pos in self.positions]
         return res
 
+    @property
     def b(self) -> float:
         res = float(0)
-        [res := max(res, pos.b()) for pos in self.positions()]
+        [res := max(res, pos.b) for pos in self.positions]
         return res
 
+    @property
     def l(self) -> float:
         res = float(0)
-        [res := res + pos.l() for pos in self.positions()]
+        [res := res + pos.l for pos in self.positions]
         return res
 
     def active_l(self, c: float) -> float:
         res = float(0)
-        [res := res + pos.active_l(c) for pos in self.positions()]
+        [res := res + pos.active_l(c) for pos in self.positions]
         return res
 
 
@@ -251,5 +261,6 @@ class AbstractStrategy:
     ):
         raise NotImplemented
 
+    @property
     def portfolio(self):
         return self._portfolio

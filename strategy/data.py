@@ -66,15 +66,19 @@ class RawData:
         print("Done")
         return RawData(swaps, mints, burns, pool)
 
+    @property
     def swaps(self) -> DataFrame:
         return self._swaps
 
+    @property
     def mints(self) -> DataFrame:
         return self._mints
 
+    @property
     def burns(self) -> DataFrame:
         return self._burns
 
+    @property
     def pool(self) -> Pool:
         return self._pool
 
@@ -82,7 +86,7 @@ class RawData:
         host = (
             os.getenv("AWS_DATA_HOST") or "mellow-uni-data.s3.us-east-2.amazonaws.com"
         )
-        return f"https://{host}/{kind}-{pool.name()}.csv"
+        return f"https://{host}/{kind}-{pool.name}.csv"
 
     def __getitem__(self, items) -> RawData:
         return RawData(
@@ -110,12 +114,10 @@ class PoolData:
 
     def from_raw_data(raw_data: RawData, freq: Frequency):
         df = pd.DataFrame()
-        pool = raw_data.pool()
-        decimals_diff = pool.token0().decimals() - pool.token1().decimals()
-        liquidity_decimals_diff = int(
-            (pool.token0().decimals() + pool.token1().decimals()) / 2
-        )
-        df["c"] = raw_data.swaps()["sqrt_price_x96"].transform(
+        pool = raw_data.pool
+        decimals_diff = pool.token0.decimals - pool.token1.decimals
+        liquidity_decimals_diff = int((pool.token0.decimals + pool.token1.decimals) / 2)
+        df["c"] = raw_data.swaps["sqrt_price_x96"].transform(
             lambda x: Decimal(x)
             * Decimal(x)
             / Decimal(2 ** 192)
@@ -123,16 +125,16 @@ class PoolData:
         )
         df["c_inv"] = 1 / df["c"]
         df["vol0"] = (
-            (-raw_data.swaps()["amount0"].where(raw_data.swaps()["amount0"] < 0))
+            (-raw_data.swaps["amount0"].where(raw_data.swaps["amount0"] < 0))
             .fillna(0)
-            .transform(lambda x: Decimal(x) / 10 ** pool.token0().decimals())
+            .transform(lambda x: Decimal(x) / 10 ** pool.token0.decimals)
         )
         df["vol1"] = (
-            (-raw_data.swaps()["amount1"].where(raw_data.swaps()["amount1"] < 0))
+            (-raw_data.swaps["amount1"].where(raw_data.swaps["amount1"] < 0))
             .fillna(0)
-            .transform(lambda x: Decimal(x) / 10 ** pool.token1().decimals())
+            .transform(lambda x: Decimal(x) / 10 ** pool.token1.decimals)
         )
-        df["l"] = raw_data.swaps()["liquidity"].transform(
+        df["l"] = raw_data.swaps["liquidity"].transform(
             lambda x: Decimal(x) / 10 ** liquidity_decimals_diff
         )
         data = pd.DataFrame()
@@ -149,12 +151,14 @@ class PoolData:
         data["vol1"] = data["vol1"].transform(lambda x: float(x))
         data["l"] = data["l"].transform(lambda x: float(x))
         data["vol"] = data["vol0"] * data["c"] + data["vol1"]
-        data["fee"] = data["vol"] * pool.fee().value / 100000
-        return PoolData(data, raw_data.mints(), raw_data.burns(), pool, freq)
+        data["fee"] = data["vol"] * pool.fee.value / 100000
+        return PoolData(data, raw_data.mints, raw_data.burns, pool, freq)
 
+    @property
     def pool(self) -> Pool:
         return self._pool
 
+    @property
     def data(self) -> pd.DataFrame:
         return self._data
 
@@ -171,7 +175,7 @@ class PoolData:
             if burn["tick_lower"] <= c and burn["tick_upper"] >= c:
                 res -= burn["amount"]
         liquidity_decimals_diff = int(
-            (self._pool.token0().decimals() + self._pool.token1().decimals()) / 2
+            (self._pool.token0.decimals + self._pool.token1.decimals) / 2
         )
         return res / 10 ** liquidity_decimals_diff
 
@@ -184,17 +188,17 @@ class PoolData:
         """
         fig, axes = plt.subplots(3, 2, figsize=(sizex, sizey))
         fig.suptitle(
-            f"Stats for {self._pool.token0().value} - {self._pool.token1().value} pool",
+            f"Stats for {self._pool.token0.value} - {self._pool.token1.value} pool",
             fontsize=16,
         )
         axes[0, 0].plot(self._data["c"], color="#bb6600")
         axes[0, 0].set_title(
-            f"Price {self._pool.token1().value} / {self._pool.token0().value}"
+            f"Price {self._pool.token1.value} / {self._pool.token0.value}"
         )
         axes[0, 0].tick_params(axis="x", labelrotation=45)
         axes[0, 1].plot(self._data["c_inv"], color="#00bbbb")
         axes[0, 1].set_title(
-            f"Price {self._pool.token0().value} / {self._pool.token1().value}"
+            f"Price {self._pool.token0.value} / {self._pool.token1.value}"
         )
         axes[0, 1].tick_params(axis="x", labelrotation=45)
         axes[1, 0].plot(self._data["vol"], color="#bb6600")
@@ -210,9 +214,9 @@ class PoolData:
         current_liquidity = LiquidityDistribution()
         current_liquidity.append(self._mints, self._burns)
 
-        decimals_diff = self._pool.token0().decimals() - self._pool.token1().decimals()
+        decimals_diff = self._pool.token0.decimals - self._pool.token1.decimals
         liquidity_decimals_diff = int(
-            (self._pool.token0().decimals() + self._pool.token1().decimals()) / 2
+            (self._pool.token0.decimals + self._pool.token1.decimals) / 2
         )
 
         liq_start = int(
@@ -232,7 +236,7 @@ class PoolData:
         )
         axes[2, 1].set_title(f"Liquidity at {t}")
         axes[2, 1].set_xlabel(
-            f"{self._pool.token1().value} / {self._pool.token0().value} price"
+            f"{self._pool.token1.value} / {self._pool.token0.value} price"
         )
 
     def __getitem__(self, items) -> RawData:
@@ -260,7 +264,7 @@ class LiquidityDistribution:
         self._burns.update(
             [
                 Interval(burn["tick_lower"], burn["tick_upper"], int(burn["amount"]))
-                for idx, burn in burns.iterrows()
+                for _idx, burn in burns.iterrows()
             ]
         )
 
