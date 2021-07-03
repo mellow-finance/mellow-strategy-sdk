@@ -39,8 +39,11 @@ class PositionHistory:
         self._data = pd.DataFrame([], columns=self.cols)
         self.fees = 0
         self.pool_fees = 0
+        self.cost = 0
 
-    def snapshot(self, t: datetime, c: float, pool_fee: float, pool_l: float):
+    def snapshot(
+        self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float
+    ):
         """
         Write current state
 
@@ -61,6 +64,7 @@ class PositionHistory:
         self._data["a"][t] = self._pos.a
         self._data["b"][t] = self._pos.b
         self._data["il"][t] = self._pos.il(c)
+        self._data["cost"][t] = cost
         l = self._pos.active_l(c)
         total_l = l + pool_l
         fee = 0
@@ -69,9 +73,12 @@ class PositionHistory:
         self._data["fee"][t] = fee
         self.fees += fee
         self.pool_fees += pool_fee
+        self.costs += cost
         self._data["fees"][t] = self.fees
         self._data["pool_fees"][t] = self.pool_fees
-        self._data["y_and_fees"][t] = self._data["y"][t] + self._data["fees"][t]
+        self._data["y_and_fees"][t] = (
+            self._data["y"][t] + self._data["fees"][t] - self._data["cost"][t]
+        )
 
     @property
     def data(self) -> pd.DataFrame:
@@ -100,7 +107,7 @@ class PositionHistory:
         :param sizex: `x` size of one chart
         :param sizey: `y` size of one chart
         """
-        fig, axes = plt.subplots(5, 2, figsize=(sizex, sizey))
+        fig, axes = plt.subplots(6, 2, figsize=(sizex, sizey))
         fig.suptitle(
             f"Stats for {self._pos.id}",
             fontsize=16,
@@ -119,15 +126,19 @@ class PositionHistory:
         axes[2, 0].plot(self._data["y"], color="#0000bb")
         axes[2, 0].set_title("Y value")
         axes[2, 1].plot(self._data["y_and_fees"], color="#0000bb")
-        axes[2, 1].set_title("Y value + fees")
+        axes[2, 1].set_title("Y value + fees - costs")
         axes[3, 0].plot(self._data["fee"], color="#0000bb")
         axes[3, 0].set_title("Current fees")
         axes[3, 1].plot(self._data["fees"], color="#0000bb")
         axes[3, 1].set_title("Accumulated fees")
-        axes[4, 0].plot(self._data["il"], color="#bb00bb")
-        axes[4, 0].set_title("Impermanent loss")
-        axes[4, 1].plot(self._data["l"], color="#00bbbb")
-        axes[4, 1].set_title("Liquidity")
+        axes[4, 0].plot(self._data["cost"], color="#0000bb")
+        axes[4, 0].set_title("Current cost")
+        axes[4, 1].plot(self._data["costs"], color="#0000bb")
+        axes[4, 1].set_title("Accumulated costs")
+        axes[5, 0].plot(self._data["il"], color="#bb00bb")
+        axes[5, 0].set_title("Impermanent loss")
+        axes[5, 1].plot(self._data["l"], color="#00bbbb")
+        axes[5, 1].set_title("Liquidity")
 
         for x in range(5):
             for y in range(2):
@@ -140,14 +151,16 @@ class PortfolioHistory:
         self._portfolio_history = PositionHistory(portfolio)
         self._positions_history = {}
 
-    def snapshot(self, t: datetime, c: float, pool_fee: float, pool_l: float):
-        self._portfolio_history.snapshot(t, c, pool_fee, pool_l)
+    def snapshot(
+        self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float
+    ):
+        self._portfolio_history.snapshot(t, c, pool_fee, pool_l, cost)
         for id in self._portfolio.position_ids:
             pos = self._portfolio.position(id)
             if id not in self._positions_history:
                 self._positions_history[id] = PositionHistory(pos)
             hist = self._positions_history[id]
-            hist.snapshot(t, c, pool_fee, pool_l)
+            hist.snapshot(t, c, pool_fee, pool_l, 0)
 
     def plot(self, sizex=20, sizey=10):
         self._portfolio_history.plot(sizex, sizey)
@@ -160,7 +173,7 @@ class Backtest:
         self._strategy = strategy
         self._history = None
 
-    def run(self, pool_data: PoolData):
+    def run(self, pool_data: PoolData, rebalance_cost_y: float):
         portfolio = self._strategy.portfolio
         self._history = PortfolioHistory(portfolio)
 
@@ -170,18 +183,23 @@ class Backtest:
         for i in range(1, len(index)):
             t = index[i]
             prev_t = index[i - 1]
-            self._strategy.rebalance(
+            rebalance = self._strategy.rebalance(
                 prev_t,
                 data["c"][prev_t],
                 data["vol"][prev_t],
                 lambda c: pool_data.liquidity(prev_t, c),
                 pool_data,
             )
+            cost = 0
+            if rebalance:
+                cost = self._strategy.portfolio.withdraw_y(
+                    data["c"][prev_t], rebalance_cost_y
+                )
             c = data["c"][t]
             fee = data["fee"][t]
             l = pool_data.liquidity(t, c)
             # print(fee, l, c, prev_t)
-            self._history.snapshot(t, c, fee, l)
+            self._history.snapshot(t, c, fee, l, cost)
 
     @property
     def history(self):

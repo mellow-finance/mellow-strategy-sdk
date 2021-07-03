@@ -64,6 +64,13 @@ class Position:
         self._bi_y -= delta_y / 2
         return delta_y
 
+    def withdraw_y(self, c: float, y: float) -> float:
+        y = min(y, self.y(c))
+        share = y / self.y(c)
+        share = min(share, 1)
+        self.withdraw(c, self.l * share)
+        return y
+
     def y(self, c: float) -> float:
         """
         The value of the current position denominated in ``Y`` token. Doesn't include fees collected.
@@ -213,6 +220,14 @@ class Portfolio(Position):
             res += pos.withdraw(с, pos.l / total_l * l)
         return res
 
+    def withdraw_y(self, c: float, y: float) -> float:
+        res = float(0)
+        total_y = self.y(c)
+        y = min(y, total_y)
+        for pos in self.positions:
+            res += pos.withdraw(c, pos.y(c) / total_y * y)
+        return res
+
     def y(self, с: float) -> float:
         res = float(0)
         [res := res + pos.y(с) for pos in self.positions]
@@ -258,7 +273,7 @@ class AbstractStrategy:
         vol: float,
         l: Callable[[float], float],
         pool_data: PoolData,
-    ):
+    ) -> bool:
         raise NotImplemented
 
     @property
