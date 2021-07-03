@@ -160,18 +160,13 @@ class Backtest:
         self._strategy = strategy
         self._history = None
 
-    def run(
-        self,
-        pool_data: PoolData,
-        start: Optional[str] = None,
-        finish: Optional[str] = None,
-    ):
+    def run(self, pool_data: PoolData):
         portfolio = self._strategy.portfolio
         self._history = PortfolioHistory(portfolio)
 
         data = pool_data.data
         fee = float(pool_data.pool.fee.value) / 100000
-        index = data[start:finish].index
+        index = data.index
         for i in range(1, len(index)):
             t = index[i]
             prev_t = index[i - 1]
@@ -183,8 +178,9 @@ class Backtest:
                 pool_data,
             )
             c = data["c"][t]
-            fee = data["fee"][t] * fee
+            fee = data["fee"][t]
             l = pool_data.liquidity(t, c)
+            # print(fee, l, c, prev_t)
             self._history.snapshot(t, c, fee, l)
 
     @property

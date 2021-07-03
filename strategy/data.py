@@ -91,8 +91,8 @@ class RawData:
     def __getitem__(self, items) -> RawData:
         return RawData(
             self._swaps.__getitem__(items),
-            self._mints.__getitem__(items),
-            self._burns.__getitem__(items),
+            self._mints,  # don't cut the range, since we need data from the beginning
+            self._burns,
             self._pool,
         )
 
@@ -115,13 +115,11 @@ class PoolData:
     def from_raw_data(raw_data: RawData, freq: Frequency):
         df = pd.DataFrame()
         pool = raw_data.pool
-        decimals_diff = pool.token0.decimals - pool.token1.decimals
-        liquidity_decimals_diff = int((pool.token0.decimals + pool.token1.decimals) / 2)
         df["c"] = raw_data.swaps["sqrt_price_x96"].transform(
             lambda x: Decimal(x)
             * Decimal(x)
             / Decimal(2 ** 192)
-            * Decimal(10 ** decimals_diff)
+            * Decimal(10 ** pool.decimals_diff)
         )
         df["c_inv"] = 1 / df["c"]
         df["vol0"] = (
@@ -135,7 +133,7 @@ class PoolData:
             .transform(lambda x: Decimal(x) / 10 ** pool.token1.decimals)
         )
         df["l"] = raw_data.swaps["liquidity"].transform(
-            lambda x: Decimal(x) / 10 ** liquidity_decimals_diff
+            lambda x: Decimal(x) / 10 ** pool.l_decimals_diff
         )
         data = pd.DataFrame()
         mean = lambda x: np.nan if len(x) == 0 else Decimal(np.mean(x))
@@ -152,6 +150,7 @@ class PoolData:
         data["l"] = data["l"].transform(lambda x: float(x))
         data["vol"] = data["vol0"] * data["c"] + data["vol1"]
         data["fee"] = data["vol"] * pool.fee.value / 100000
+
         return PoolData(data, raw_data.mints, raw_data.burns, pool, freq)
 
     @property
@@ -164,20 +163,18 @@ class PoolData:
 
     def liquidity(self, t: datetime, c: float):
         res = 0
+        tick = (np.log(c) - self._pool.decimals_diff * np.log(10)) / np.log(1.0001)
         for idx, mint in self._mints.iterrows():
-            # if idx > t:
-            #     break
-            if mint["tick_lower"] <= c and mint["tick_upper"] >= c:
+            if idx > t:
+                break
+            if mint["tick_lower"] <= tick and mint["tick_upper"] >= tick:
                 res += mint["amount"]
         for idx, burn in self._burns.iterrows():
-            # if idx > t:
-            #     break
-            if burn["tick_lower"] <= c and burn["tick_upper"] >= c:
+            if idx > t:
+                break
+            if burn["tick_lower"] <= tick and burn["tick_upper"] >= tick:
                 res -= burn["amount"]
-        liquidity_decimals_diff = int(
-            (self._pool.token0.decimals + self._pool.token1.decimals) / 2
-        )
-        return res / 10 ** liquidity_decimals_diff
+        return res / 10 ** self._pool.l_decimals_diff
 
     def plot(self, sizex=20, sizey=30):
         """
@@ -214,24 +211,19 @@ class PoolData:
         current_liquidity = LiquidityDistribution()
         current_liquidity.append(self._mints, self._burns)
 
-        decimals_diff = self._pool.token0.decimals - self._pool.token1.decimals
-        liquidity_decimals_diff = int(
-            (self._pool.token0.decimals + self._pool.token1.decimals) / 2
-        )
-
         liq_start = int(
-            np.log(float(self._data["c"].min() / 10 ** decimals_diff / 2))
+            np.log(float(self._data["c"].min() / 10 ** self._pool.decimals_diff / 2))
             / np.log(1.0001)
         )
         liq_end = int(
-            np.log(float(self._data["c"].max() / 10 ** decimals_diff * 2))
+            np.log(float(self._data["c"].max() / 10 ** self._pool.decimals_diff * 2))
             / np.log(1.0001)
         )
         liq_x = np.linspace(liq_start, liq_end, 200)
         t = self._data.index[-1]
         axes[2, 1].plot(
-            [1.0001 ** x * 10 ** decimals_diff for x in liq_x],
-            [current_liquidity.at(x) / 10 ** liquidity_decimals_diff for x in liq_x],
+            [1.0001 ** x * 10 ** self._pool.decimals_diff for x in liq_x],
+            [current_liquidity.at(x) / 10 ** self._pool.l_decimals_diff for x in liq_x],
             color="#0000bb",
         )
         axes[2, 1].set_title(f"Liquidity at {t}")
@@ -242,8 +234,8 @@ class PoolData:
     def __getitem__(self, items) -> RawData:
         return PoolData(
             self._data.__getitem__(items),
-            self._mints.__getitem__(items),
-            self._burns.__getitem__(items),
+            self._mints,
+            self._burns,
             self._pool,
             self._freq,
         )

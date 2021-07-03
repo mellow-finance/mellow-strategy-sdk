@@ -69,6 +69,14 @@ class Pool:
             raise KeyError("Pool not found")
 
     @property
+    def decimals_diff(self) -> int:
+        return self._token0.decimals - self._token1.decimals
+
+    @property
+    def l_decimals_diff(self) -> int:
+        return int((self._token0.decimals + self._token1.decimals) / 2)
+
+    @property
     def name(self) -> str:
         return f"{self._token0.value}-{self._token1.value}-{self._fee.value}"
 
