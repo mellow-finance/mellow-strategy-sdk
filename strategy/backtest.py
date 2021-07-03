@@ -35,11 +35,13 @@ class PositionHistory:
             "il",
             "c",
             "pool_l",
+            "cost",
+            "costs",
         ]
         self._data = pd.DataFrame([], columns=self.cols)
         self.fees = 0
         self.pool_fees = 0
-        self.cost = 0
+        self.costs = 0
 
     def snapshot(
         self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float
@@ -76,6 +78,7 @@ class PositionHistory:
         self.costs += cost
         self._data["fees"][t] = self.fees
         self._data["pool_fees"][t] = self.pool_fees
+        self._data["costs"][t] = self.costs
         self._data["y_and_fees"][t] = (
             self._data["y"][t] + self._data["fees"][t] - self._data["cost"][t]
         )
@@ -126,7 +129,7 @@ class PositionHistory:
         axes[2, 0].plot(self._data["y"], color="#0000bb")
         axes[2, 0].set_title("Y value")
         axes[2, 1].plot(self._data["y_and_fees"], color="#0000bb")
-        axes[2, 1].set_title("Y value + fees - costs")
+        axes[2, 1].set_title("Y value + fees")
         axes[3, 0].plot(self._data["fee"], color="#0000bb")
         axes[3, 0].set_title("Current fees")
         axes[3, 1].plot(self._data["fees"], color="#0000bb")
@@ -140,7 +143,7 @@ class PositionHistory:
         axes[5, 1].plot(self._data["l"], color="#00bbbb")
         axes[5, 1].set_title("Liquidity")
 
-        for x in range(5):
+        for x in range(6):
             for y in range(2):
                 axes[x, y].tick_params(axis="x", labelrotation=45)
 
@@ -190,15 +193,10 @@ class Backtest:
                 lambda c: pool_data.liquidity(prev_t, c),
                 pool_data,
             )
-            cost = 0
-            if rebalance:
-                cost = self._strategy.portfolio.withdraw_y(
-                    data["c"][prev_t], rebalance_cost_y
-                )
+            cost = rebalance_cost_y if rebalance else 0
             c = data["c"][t]
             fee = data["fee"][t]
             l = pool_data.liquidity(t, c)
-            # print(fee, l, c, prev_t)
             self._history.snapshot(t, c, fee, l, cost)
 
     @property
