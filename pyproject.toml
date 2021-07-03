@@ -10,7 +10,7 @@ author-email = "ak@mellow.finance"
 home-page = "https://github.com/mellow-finance/mellow-strategy-sdk"
 classifiers = [ "License :: OSI Approved :: MIT License",]
 description-file = "README.md"
-requires-python=">=3.5"
+requires-python=">=3.7"
 requires=["numpy", "pandas", "matplotlib", "intervaltree"]
 
 [tool.flit.sdist]

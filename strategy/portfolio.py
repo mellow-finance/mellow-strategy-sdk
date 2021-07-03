@@ -5,7 +5,8 @@ on Uniswap V3
 """
 
 from datetime import datetime
-from typing import List, Optional
+from strategy.data import PoolData
+from typing import Callable, List, Optional
 import numpy as np
 import pandas as pd
 from strategy.uni import y_per_l
@@ -241,7 +242,12 @@ class AbstractStrategy:
         self._portfolio = Portfolio()
 
     def rebalance(
-        self, t: datetime, prices: pd.Series, fees0: pd.Series, fees1: pd.Series
+        self,
+        t: datetime,
+        c: float,
+        vol: float,
+        l: Callable[[float], float],
+        pool_data: PoolData,
     ):
         raise NotImplemented
 

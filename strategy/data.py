@@ -1,7 +1,10 @@
+from __future__ import annotations
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+
+from pandas.core.frame import DataFrame
 from strategy.primitives import Pool, Token, Frequency
 from decimal import Decimal
 from datetime import datetime
@@ -9,11 +12,18 @@ from intervaltree import IntervalTree, Interval
 
 
 class RawData:
-    def __init__(self, pool: Pool):
+    def __init__(
+        self, swaps: pd.DataFrame, mints: pd.DataFrame, burns: pd.DataFrame, pool: Pool
+    ):
+        self._swaps = swaps
+        self._mints = mints
+        self._burns = burns
         self._pool = pool
+
+    def from_pool(pool: Pool) -> RawData:
         print(f"Downloading swaps")
-        self.swaps = pd.read_csv(
-            self._get_download_url("swaps"),
+        swaps = pd.read_csv(
+            RawData._get_download_url("swaps", pool),
             converters={
                 "block_time": int,
                 "block_number": int,
@@ -24,10 +34,10 @@ class RawData:
             },
             parse_dates=["block_time"],
         )
-        self.swaps.index = pd.to_datetime(self.swaps["block_time"], unit="s")
+        swaps.index = pd.to_datetime(swaps["block_time"], unit="s")
         print(f"Downloading burns")
-        self.burns = pd.read_csv(
-            self._get_download_url("burns"),
+        burns = pd.read_csv(
+            RawData._get_download_url("burns", pool),
             converters={
                 "block_time": int,
                 "block_number": int,
@@ -38,10 +48,10 @@ class RawData:
                 "amount1": int,
             },
         )
-        self.burns.index = pd.to_datetime(self.burns["block_time"], unit="s")
+        burns.index = pd.to_datetime(burns["block_time"], unit="s")
         print(f"Downloading mints")
-        self.mints = pd.read_csv(
-            self._get_download_url("mints"),
+        mints = pd.read_csv(
+            RawData._get_download_url("mints", pool),
             converters={
                 "block_time": int,
                 "block_number": int,
@@ -52,31 +62,60 @@ class RawData:
                 "amount1": int,
             },
         )
-        self.mints.index = pd.to_datetime(self.mints["block_time"], unit="s")
+        mints.index = pd.to_datetime(mints["block_time"], unit="s")
         print("Done")
+        return RawData(swaps, mints, burns, pool)
+
+    def swaps(self) -> DataFrame:
+        return self._swaps
+
+    def mints(self) -> DataFrame:
+        return self._mints
+
+    def burns(self) -> DataFrame:
+        return self._burns
 
     def pool(self) -> Pool:
         return self._pool
 
-    def _get_download_url(self, kind):
+    def _get_download_url(kind, pool: Pool):
         host = (
             os.getenv("AWS_DATA_HOST") or "mellow-uni-data.s3.us-east-2.amazonaws.com"
         )
-        return f"https://{host}/{kind}-{self._pool.name()}.csv"
+        return f"https://{host}/{kind}-{pool.name()}.csv"
+
+    def __getitem__(self, items) -> RawData:
+        return RawData(
+            self._swaps.__getitem__(items),
+            self._mints.__getitem__(items),
+            self._burns.__getitem__(items),
+            self._pool,
+        )
 
 
 class PoolData:
-    def __init__(self, raw_data: RawData, freq: Frequency):
-        self._pool = raw_data.pool()
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        mints: pd.DataFrame,
+        burns: pd.DataFrame,
+        pool: Pool,
+        freq: Frequency,
+    ):
+        self._data = data
+        self._pool = pool
         self._freq = freq
-        self._mints = raw_data.mints
-        self._burns = raw_data.burns
+        self._mints = mints
+        self._burns = burns
+
+    def from_raw_data(raw_data: RawData, freq: Frequency):
         df = pd.DataFrame()
-        decimals_diff = self._pool.token0().decimals() - self._pool.token1().decimals()
+        pool = raw_data.pool()
+        decimals_diff = pool.token0().decimals() - pool.token1().decimals()
         liquidity_decimals_diff = int(
-            (self._pool.token0().decimals() + self._pool.token1().decimals()) / 2
+            (pool.token0().decimals() + pool.token1().decimals()) / 2
         )
-        df["c"] = raw_data.swaps["sqrt_price_x96"].transform(
+        df["c"] = raw_data.swaps()["sqrt_price_x96"].transform(
             lambda x: Decimal(x)
             * Decimal(x)
             / Decimal(2 ** 192)
@@ -84,31 +123,34 @@ class PoolData:
         )
         df["c_inv"] = 1 / df["c"]
         df["vol0"] = (
-            (-raw_data.swaps["amount0"].where(raw_data.swaps["amount0"] < 0))
+            (-raw_data.swaps()["amount0"].where(raw_data.swaps()["amount0"] < 0))
             .fillna(0)
-            .transform(lambda x: Decimal(x) / 10 ** self._pool.token0().decimals())
+            .transform(lambda x: Decimal(x) / 10 ** pool.token0().decimals())
         )
         df["vol1"] = (
-            (-raw_data.swaps["amount1"].where(raw_data.swaps["amount1"] < 0))
+            (-raw_data.swaps()["amount1"].where(raw_data.swaps()["amount1"] < 0))
             .fillna(0)
-            .transform(lambda x: Decimal(x) / 10 ** self._pool.token1().decimals())
+            .transform(lambda x: Decimal(x) / 10 ** pool.token1().decimals())
         )
-        df["l"] = raw_data.swaps["liquidity"].transform(
+        df["l"] = raw_data.swaps()["liquidity"].transform(
             lambda x: Decimal(x) / 10 ** liquidity_decimals_diff
         )
-        self._data = pd.DataFrame()
+        data = pd.DataFrame()
         mean = lambda x: np.nan if len(x) == 0 else Decimal(np.mean(x))
         sum = lambda x: np.sum(x)
-        self._data["c"] = df["c"].resample(freq.value).agg(mean).ffill()
-        self._data["c_inv"] = 1 / self._data["c"]
-        self._data["vol0"] = df["vol0"].resample(freq.value).agg(sum)
-        self._data["vol1"] = df["vol1"].resample(freq.value).agg(sum)
-        self._data["l"] = df["l"].resample(freq.value).agg(mean)
-        self._data["c"] = self._data["c"].transform(lambda x: float(x))
-        self._data["c_inv"] = self._data["c_inv"].transform(lambda x: float(x))
-        self._data["vol0"] = self._data["vol0"].transform(lambda x: float(x))
-        self._data["vol1"] = self._data["vol1"].transform(lambda x: float(x))
-        self._data["l"] = self._data["l"].transform(lambda x: float(x))
+        data["c"] = df["c"].resample(freq.value).agg(mean).ffill()
+        data["c_inv"] = 1 / data["c"]
+        data["vol0"] = df["vol0"].resample(freq.value).agg(sum)
+        data["vol1"] = df["vol1"].resample(freq.value).agg(sum)
+        data["l"] = df["l"].resample(freq.value).agg(mean)
+        data["c"] = data["c"].transform(lambda x: float(x))
+        data["c_inv"] = data["c_inv"].transform(lambda x: float(x))
+        data["vol0"] = data["vol0"].transform(lambda x: float(x))
+        data["vol1"] = data["vol1"].transform(lambda x: float(x))
+        data["l"] = data["l"].transform(lambda x: float(x))
+        data["vol"] = data["vol0"] * data["c"] + data["vol1"]
+        data["fee"] = data["vol"] * pool.fee().value / 100000
+        return PoolData(data, raw_data.mints(), raw_data.burns(), pool, freq)
 
     def pool(self) -> Pool:
         return self._pool
@@ -155,11 +197,11 @@ class PoolData:
             f"Price {self._pool.token0().value} / {self._pool.token1().value}"
         )
         axes[0, 1].tick_params(axis="x", labelrotation=45)
-        axes[1, 0].plot(self._data["vol0"], color="#bb6600")
-        axes[1, 0].set_title(f"Trading volume {self._pool.token0().value}")
+        axes[1, 0].plot(self._data["vol"], color="#bb6600")
+        axes[1, 0].set_title(f"Trading volume")
         axes[1, 0].tick_params(axis="x", labelrotation=45)
-        axes[1, 1].plot(self._data["vol1"], color="#00bbbb")
-        axes[1, 1].set_title(f"Trading volume {self._pool.token1().value}")
+        axes[1, 1].plot(self._data["fee"], color="#00bbbb")
+        axes[1, 1].set_title(f"Fees")
         axes[1, 1].tick_params(axis="x", labelrotation=45)
         axes[2, 0].plot(self._data["l"], color="#0000bb")
         axes[2, 0].set_title(f"Liquidity dynamics")
@@ -191,6 +233,15 @@ class PoolData:
         axes[2, 1].set_title(f"Liquidity at {t}")
         axes[2, 1].set_xlabel(
             f"{self._pool.token1().value} / {self._pool.token0().value} price"
+        )
+
+    def __getitem__(self, items) -> RawData:
+        return PoolData(
+            self._data.__getitem__(items),
+            self._mints.__getitem__(items),
+            self._burns.__getitem__(items),
+            self._pool,
+            self._freq,
         )
 
 

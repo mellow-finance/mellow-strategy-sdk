@@ -3,6 +3,7 @@
 """
 
 from datetime import datetime
+from typing import Optional
 from strategy.data import PoolData
 import numpy as np
 import pandas as pd
@@ -158,20 +159,30 @@ class Backtest:
         self._strategy = strategy
         self._history = None
 
-    def run(self, pool_data: PoolData):
+    def run(
+        self,
+        pool_data: PoolData,
+        start: Optional[str] = None,
+        finish: Optional[str] = None,
+    ):
         portfolio = self._strategy.portfolio()
         self._history = PortfolioHistory(portfolio)
 
         data = pool_data.data()
         fee = float(pool_data.pool().fee().value) / 100000
-        for t in data.index:
+        index = data[start:finish].index
+        for i in range(1, len(index)):
+            t = index[i]
+            prev_t = index[i - 1]
             self._strategy.rebalance(
-                t, data["c"], data["vol0"] * fee, data["vol1"] * fee
+                prev_t,
+                data["c"][prev_t],
+                data["vol"][prev_t],
+                lambda c: pool_data.liquidity(prev_t, c),
+                pool_data,
             )
             c = data["c"][t]
-            fee0 = data["vol0"][t] * fee
-            fee1 = data["vol1"][t] * fee
-            fee = fee0 * c + fee1
+            fee = data["fee"][t] * fee
             l = pool_data.liquidity(t, c)
             self._history.snapshot(t, c, fee, l)
 
