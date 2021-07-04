@@ -1,4 +1,5 @@
 from __future__ import annotations
+from strategy.const import COLORS
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -188,23 +189,23 @@ class PoolData:
             f"Stats for {self._pool.token0.value} - {self._pool.token1.value} pool",
             fontsize=16,
         )
-        axes[0, 0].plot(self._data["c"], color="#bb6600")
+        axes[0, 0].plot(self._data["c"], color=COLORS["c"])
         axes[0, 0].set_title(
             f"Price {self._pool.token1.value} / {self._pool.token0.value}"
         )
         axes[0, 0].tick_params(axis="x", labelrotation=45)
-        axes[0, 1].plot(self._data["c_inv"], color="#00bbbb")
+        axes[0, 1].plot(self._data["c_inv"], color=COLORS["c_inv"])
         axes[0, 1].set_title(
             f"Price {self._pool.token0.value} / {self._pool.token1.value}"
         )
         axes[0, 1].tick_params(axis="x", labelrotation=45)
-        axes[1, 0].plot(self._data["vol"], color="#bb6600")
+        axes[1, 0].plot(self._data["vol"], color=COLORS["vol"])
         axes[1, 0].set_title(f"Trading volume")
         axes[1, 0].tick_params(axis="x", labelrotation=45)
-        axes[1, 1].plot(self._data["fee"], color="#00bbbb")
+        axes[1, 1].plot(self._data["fee"], color=COLORS["fee"])
         axes[1, 1].set_title(f"Fees")
         axes[1, 1].tick_params(axis="x", labelrotation=45)
-        axes[2, 0].plot(self._data["l"], color="#0000bb")
+        axes[2, 0].plot(self._data["l"], color=COLORS["l"])
         axes[2, 0].set_title(f"Liquidity dynamics")
         axes[2, 0].tick_params(axis="x", labelrotation=45)
 
@@ -224,7 +225,7 @@ class PoolData:
         axes[2, 1].plot(
             [1.0001 ** x * 10 ** self._pool.decimals_diff for x in liq_x],
             [current_liquidity.at(x) / 10 ** self._pool.l_decimals_diff for x in liq_x],
-            color="#0000bb",
+            color=COLORS["l"],
         )
         axes[2, 1].set_title(f"Liquidity at {t}")
         axes[2, 1].set_xlabel(

@@ -3,6 +3,7 @@
 """
 
 from datetime import datetime
+from strategy.const import COLORS
 from typing import Callable, Optional
 from strategy.data import PoolData
 import numpy as np
@@ -107,33 +108,34 @@ class PositionHistory:
             f"Stats for {self._pos.id}",
             fontsize=16,
         )
-        axes[0, 0].plot(self._data["c"], color="#00bb00")
-        axes[0, 0].plot(self._data["a"], color="#0000bb")
-        axes[0, 0].plot(self._data["b"], color="#0000bb")
-        axes[0, 0].tick_params(axis="x", labelrotation=45)
+        axes[0, 0].plot(self._data["c"], label="c", color=COLORS["c"])
+        axes[0, 0].plot(self._data["a"], ":", label="a", color=COLORS["c"])
+        axes[0, 0].plot(self._data["b"], ":", label="b", color=COLORS["c"])
         axes[0, 0].set_title("Price and bounds")
-        axes[0, 1].plot(self._data["pool_fees"], color="#777777")
-        axes[0, 1].set_title("Pool fees")
-        axes[1, 0].plot(self._data["pool_l"], color="#00bbbb")
+        axes[0, 0].legend()
+        axes[0, 1].plot(self._data["l"], color=COLORS["l"])
+        axes[0, 1].set_title("Position liquidity")
+
+        axes[1, 0].plot(self._data["pool_l"], color=COLORS["l"])
         axes[1, 0].set_title("Pool liquidity")
-        axes[1, 1].plot(self._data["al"], color="#00bbbb")
+        axes[1, 1].plot(self._data["al"], color=COLORS["l"])
         axes[1, 1].set_title("Active liquidity")
-        axes[2, 0].plot(self._data["y"], color="#0000bb")
+        axes[2, 0].plot(self._data["y"], color=COLORS["y"])
         axes[2, 0].set_title("Y value")
-        axes[2, 1].plot(self._data["net_y"], color="#0000bb")
-        axes[2, 1].set_title("Y value + fees")
-        axes[3, 0].plot(self._data["fee"], color="#0000bb")
+        axes[2, 1].plot(self._data["net_y"], color=COLORS["y"])
+        axes[2, 1].set_title("Y value + Accumulated fees - costs")
+        axes[3, 0].plot(self._data["fees"].diff(), color=COLORS["fee"])
         axes[3, 0].set_title("Current fees")
-        axes[3, 1].plot(self._data["fees"], color="#0000bb")
+        axes[3, 1].plot(self._data["fees"], color=COLORS["fee"])
         axes[3, 1].set_title("Accumulated fees")
-        axes[4, 0].plot(self._data["cost"], color="#0000bb")
+        axes[4, 0].plot(self._data["cost"], color=COLORS["cost"])
         axes[4, 0].set_title("Current cost")
-        axes[4, 1].plot(self._data["costs"], color="#0000bb")
+        axes[4, 1].plot(self._data["costs"], color=COLORS["cost"])
         axes[4, 1].set_title("Accumulated costs")
-        axes[5, 0].plot(self._data["il"], color="#bb00bb")
+        axes[5, 0].plot(self._data["il"], color=COLORS["il"])
         axes[5, 0].set_title("Impermanent loss")
-        axes[5, 1].plot(self._data["l"], color="#00bbbb")
-        axes[5, 1].set_title("Liquidity")
+        axes[5, 1].plot(self._data["pool_fees"], color=COLORS["fee"])
+        axes[5, 1].set_title("Pool fees")
 
         for x in range(6):
             for y in range(2):
