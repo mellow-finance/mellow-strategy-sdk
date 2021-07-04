@@ -123,19 +123,17 @@ class PositionHistory:
         axes[2, 0].plot(self._data["y"], color=COLORS["y"])
         axes[2, 0].set_title("Y value")
         axes[2, 1].plot(self._data["net_y"], color=COLORS["y"])
-        axes[2, 1].set_title("Y value + Accumulated fees - costs")
-        axes[3, 0].plot(self._data["fees"].diff(), color=COLORS["fee"])
-        axes[3, 0].set_title("Current fees")
+        axes[2, 1].set_title("Y value + accumulated fees - costs")
+        axes[3, 0].plot(self._data["pool_fees"], color=COLORS["fee"])
+        axes[3, 0].set_title("Pool fees")
         axes[3, 1].plot(self._data["fees"], color=COLORS["fee"])
-        axes[3, 1].set_title("Accumulated fees")
+        axes[3, 1].set_title("Earned fees")
         axes[4, 0].plot(self._data["cost"], color=COLORS["cost"])
         axes[4, 0].set_title("Current cost")
         axes[4, 1].plot(self._data["costs"], color=COLORS["cost"])
         axes[4, 1].set_title("Accumulated costs")
         axes[5, 0].plot(self._data["il"], color=COLORS["il"])
         axes[5, 0].set_title("Impermanent loss")
-        axes[5, 1].plot(self._data["pool_fees"], color=COLORS["fee"])
-        axes[5, 1].set_title("Pool fees")
 
         for x in range(6):
             for y in range(2):
@@ -210,7 +208,7 @@ class Backtest:
             c = data["c"][t]
             pool_fee = data["fee"][t]
             pool_l = pool_data.liquidity(t, c)
-            print(self._strategy.portfolio.charge_fees(c, pool_l, pool_fee))
+            self._strategy.portfolio.charge_fees(c, pool_l, pool_fee)
             self._history.snapshot(t, c, pool_fee, pool_l, cost)
             self._strategy.portfolio.reinvest_fees(c)
 
