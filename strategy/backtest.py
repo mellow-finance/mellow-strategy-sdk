@@ -3,12 +3,12 @@
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Callable, Optional
 from strategy.data import PoolData
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from strategy.portfolio import AbstractStrategy, Position, Portfolio
+from strategy.portfolio import Position, Portfolio
 
 
 class PositionHistory:
@@ -22,24 +22,23 @@ class PositionHistory:
     def __init__(self, pos: Position):
         self._pos = pos
         self.cols = [
+            "c",
             "l",
             "al",
-            "y",
             "pool_fee",
             "pool_fees",
-            "fee",
-            "fees",
-            "y_and_fees",
+            "pool_l",
             "a",
             "b",
-            "il",
-            "c",
-            "pool_l",
+            "y",
+            "fee",
+            "fees",
             "cost",
             "costs",
+            "il",
+            "net_y",
         ]
         self._data = pd.DataFrame([], columns=self.cols)
-        self.fees = 0
         self.pool_fees = 0
         self.costs = 0
 
@@ -56,10 +55,13 @@ class PositionHistory:
         """
         if t in self._data.index:
             return
+        self.pool_fees += pool_fee
+        self.costs += cost
         self._data.loc[t] = [np.nan] * len(self.cols)
         self._data["c"][t] = c
         self._data["pool_l"][t] = pool_l
         self._data["pool_fee"][t] = pool_fee
+        self._data["pool_fees"][t] = self.pool_fees
         self._data["l"][t] = self._pos.l
         self._data["al"][t] = self._pos.active_l(c)
         self._data["y"][t] = self._pos.y(c)
@@ -67,20 +69,10 @@ class PositionHistory:
         self._data["b"][t] = self._pos.b
         self._data["il"][t] = self._pos.il(c)
         self._data["cost"][t] = cost
-        l = self._pos.active_l(c)
-        total_l = l + pool_l
-        fee = 0
-        if total_l != 0:
-            fee = l * pool_fee / total_l
-        self._data["fee"][t] = fee
-        self.fees += fee
-        self.pool_fees += pool_fee
-        self.costs += cost
-        self._data["fees"][t] = self.fees
-        self._data["pool_fees"][t] = self.pool_fees
         self._data["costs"][t] = self.costs
-        self._data["y_and_fees"][t] = (
-            self._data["y"][t] + self._data["fees"][t] - self._data["cost"][t]
+        self._data["fees"][t] = self._pos.fees
+        self._data["net_y"][t] = (
+            self._data["y"][t] + self._data["fees"][t] - self._data["costs"][t]
         )
 
     @property
@@ -128,7 +120,7 @@ class PositionHistory:
         axes[1, 1].set_title("Active liquidity")
         axes[2, 0].plot(self._data["y"], color="#0000bb")
         axes[2, 0].set_title("Y value")
-        axes[2, 1].plot(self._data["y_and_fees"], color="#0000bb")
+        axes[2, 1].plot(self._data["net_y"], color="#0000bb")
         axes[2, 1].set_title("Y value + fees")
         axes[3, 0].plot(self._data["fee"], color="#0000bb")
         axes[3, 0].set_title("Current fees")
@@ -171,6 +163,25 @@ class PortfolioHistory:
             pos.plot(sizex, sizey)
 
 
+class AbstractStrategy:
+    def __init__(self):
+        self._portfolio = Portfolio()
+
+    def rebalance(
+        self,
+        t: datetime,
+        c: float,
+        vol: float,
+        l: Callable[[float], float],
+        pool_data: PoolData,
+    ) -> bool:
+        raise NotImplemented
+
+    @property
+    def portfolio(self):
+        return self._portfolio
+
+
 class Backtest:
     def __init__(self, strategy: AbstractStrategy):
         self._strategy = strategy
@@ -181,7 +192,6 @@ class Backtest:
         self._history = PortfolioHistory(portfolio)
 
         data = pool_data.data
-        fee = float(pool_data.pool.fee.value) / 100000
         index = data.index
         for i in range(1, len(index)):
             t = index[i]
@@ -193,11 +203,14 @@ class Backtest:
                 lambda c: pool_data.liquidity(prev_t, c),
                 pool_data,
             )
+
             cost = rebalance_cost_y if rebalance else 0
             c = data["c"][t]
-            fee = data["fee"][t]
-            l = pool_data.liquidity(t, c)
-            self._history.snapshot(t, c, fee, l, cost)
+            pool_fee = data["fee"][t]
+            pool_l = pool_data.liquidity(t, c)
+            print(self._strategy.portfolio.charge_fees(c, pool_l, pool_fee))
+            self._history.snapshot(t, c, pool_fee, pool_l, cost)
+            self._strategy.portfolio.reinvest_fees(c)
 
     @property
     def history(self):

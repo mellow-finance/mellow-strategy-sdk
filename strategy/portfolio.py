@@ -25,13 +25,35 @@ class Position:
         self._id = id
         self._a = a
         self._b = b
-        self._l = float(0)
-        self._bi_y = float(0)
-        self._bi_x = float(0)
+        self._l = 0
+        self._bi_y = 0
+        self._bi_x = 0
+        self._fees = 0
 
     @property
     def id(self) -> str:
         return self._id
+
+    @property
+    def fees(self) -> str:
+        return self._fees
+
+    def charge_fees(self, c: float, pool_l: float, pool_fee: float) -> float:
+        l = self.active_l(c)
+        total_l = l + pool_l
+        fee = 0
+        if total_l != 0:
+            fee = l * pool_fee / total_l
+        self._fees += fee
+        return fee
+
+    def reinvest_fees(self, c: float, amount: Optional[float] = None) -> float:
+        if not amount:
+            amount = self._fees
+        amount = min(amount, self._fees)
+        self.deposit(c, amount)
+        self._fees -= amount
+        return amount
 
     def deposit(self, c: float, y: float) -> float:
         """
@@ -206,6 +228,22 @@ class Portfolio(Position):
     def position_ids(self) -> List[str]:
         return self._positions.keys()
 
+    @property
+    def fees(self):
+        res = float(0)
+        [res := res + pos.fees for pos in self.positions]
+        return res
+
+    def charge_fees(self, c: float, pool_l: float, pool_fee: float) -> float:
+        res = float(0)
+        [res := res + pos.charge_fees(c, pool_l, pool_fee) for pos in self.positions]
+        return res
+
+    def reinvest_fees(self, c: float, amount: Optional[float] = None) -> float:
+        res = float(0)
+        [res := res + pos.reinvest_fees(c, amount) for pos in self.positions]
+        return res
+
     def deposit(self, с: float, y: float) -> float:
         res = float(0)
         total_y = self.y(с)
@@ -260,22 +298,3 @@ class Portfolio(Position):
         res = float(0)
         [res := res + pos.active_l(c) for pos in self.positions]
         return res
-
-
-class AbstractStrategy:
-    def __init__(self):
-        self._portfolio = Portfolio()
-
-    def rebalance(
-        self,
-        t: datetime,
-        c: float,
-        vol: float,
-        l: Callable[[float], float],
-        pool_data: PoolData,
-    ) -> bool:
-        raise NotImplemented
-
-    @property
-    def portfolio(self):
-        return self._portfolio
