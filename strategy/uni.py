@@ -27,7 +27,7 @@ def l_per_y(a: float, b: float, c: float) -> float:
     :param b: Right bound of liquidity interval (price)
     :param c: Current price
     :return: Amount of liquidity you will receive if you invest one unit of ``Y``, convert optimal portion to token ``X``
-    with no slippage and invest into uniV3 pool
+             with no slippage and invest into uniV3 pool
     """
 
     return 1 / y_per_l(a, b, c)
