@@ -3,7 +3,21 @@ from functools import total_ordering
 
 
 class Frequency(Enum):
-    BLOCK = "15S"
+    """
+    ``Frequency`` defines the sampling frequency for the data.
+    It is helpful if you want your time series to be split into equal intervals and you want to define interval width.
+
+    Values:
+
+    - `MINUTE` - One minute
+    - `MINUTE5` - 5 minutes
+    - `MINUTE15` - 15 minutes
+    - `HOUR` - 1 hour
+    - `DAY` - 1 day
+    - `WEEK` - 1 week
+    - `MONTH` - 1 month
+    """
+
     MINUTE = "min"
     MINUTE5 = "5min"
     MINUTE15 = "15min"
@@ -14,24 +28,61 @@ class Frequency(Enum):
 
 
 class Fee(Enum):
+    """
+    ``Fee`` defines available fees for UniV3 pools. Currently 3 values are available: 0.05%, 0.3%, 1%.
+    The actual enum values are fee * 100_000, i.e. 0.05% enum value is integer 500
+
+    Values:
+
+    - `LOW` - 500
+    - `MIDDLE` - 3000
+    - `HIGH` - 10000
+    """
+
     LOW = 500
     MIDDLE = 3000
     HIGH = 10000
 
+    @property
+    def percent(self) -> float:
+        """
+        The actual uniswap percentage fee, i.e. 0.05%, 0.3% or 1%.
+        """
+        return self.value / 100000
+
 
 @total_ordering
 class Token(Enum):
+    """
+    ``Token`` represents a specific token and contains some additional data about the token.
+    This class is ordered according to token address. E.g. :code:`Token.WBTC < Token.USDC`.
+
+    Values:
+
+    - `WBTC`
+    - `WETH`
+    - `USDC`
+    - `USDT`
+
+    """
+
     WBTC = "WBTC"
     WETH = "WETH"
     USDC = "USDC"
     USDT = "USDT"
 
     @property
-    def address(self):
+    def address(self) -> str:
+        """
+        Mainnet address of the token
+        """
         return TOKEN_DETAILS[self.value]["address"]
 
     @property
     def decimals(self) -> int:
+        """
+        Decimals of the token
+        """
         return TOKEN_DETAILS[self.value]["decimals"]
 
     def _is_valid_operand(self, other):
@@ -53,6 +104,14 @@ class Token(Enum):
 
 
 class Pool:
+    """
+    ``Pool`` represents a UniV3 pool.
+
+    :param tokenA: First token of the pool
+    :param tokenB: Second token of the pool
+    :param fee: Pool fee
+    """
+
     def __init__(self, tokenA: Token, tokenB: Token, fee: Fee):
         [self._token0, self._token1] = sorted([tokenA, tokenB])
         self._fee = fee
@@ -70,30 +129,51 @@ class Pool:
 
     @property
     def decimals_diff(self) -> int:
+        """
+        Difference between ``token0`` and ``token1`` decimals. Used for conversion of price from `wei` to `eth`.
+        """
         return self._token0.decimals - self._token1.decimals
 
     @property
     def l_decimals_diff(self) -> int:
+        """
+        Average of ``token0`` and ``token1`` decimals. Used for conversion of liquidity from `wei` to `eth`.
+        """
         return int((self._token0.decimals + self._token1.decimals) / 2)
 
     @property
     def name(self) -> str:
+        """
+        Unique name for the pool
+        """
         return f"{self._token0.value}-{self._token1.value}-{self._fee.value}"
 
     @property
     def address(self) -> str:
+        """
+        Address of the pool on the mainnet
+        """
         return self._address
 
     @property
     def token0(self) -> Token:
+        """
+        First token of the pool
+        """
         return self._token0
 
     @property
     def token1(self) -> Token:
+        """
+        Second token of the pool
+        """
         return self._token1
 
     @property
     def fee(self) -> Fee:
+        """
+        Fee of the pool
+        """
         return self._fee
 
 

@@ -13,6 +13,10 @@ from intervaltree import IntervalTree, Interval
 
 
 class RawData:
+    """
+    ``RawData`` downloads external pool data.
+    """
+
     def __init__(
         self, swaps: pd.DataFrame, mints: pd.DataFrame, burns: pd.DataFrame, pool: Pool
     ):
@@ -150,7 +154,7 @@ class PoolData:
         data["vol1"] = data["vol1"].transform(lambda x: float(x))
         data["l"] = data["l"].transform(lambda x: float(x))
         data["vol"] = data["vol0"] * data["c"] + data["vol1"]
-        data["fee"] = data["vol"] * pool.fee.value / 100000
+        data["fee"] = data["vol"] * pool.fee.percent
 
         return PoolData(data, raw_data.mints, raw_data.burns, pool, freq)
 
