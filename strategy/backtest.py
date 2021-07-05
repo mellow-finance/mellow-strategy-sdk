@@ -1,8 +1,35 @@
 """
-``history`` module models Portfolio and Position spanning over time
+``backtest`` contains classes to define investing strategy and backtest it against real data.
+
+Example::
+
+    from strategy.primitives import Frequency, Pool, Token
+    from strategy.backtest import Backtest, AbstractStrategy
+
+    class Strategy(AbstractStrategy):        
+        def rebalance(
+            self,
+            t: datetime,
+            c: float,
+            vol: float,
+            l: Callable[[float], float],
+            pool_data: PoolData,
+        ) -> bool:
+            if not self.portfolio.position("main"):
+                self.portfolio.add_position(Position(id="main", a = c / 2, b = c * 2))
+                pos = self.portfolio.position("main")
+                pos.deposit(c, 1)
+            return False
+
+    strategy = Strategy()
+    backtest = Backtest(strategy)
+    backtest.run_for_pool(Pool(Token.WBTC, Token.USDC, Fee.MIDDLE), Frequency.DAY, 0.001)
+    backtest.plot()
+
 """
 
 from datetime import datetime
+from strategy.primitives import Frequency, Pool
 from strategy.const import COLORS
 from typing import Callable, Optional
 from strategy.data import PoolData
@@ -18,6 +45,27 @@ class PositionHistory:
     Each time ``snapshot`` method is called it remembers current state in time.
     All tracked values then can be accessed via ``data`` method that will return a ``pandas`` Dataframe.
     Or can be plotted using ``plot`` method.
+
+    The list of tracked values:
+
+    - `c` - Current price
+    - `l` - Current virtual liquidity for the position
+    - `al` - Current active virtual liquidity for the position (i.e. taking into account if price is out of bounds)
+    - `pool_fee` - Current fee distributes in the UniV3 pool
+    - `pool_fees` - Accumulated to date fees distributes in the UniV3 pool
+    - `pool_l` - Current virtual liquidity for the pool
+    - `y` - value of the position denominated in ``Y`` token
+    - `net_y` - `value of the position + accumulated fees - rebalance costs` denominated in ``Y`` token
+    - `a` - Left bound of liquidity interval (price)
+    - `b` - Right bound of liquidity interval (price)
+    - `fee` - Fee earned by the position
+    - `fees` - Accunulated fees earned by the position
+    - `cost` - Rebalance costs for the position
+    - `costs` - Accumulated rebalance costs for the position
+
+    Note: The convention is to keep cost at portfolio level (thus in PortfolioHistory)
+
+    :param pos: The position to track
     """
 
     def __init__(self, pos: Position):
@@ -32,16 +80,23 @@ class PositionHistory:
             "a",
             "b",
             "y",
+            "net_y",
             "fee",
             "fees",
             "cost",
             "costs",
             "il",
-            "net_y",
         ]
         self._data = pd.DataFrame([], columns=self.cols)
         self.pool_fees = 0
         self.costs = 0
+
+    @property
+    def data(self) -> pd.DataFrame:
+        """
+        Historical data
+        """
+        return self._data
 
     def snapshot(
         self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float
@@ -51,8 +106,9 @@ class PositionHistory:
 
         :param t: Time for state snapshot
         :param c: Price at time ``t``
-        :param fee: Fees for the current period denominated in ``Y`` token
-        :param pool_l: Total liquidity in the pool at time ``t``
+        :param pool_fee: Total fees distributed in the UniV3 pool in the current period(denominated in ``Y`` token)
+        :param pool_l: Total liquidity in the UniV3 pool at time ``t``
+        :param cost: Rebalance cost
         """
         if t in self._data.index:
             return
@@ -76,29 +132,9 @@ class PositionHistory:
             self._data["y"][t] + self._data["fees"][t] - self._data["costs"][t]
         )
 
-    @property
-    def data(self) -> pd.DataFrame:
-        """
-        Tracking data
-
-        The list of tracked values:
-
-        - `a` - Left bound of liquidity interval (price)
-        - `b` - Right bound of liquidity interval (price)
-        - `c` - Current price
-        - `fee_per_l` - fees that could ber earned available per unit of liquidity at current time
-        - `l` - Liquidity of the position
-        - `al` - Active liquidity of the position (i.e. `l` when `c` is in (a, b), 0 o/w)
-        - `fee` - fee earned at current time
-        - `fees` - cumulative fees earned at current time
-        - `y` - value of the position denominated in ``Y`` token
-        - `y_and_fees` - `y` + `fees`
-        """
-        return self._data
-
     def plot(self, sizex=20, sizey=10):
         """
-        Plot tracking data
+        Plot historical data
 
         :param sizex: `x` size of one chart
         :param sizey: `y` size of one chart
@@ -140,11 +176,46 @@ class PositionHistory:
                 axes[x, y].tick_params(axis="x", labelrotation=45)
 
 
-class PortfolioHistory:
+class PortfolioHistory(PositionHistory):
+    """
+    ``PortfolioHistory`` tracks portfolio values over time.
+    Each time ``snapshot`` method is called it remembers current state in time.
+    All tracked values then can be accessed via ``data`` method that will return a ``pandas`` Dataframe.
+    Or can be plotted using ``plot`` method.
+
+    The list of tracked values:
+
+    - `c` - Current price
+    - `l` - Current virtual liquidity for the portfolio
+    - `al` - Current active virtual liquidity for the portfolio (i.e. taking into account if price is out of bounds)
+    - `pool_fee` - Current fee distributes in the UniV3 pool
+    - `pool_fees` - Accumulated to date fees distributes in the UniV3 pool
+    - `pool_l` - Current virtual liquidity for the pool
+    - `y` - value of the portfolio denominated in ``Y`` token
+    - `net_y` - `value of the portfolio + accumulated fees - rebalance costs` denominated in ``Y`` token
+    - `a` - Left bound of liquidity interval (price)
+    - `b` - Right bound of liquidity interval (price)
+    - `fee` - Fee earned by the portfolio
+    - `fees` - Accunulated fees earned by the portfolio
+    - `cost` - Rebalance costs for the portfolio
+    - `costs` - Accumulated rebalance costs for the portfolio
+
+    Note: The convention is to keep cost at portfolio level (thus in PortfolioHistory)
+
+    :param portfolio: The portfolio to track
+    """
+
     def __init__(self, portfolio: Portfolio):
         self._portfolio = portfolio
         self._portfolio_history = PositionHistory(portfolio)
         self._positions_history = {}
+
+    @property
+    def data(self) -> pd.DataFrame:
+        """
+        Historical data
+        """
+        return self._positions_history.data
 
     def snapshot(
         self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float
@@ -201,7 +272,7 @@ class Backtest:
                 data["c"][prev_t],
                 data["vol"][prev_t],
                 lambda c: pool_data.liquidity(prev_t, c),
-                pool_data,
+                pool_data[:prev_t],
             )
 
             cost = rebalance_cost_y if rebalance else 0
@@ -211,6 +282,10 @@ class Backtest:
             self._strategy.portfolio.charge_fees(c, pool_l, pool_fee)
             self._history.snapshot(t, c, pool_fee, pool_l, cost)
             self._strategy.portfolio.reinvest_fees(c)
+
+    def run_for_pool(self, pool: Pool, freq: Frequency, rebalance_cost_y: float):
+        pool_data = PoolData.from_pool(pool, freq)
+        self.run(pool_data, rebalance_cost_y)
 
     @property
     def history(self):

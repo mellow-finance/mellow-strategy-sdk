@@ -14,8 +14,9 @@ The SDK has 2 main modules ``data`` and ``strategy``.
    :caption: API
 
    strategy
-   strategy/portfolio
+   strategy/backtest
    strategy/data
+   strategy/portfolio
    strategy/uni
    strategy/primitives
 
