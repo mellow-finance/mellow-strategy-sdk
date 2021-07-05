@@ -230,7 +230,7 @@ class PoolData:
         :return: New ``PoolData`` instance
         """
         raw = RawData.from_pool(pool)
-        return cls.from_raw_data(raw, freq)
+        return PoolData.from_raw_data(raw, freq)
 
     @property
     def pool(self) -> Pool:

@@ -371,7 +371,7 @@ class Backtest:
             raise Exception("Please call `run` method first")
         return self._history
 
-    def plot(self, sizex=20, sizey=10):
+    def plot(self, sizex=20, sizey=50):
         """
         Plot results of the run. If run was not called before this property ``Exception`` will be raised.
 
