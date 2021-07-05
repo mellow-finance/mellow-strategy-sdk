@@ -15,6 +15,8 @@ from strategy.uni import y_per_l
 class Position:
     """
     ``Position`` is a primitive corresponding to one investment into UniV3 interval.
+    It's defined by lower and upper bounds ``a`` and ``b``, current invested virtual liquidity ``l``
+    and accumulated ``fees``.
 
     :param id: Unique string id for the position
     :param a: Left bound of the interval (price)
@@ -32,13 +34,28 @@ class Position:
 
     @property
     def id(self) -> str:
+        """
+        Unique id of the position
+        """
         return self._id
 
     @property
     def fees(self) -> str:
+        """
+        Accumulated fees for the position
+        """
         return self._fees
 
     def charge_fees(self, c: float, pool_l: float, pool_fee: float) -> float:
+        """
+        Take a fraction of fees according to `pool` and `position` params and add it to ``fees``.
+
+        :param c: Current price
+        :param pool_l: Current total virtual liquidity in the pool
+        :param pool_fee: Current total fees distributed by the pool
+
+        :return: Fees charged
+        """
         l = self.active_l(c)
         total_l = l + pool_l
         fee = 0
@@ -48,6 +65,14 @@ class Position:
         return fee
 
     def reinvest_fees(self, c: float, amount: Optional[float] = None) -> float:
+        """
+        Put accumulated fees into position
+
+        :param c: Current price
+        :param amount: Amount of fees to put into position. Default - all fees.
+
+        :return: Amount of fees actually put into position
+        """
         if not amount:
             amount = self._fees
         amount = min(amount, self._fees)
@@ -78,7 +103,7 @@ class Position:
 
         :param c: Current price
         :param l: Amount of liquidity to withdraw
-        :return: amount of ``Y`` token after withdrawal
+        :return: amount of ``Y`` token actually withdrawn
         """
         self._l -= l
         delta_y = l * y_per_l(self._a, self._b, c)
@@ -87,6 +112,13 @@ class Position:
         return delta_y
 
     def withdraw_y(self, c: float, y: float) -> float:
+        """
+        Withdraws the equivalent of ``y`` tokens from the pool.
+
+        :param c: Current price
+        :param y: Amount of y token to withdraw
+        :return: amount of ``Y`` token actually withdrawn
+        """
         y = min(y, self.y(c))
         share = y / self.y(c)
         share = min(share, 1)
@@ -186,6 +218,9 @@ class Portfolio(Position):
 
     @property
     def id(self):
+        """
+        Id of the portfolio
+        """
         return self._id
 
     def add_position(self, position: Position):
@@ -226,6 +261,9 @@ class Portfolio(Position):
 
     @property
     def position_ids(self) -> List[str]:
+        """
+        Ids of all positions in portfolio
+        """
         return self._positions.keys()
 
     @property

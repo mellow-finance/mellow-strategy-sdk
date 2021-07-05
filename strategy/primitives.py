@@ -54,7 +54,7 @@ class Fee(Enum):
 @total_ordering
 class Token(Enum):
     """
-    ``Token`` represents a specific token and contains some additional data about the token.
+    ``Token`` represents one of mainnet tokens and contains some additional data line address and decimals.
     This class is ordered according to token address. E.g. :code:`Token.WBTC < Token.USDC`.
 
     Values:
@@ -105,7 +105,7 @@ class Token(Enum):
 
 class Pool:
     """
-    ``Pool`` represents a UniV3 pool.
+    ``Pool`` represents a mainnet UniV3 pool.
 
     :param tokenA: First token of the pool
     :param tokenB: Second token of the pool

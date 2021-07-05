@@ -1,3 +1,13 @@
+"""
+``data`` module contains classes for getting and transforming the UniV3 data.
+
+``RawData`` downloads external data. It can be used in notebooks for caching the downloaded data.
+
+``PoolData`` is a wrapper around ``RawData`` that transforms, resamples data and makes it usable for backtesting.
+
+Use ``PoolData`` by default and ``RawData`` if you want additional layer of customization.
+"""
+
 from __future__ import annotations
 from strategy.const import COLORS
 import pandas as pd
@@ -15,6 +25,9 @@ from intervaltree import IntervalTree, Interval
 class RawData:
     """
     ``RawData`` downloads external pool data.
+    If for some reason you want to override host for data blobs use ``AWS_DATA_HOST`` env variable.
+
+    Constructor is considered to be private, you want to use ``from_pool`` method to instantiate ``RawData``.
     """
 
     def __init__(
@@ -25,7 +38,14 @@ class RawData:
         self._burns = burns
         self._pool = pool
 
-    def from_pool(pool: Pool) -> RawData:
+    @classmethod
+    def from_pool(cls: RawData, pool: Pool) -> RawData:
+        """
+        Create ``RawData`` for a specific pool
+
+        :param pool: Pool specification
+        :return: New ``RawData`` instance
+        """
         print(f"Downloading swaps")
         swaps = pd.read_csv(
             RawData._get_download_url("swaps", pool),
@@ -69,22 +89,35 @@ class RawData:
         )
         mints.index = pd.to_datetime(mints["block_time"], unit="s")
         print("Done")
-        return RawData(swaps, mints, burns, pool)
+        return cls(swaps, mints, burns, pool)
 
     @property
     def swaps(self) -> DataFrame:
+        """
+        Swap data
+        """
         return self._swaps
 
     @property
     def mints(self) -> DataFrame:
+        """
+        Mints data
+        """
+
         return self._mints
 
     @property
     def burns(self) -> DataFrame:
+        """
+        Burns data
+        """
         return self._burns
 
     @property
     def pool(self) -> Pool:
+        """
+        Pool specification
+        """
         return self._pool
 
     def _get_download_url(kind, pool: Pool):
@@ -103,6 +136,27 @@ class RawData:
 
 
 class PoolData:
+    """
+    ``PoolData`` prepares data for backtesting. The data itself is available via ``data`` property as a ``pandas`` DataFrame with datetime index.
+    All data is denominated in eth rather then wei (or btc rather that sat, etc.)
+    The fields of the ``data`` are:
+
+    - `c` - price
+    - `c_inv` - 1 / `c`
+    - `vol0` - amount of `token0` users swapped in the current period (i.e. only incoming part of the swap)
+    - `vol1` - amount of `token1` users swapped in the current period (i.e. only incoming part of the swap)
+    - `vol` - `vol0 * c + vol1` - total volume denominated in token ``Y``
+    - `fee` -  Total fees distribtuted denominated in token ``Y``
+    - `l` - average virtual liquidity used for swaps
+
+    You can also use a subrange of data. Example::
+
+        pool_data = PoolData.from_pool(...)
+        p = pool_data["2021-06-25":"2021-06-27"]
+
+    Constructor is considered to be private, you want to use ``from_pool`` or ``from_raw_Data`` method to instantiate ``RawData``.
+    """
+
     def __init__(
         self,
         data: pd.DataFrame,
@@ -117,7 +171,15 @@ class PoolData:
         self._mints = mints
         self._burns = burns
 
-    def from_raw_data(raw_data: RawData, freq: Frequency):
+    @classmethod
+    def from_raw_data(cls: PoolData, raw_data: RawData, freq: Frequency) -> PoolData:
+        """
+        Create a PoolData from RawData
+
+        :param raw_data: Raw downloaded data
+        :param freq: Resampling frequency, i.e. the timeline is split into equal time chunks with ``freq`` value.
+        :return: New instance of ``PoolData``
+        """
         df = pd.DataFrame()
         pool = raw_data.pool
         df["c"] = raw_data.swaps["sqrt_price_x96"].transform(
@@ -156,17 +218,42 @@ class PoolData:
         data["vol"] = data["vol0"] * data["c"] + data["vol1"]
         data["fee"] = data["vol"] * pool.fee.percent
 
-        return PoolData(data, raw_data.mints, raw_data.burns, pool, freq)
+        return cls(data, raw_data.mints, raw_data.burns, pool, freq)
+
+    @classmethod
+    def from_pool(cls: PoolData, pool: Pool, freq: Frequency) -> PoolData:
+        """
+        Create ``PoolData`` for a specific pool
+
+        :param pool: Pool specification
+        :param freq: Resampling frequency, i.e. the timeline is split into equal time chunks with ``freq`` value.
+        :return: New ``PoolData`` instance
+        """
+        raw = RawData.from_pool(pool)
+        return cls.from_raw_data(raw, freq)
 
     @property
     def pool(self) -> Pool:
+        """
+        Pool specification
+        """
         return self._pool
 
     @property
     def data(self) -> pd.DataFrame:
+        """
+        Transformed pandas data
+        """
         return self._data
 
-    def liquidity(self, t: datetime, c: float):
+    def liquidity(self, t: datetime, c: float) -> float:
+        """
+        Get pool liquidity at time ``t`` and price ``c``
+
+        :param t: Time for liquidity
+        :param c: Current price for liquidity
+        :return: Liquidity amount
+        """
         res = 0
         tick = (np.log(c) - self._pool.decimals_diff * np.log(10)) / np.log(1.0001)
         for idx, mint in self._mints.iterrows():
@@ -183,7 +270,7 @@ class PoolData:
 
     def plot(self, sizex=20, sizey=30):
         """
-        Plot tracking data
+        Plot pool data
 
         :param sizex: `x` size of one chart
         :param sizey: `y` size of one chart
