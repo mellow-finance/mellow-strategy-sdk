@@ -235,6 +235,49 @@ class PortfolioHistory(PositionHistory):
 
 
 class AbstractStrategy:
+    """
+    ``AbstractStrategy`` is a base class for defining a strategy.
+
+    When backtested, ``Backtest`` class runs through all data and calls the ``rebalance`` method.
+    That is the only method that needs to be implemented by the actual Strategy.
+
+    Example::
+
+        class RabalanceStrategy(AbstractStrategy):
+            def rebalance(
+                self,
+                t: datetime,
+                c: float,
+                vol: float,
+                l: Callable[[float], float],
+                pool_data: PoolData,
+            ) -> bool:
+                # Lazy init code
+                if not self.portfolio.position("main"):
+                    self.portfolio.add_position(Position(id="main", a = c / 2, b = c * 2))
+                    pos = self.portfolio.position("main")
+                    pos.deposit(c, 1)
+                    self.c0 = c
+
+                # Rebalance code
+                if abs(c0 / c - 1) > 0.25:
+                    pos.set_a(c / 2, c)
+                    pos.set_b(c * 2, c)
+                    self.c0 = c
+                    return True
+
+                return False
+
+    A typical definition of a ``rebalance`` method would contain two sections:
+
+    - `Lazy init`
+                  On the first call you need to initialize strategy's portfolio under management.
+                  Here you need to create initial positions with ``add_position`` method and invest initial amount using ``deposit`` method.
+    - `Rebalance`
+                  In this section you decied if you want to rebalance or not.
+                  If you rebalance you need to return ``True`` from the rebalance method to account for rebalance costs
+    """
+
     def __init__(self):
         self._portfolio = Portfolio()
 
@@ -246,19 +289,44 @@ class AbstractStrategy:
         l: Callable[[float], float],
         pool_data: PoolData,
     ) -> bool:
+        """
+        ``rebalance`` method defines how the strategy will be initialized and rebalanced.
+        See :ref:`class AbstractStrategy` description for details
+
+        :param t: Current time
+        :param c: Current price
+        :param vol: Current volume
+        :param l: Current liquidity distribution function (depending on price)
+        :param pool_data: All historical data used for extra logic. See :ref:`class PoolData` for more.
+        :return: ``True`` if the rebalance happened, ``False`` otherwise
+        """
         raise NotImplemented
 
     @property
     def portfolio(self):
+        """
+        Portfolio of the strategy
+        """
         return self._portfolio
 
 
 class Backtest:
+    """
+    ``Backtest`` is used for backtesting strategy on pool data.
+    It contains the logic of running strategy thrhough the data and tracks results.
+
+    :param strategy: Strategy to backtest
+    """
+
     def __init__(self, strategy: AbstractStrategy):
         self._strategy = strategy
         self._history = None
 
     def run(self, pool_data: PoolData, rebalance_cost_y: float):
+        """
+        :param pool_data: Data to run strategy on
+        :param rebalance_cost_y: The cost of each rebalance
+        """
         portfolio = self._strategy.portfolio
         self._history = PortfolioHistory(portfolio)
 
@@ -284,14 +352,32 @@ class Backtest:
             self._strategy.portfolio.reinvest_fees(c)
 
     def run_for_pool(self, pool: Pool, freq: Frequency, rebalance_cost_y: float):
+        """
+        Download the data and backtest strategy
+
+        :param pool: Pool to test on
+        :param freq: Resampling frequence. See :ref:`class Frequency`
+        :param rebalance_cost_y: The cost of each rebalance
+        """
         pool_data = PoolData.from_pool(pool, freq)
         self.run(pool_data, rebalance_cost_y)
 
     @property
-    def history(self):
+    def history(self) -> PortfolioHistory:
+        """
+        Results of the run. If run was not called before this property ``Exception`` will be raised.
+        """
+        if not self._history:
+            raise Exception("Please call `run` method first")
         return self._history
 
     def plot(self, sizex=20, sizey=10):
+        """
+        Plot results of the run. If run was not called before this property ``Exception`` will be raised.
+
+        :param sizex: `x` size of one chart
+        :param sizey: `y` size of one chart
+        """
         if not self._history:
             raise Exception("Please call `run` method first")
         self._history.plot(sizex=sizex, sizey=sizey)
