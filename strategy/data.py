@@ -254,6 +254,9 @@ class PoolData:
         :param c: Current price for liquidity
         :return: Liquidity amount
         """
+        c0 = self.data["c"][t]
+        if c0 == c:
+            return self.data["l"][t]
         res = 0
         tick = (np.log(c) - self._pool.decimals_diff * np.log(10)) / np.log(1.0001)
         for idx, mint in self._mints.iterrows():
