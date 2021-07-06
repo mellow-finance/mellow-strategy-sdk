@@ -25,7 +25,7 @@ Currently data is available for 3 pools:
 - USDC / USDT
 """
 
-__version__ = "0.1.0"
+__version__ = "0.0.1"
 
 
 from strategy.backtest import *
