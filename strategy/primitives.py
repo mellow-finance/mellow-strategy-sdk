@@ -223,4 +223,40 @@ POOLS = [
         "token1": Token.USDT,
         "fee": Fee.MIDDLE,
     },
+    {
+        "address": "0x6Ab3bba2F41e7eAA262fa5A1A9b3932fA161526F",
+        "token0": Token.WBTC,
+        "token1": Token.WETH,
+        "fee": Fee.HIGH,
+    },
+    {
+        "address": "0xbb256c2F1B677e27118b0345FD2b3894D2E6D487",
+        "token0": Token.USDC,
+        "token1": Token.WETH,
+        "fee": Fee.HIGH,
+    },
+    {
+        "address": "0x7858E59e0C01EA06Df3aF3D20aC7B0003275D4Bf",
+        "token0": Token.USDC,
+        "token1": Token.USDT,
+        "fee": Fee.HIGH,
+    },
+    {
+        "address": "0x4585FE77225b41b697C938B018E2Ac67Ac5a20c0",
+        "token0": Token.WBTC,
+        "token1": Token.WETH,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x7858E59e0C01EA06Df3aF3D20aC7B0003275D4Bf",
+        "token0": Token.USDC,
+        "token1": Token.WETH,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x7858E59e0C01EA06Df3aF3D20aC7B0003275D4Bf",
+        "token0": Token.USDC,
+        "token1": Token.USDT,
+        "fee": Fee.LOW,
+    },
 ]
