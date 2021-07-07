@@ -55,8 +55,6 @@ Then you define your strategy by inheriting :ref:`class AbstractStrategy` and ov
 
             return False
 
-    strategy = TickStrategy()
-
 Typycally the definition of the ``rebalance`` method would contain two sections:
 
 - `Lazy init`
@@ -71,7 +69,7 @@ The final step is to run backtest using your strategy and data::
 
     from strategy import Backtest
 
-    backtest = Backtest(strategy)
+    backtest = Backtest(TickStrategy)
     backtest.run(data, 0.001)
     backtest.plot() # or you can use backtest.history to analyze data
 

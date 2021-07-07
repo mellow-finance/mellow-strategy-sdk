@@ -320,8 +320,8 @@ class Backtest:
     :param strategy: Strategy to backtest
     """
 
-    def __init__(self, strategy: AbstractStrategy):
-        self._strategy = strategy
+    def __init__(self, strategyCls: AbstractStrategy):
+        self._strategy = strategyCls()
         self._history = None
 
     def run(self, pool_data: PoolData, rebalance_cost_y: float):
