@@ -206,21 +206,15 @@ TOKEN_DETAILS = {
 
 POOLS = [
     {
+        "address": "0x4585FE77225b41b697C938B018E2Ac67Ac5a20c0",
+        "token0": Token.WBTC,
+        "token1": Token.WETH,
+        "fee": Fee.LOW,
+    },
+    {
         "address": "0xCBCdF9626bC03E24f779434178A73a0B4bad62eD",
         "token0": Token.WBTC,
         "token1": Token.WETH,
-        "fee": Fee.MIDDLE,
-    },
-    {
-        "address": "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8",
-        "token0": Token.USDC,
-        "token1": Token.WETH,
-        "fee": Fee.MIDDLE,
-    },
-    {
-        "address": "0x7858E59e0C01EA06Df3aF3D20aC7B0003275D4Bf",
-        "token0": Token.USDC,
-        "token1": Token.USDT,
         "fee": Fee.MIDDLE,
     },
     {
@@ -230,33 +224,39 @@ POOLS = [
         "fee": Fee.HIGH,
     },
     {
+        "address": "0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640",
+        "token0": Token.USDC,
+        "token1": Token.WETH,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8",
+        "token0": Token.USDC,
+        "token1": Token.WETH,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "0x7BeA39867e4169DBe237d55C8242a8f2fcDcc387",
+        "token0": Token.USDC,
+        "token1": Token.WETH,
+        "fee": Fee.HIGH,
+    },
+    {
+        "address": "0x7858E59e0C01EA06Df3aF3D20aC7B0003275D4Bf",
+        "token0": Token.USDC,
+        "token1": Token.USDT,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0xEe4Cf3b78A74aFfa38C6a926282bCd8B5952818d",
+        "token0": Token.USDC,
+        "token1": Token.USDT,
+        "fee": Fee.MIDDLE,
+    },
+    {
         "address": "0xbb256c2F1B677e27118b0345FD2b3894D2E6D487",
         "token0": Token.USDC,
-        "token1": Token.WETH,
-        "fee": Fee.HIGH,
-    },
-    {
-        "address": "0x7858E59e0C01EA06Df3aF3D20aC7B0003275D4Bf",
-        "token0": Token.USDC,
         "token1": Token.USDT,
         "fee": Fee.HIGH,
-    },
-    {
-        "address": "0x4585FE77225b41b697C938B018E2Ac67Ac5a20c0",
-        "token0": Token.WBTC,
-        "token1": Token.WETH,
-        "fee": Fee.LOW,
-    },
-    {
-        "address": "0x7858E59e0C01EA06Df3aF3D20aC7B0003275D4Bf",
-        "token0": Token.USDC,
-        "token1": Token.WETH,
-        "fee": Fee.LOW,
-    },
-    {
-        "address": "0x7858E59e0C01EA06Df3aF3D20aC7B0003275D4Bf",
-        "token0": Token.USDC,
-        "token1": Token.USDT,
-        "fee": Fee.LOW,
     },
 ]
