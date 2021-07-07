@@ -135,11 +135,11 @@ class Pool:
         return self._token0.decimals - self._token1.decimals
 
     @property
-    def l_decimals_diff(self) -> int:
+    def l_decimals_diff(self) -> float:
         """
-        Average of ``token0`` and ``token1`` decimals. Used for conversion of liquidity from `wei` to `eth`.
+        Used for conversion of liquidity from `wei` to `eth`.
         """
-        return int((self._token0.decimals + self._token1.decimals) / 2)
+        return float(self._token0.decimals - self._token1.decimals) / 2
 
     @property
     def name(self) -> str:

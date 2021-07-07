@@ -200,7 +200,7 @@ class PoolData:
             .transform(lambda x: Decimal(x) / 10 ** pool.token1.decimals)
         )
         df["l"] = raw_data.swaps["liquidity"].transform(
-            lambda x: Decimal(x) / 10 ** pool.l_decimals_diff
+            lambda x: Decimal(x) * Decimal(10 ** pool.l_decimals_diff)
         )
         data = pd.DataFrame()
         mean = lambda x: np.nan if len(x) == 0 else Decimal(np.mean(x))
