@@ -139,7 +139,7 @@ class Pool:
         """
         Used for conversion of liquidity from `wei` to `eth`.
         """
-        return float(self._token0.decimals - self._token1.decimals) / 2
+        return float(self._token0.decimals + self._token1.decimals) / 2
 
     @property
     def name(self) -> str:
