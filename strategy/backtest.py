@@ -29,6 +29,8 @@ Example::
 """
 
 from datetime import datetime
+
+from pandas.core.frame import DataFrame
 from strategy.primitives import Frequency, Pool
 from strategy.const import COLORS
 from typing import Callable, Optional
@@ -215,7 +217,7 @@ class PortfolioHistory(PositionHistory):
         """
         Historical data
         """
-        return self._positions_history.data
+        return self._portfolio_history.data
 
     def snapshot(
         self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float
@@ -363,13 +365,14 @@ class Backtest:
         self.run(pool_data, rebalance_cost_y)
 
     @property
-    def history(self) -> PortfolioHistory:
+    def history(self) -> DataFrame:
         """
         Results of the run. If run was not called before this property ``Exception`` will be raised.
+        See :ref:`class PositionHistory` for data contents.
         """
         if not self._history:
             raise Exception("Please call `run` method first")
-        return self._history
+        return self._history.data
 
     def plot(self, sizex=20, sizey=50):
         """

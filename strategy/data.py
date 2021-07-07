@@ -209,7 +209,7 @@ class PoolData:
         data["c_inv"] = 1 / data["c"]
         data["vol0"] = df["vol0"].resample(freq.value).agg(sum)
         data["vol1"] = df["vol1"].resample(freq.value).agg(sum)
-        data["l"] = df["l"].resample(freq.value).agg(mean)
+        data["l"] = df["l"].resample(freq.value).agg(mean).ffill()
         data["c"] = data["c"].transform(lambda x: float(x))
         data["c_inv"] = data["c_inv"].transform(lambda x: float(x))
         data["vol0"] = data["vol0"].transform(lambda x: float(x))
