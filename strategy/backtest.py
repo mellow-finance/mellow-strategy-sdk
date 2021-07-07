@@ -166,12 +166,14 @@ class PositionHistory:
         axes[3, 0].set_title("Pool fees")
         axes[3, 1].plot(self._data["fees"], color=COLORS["fee"])
         axes[3, 1].set_title("Earned fees")
-        axes[4, 0].plot(self._data["cost"], color=COLORS["cost"])
-        axes[4, 0].set_title("Current cost")
-        axes[4, 1].plot(self._data["costs"], color=COLORS["cost"])
-        axes[4, 1].set_title("Accumulated costs")
-        axes[5, 0].plot(self._data["il"], color=COLORS["il"])
-        axes[5, 0].set_title("Impermanent loss")
+        axes[4, 0].plot(self._data["fees"].cumsum(), color=COLORS["fee"])
+        axes[4, 0].set_title("Accumulated fees")
+        axes[4, 1].plot(self._data["il"], color=COLORS["il"])
+        axes[4, 1].set_title("Impermanent loss")
+        axes[5, 0].plot(self._data["cost"], color=COLORS["cost"])
+        axes[5, 0].set_title("Current cost")
+        axes[5, 1].plot(self._data["costs"], color=COLORS["cost"])
+        axes[5, 1].set_title("Accumulated costs")
 
         for x in range(6):
             for y in range(2):
