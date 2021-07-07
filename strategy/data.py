@@ -48,7 +48,7 @@ class RawData:
         """
         print(f"Downloading swaps")
         swaps = pd.read_csv(
-            RawData._get_download_url("swaps", pool),
+            RawData._get_download_url("swap", pool),
             converters={
                 "block_time": int,
                 "block_number": int,
@@ -62,7 +62,7 @@ class RawData:
         swaps.index = pd.to_datetime(swaps["block_time"], unit="s")
         print(f"Downloading burns")
         burns = pd.read_csv(
-            RawData._get_download_url("burns", pool),
+            RawData._get_download_url("burn", pool),
             converters={
                 "block_time": int,
                 "block_number": int,
@@ -76,7 +76,7 @@ class RawData:
         burns.index = pd.to_datetime(burns["block_time"], unit="s")
         print(f"Downloading mints")
         mints = pd.read_csv(
-            RawData._get_download_url("mints", pool),
+            RawData._get_download_url("mint", pool),
             converters={
                 "block_time": int,
                 "block_number": int,
