@@ -230,8 +230,10 @@ class PortfolioHistory(PositionHistory):
             hist = self._positions_history[id]
             hist.snapshot(t, c, pool_fee, pool_l, 0)
 
-    def plot(self, sizex=20, sizey=10):
+    def plot(self, sizex=20, sizey=10, with_positions: bool = False):
         self._portfolio_history.plot(sizex, sizey)
+        if not with_positions:
+            return
         for pos in self._positions_history.values():
             pos.plot(sizex, sizey)
 
@@ -374,7 +376,7 @@ class Backtest:
             raise Exception("Please call `run` method first")
         return self._history.data
 
-    def plot(self, sizex=20, sizey=50):
+    def plot(self, sizex: int = 20, sizey: int = 50, with_positions: bool = False):
         """
         Plot results of the run. If run was not called before this property ``Exception`` will be raised.
 
@@ -383,4 +385,4 @@ class Backtest:
         """
         if not self._history:
             raise Exception("Please call `run` method first")
-        self._history.plot(sizex=sizex, sizey=sizey)
+        self._history.plot(sizex=sizex, sizey=sizey, with_positions=with_positions)
