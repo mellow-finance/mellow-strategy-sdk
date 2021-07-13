@@ -6,7 +6,7 @@ on Uniswap V3
 
 from datetime import datetime
 from strategy.data import PoolData
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from strategy.uni import y_per_l
@@ -30,7 +30,8 @@ class Position:
         self._l = 0
         self._bi_y = 0
         self._bi_x = 0
-        self._fees = 0
+        self._fees0 = 0
+        self._fees1 = 0
 
     @property
     def id(self) -> str:
@@ -40,45 +41,65 @@ class Position:
         return self._id
 
     @property
-    def fees(self) -> str:
+    def fees0(self) -> float:
         """
-        Accumulated fees for the position
+        Accumulated fees for the position for the ``X`` token
         """
-        return self._fees
+        return self._fees0
 
-    def charge_fees(self, c: float, pool_l: float, pool_fee: float) -> float:
+    @property
+    def fees1(self) -> float:
         """
-        Take a fraction of fees according to `pool` and `position` params and add it to ``fees``.
+        Accumulated fees for the position for the ``Y`` token
+        """
+        return self._fees1
+
+    def fees(self, c: float) -> float:
+        """
+        Accumulated fees for the position for the ``X`` and ``Y`` token converted to ``Y`` at price ``c``.
 
         :param c: Current price
-        :param pool_l: Current total virtual liquidity in the pool
-        :param pool_fee: Current total fees distributed by the pool
-
-        :return: Fees charged
+        :return: Total fees measured in ``Y`` token
         """
-        l = self.active_l(c)
-        total_l = l + pool_l
-        fee = 0
-        if total_l != 0:
-            fee = l * pool_fee / total_l
-        self._fees += fee
-        return fee
 
-    def reinvest_fees(self, c: float, amount: Optional[float] = None) -> float:
+        return self._fees0 * c + self._fees1
+
+    def charge_fees(
+        self, before_c: float, after_c: float, fee_factor: float
+    ) -> Tuple[float, float]:
+        """
+        Takes a price movement for a specific swap and adjusts the fees account
+
+        :param before_c: Price before the swap
+        :param after_c: Price after the swap
+        :param fee_factor: Fee for the current pool, e.g. 0.3%
+
+        :return: tuple of fees for ``X`` and ``Y`` tokens
+        """
+        x_before, y_before = self.xy(before_c)
+        x_after, y_after = self.xy(after_c)
+        fee0, fee1 = 0, 0
+        if y_after <= y_before:
+            fee1 = (y_before - y_after) * fee_factor
+        else:
+            fee0 = (x_before - x_after) * fee_factor
+        self._fees0 += fee0
+        self._fees1 += fee1
+        return fee0, fee1
+
+    def reinvest_fees(self, c: float) -> float:
         """
         Put accumulated fees into position
 
         :param c: Current price
-        :param amount: Amount of fees to put into position. Default - all fees.
 
-        :return: Amount of fees actually put into position
+        :return: Increase of the liquidity after reinvestment
         """
-        if not amount:
-            amount = self._fees
-        amount = min(amount, self._fees)
-        self.deposit(c, amount)
-        self._fees -= amount
-        return amount
+
+        res = self.deposit(c, self.fees(c))
+        self._fees0 = 0
+        self._fees1 = 0
+        return res
 
     def deposit(self, c: float, y: float) -> float:
         """
@@ -130,10 +151,24 @@ class Position:
         The value of the current position denominated in ``Y`` token. Doesn't include fees collected.
 
         :param c: Current price
-        :return: amount of ``Y`` token if the position is fully withdrawn
+        :return: amount of ``Y`` token if the position is fully withdrawn and ``X`` token converted to ``Y`` at price `c`.
         """
 
         return self._l * y_per_l(self._a, self._b, c)
+
+    def xy(self, c: float) -> Tuple[float, float]:
+        """
+        Values of x and y tokens corresponding to current liquidity at price
+
+        :param c: Current price
+        :return: amount of ``X`` and ``Y`` tokens if the position is fully withdrawn
+        """
+        x, y = 0, 0
+        if c > self.a:
+            y = self.l * (np.sqrt(c) - np.sqrt(self.a))
+        if c < self.b:
+            x = self.l * (np.sqrt(self.b) - np.sqrt(c)) / np.sqrt(self.b * c)
+        return x, y
 
     @property
     def l(self) -> float:
@@ -267,19 +302,35 @@ class Portfolio(Position):
         return self._positions.keys()
 
     @property
-    def fees(self):
+    def fees0(self) -> float:
         res = float(0)
-        [res := res + pos.fees for pos in self.positions]
+        [res := res + pos.fees0 for pos in self.positions]
         return res
 
-    def charge_fees(self, c: float, pool_l: float, pool_fee: float) -> float:
+    @property
+    def fees1(self) -> float:
         res = float(0)
-        [res := res + pos.charge_fees(c, pool_l, pool_fee) for pos in self.positions]
+        [res := res + pos.fees1 for pos in self.positions]
         return res
 
-    def reinvest_fees(self, c: float, amount: Optional[float] = None) -> float:
+    def fees(self, c: float) -> float:
         res = float(0)
-        [res := res + pos.reinvest_fees(c, amount) for pos in self.positions]
+        [res := res + pos.fees(c) for pos in self.positions]
+        return res
+
+    def charge_fees(
+        self, before_c: float, after_c: float, fee_factor: float
+    ) -> Tuple[float, float]:
+        f0, f1 = 0, 0
+        for pos in self.positions:
+            fd0, fd1 = pos.charge_fees(before_c, after_c, fee_factor)
+            f0 += fd0
+            f1 += fd1
+        return f0, f1
+
+    def reinvest_fees(self, c: float) -> float:
+        res = float(0)
+        [res := res + pos.reinvest_fees(c) for pos in self.positions]
         return res
 
     def deposit(self, с: float, y: float) -> float:
@@ -308,6 +359,14 @@ class Portfolio(Position):
         res = float(0)
         [res := res + pos.y(с) for pos in self.positions]
         return res
+
+    def xy(self, c: float) -> Tuple[float, float]:
+        x, y = 0, 0
+        for pos in self.positions:
+            xc, yc = pos.xy(c)
+            x += xc
+            y += yc
+        return x, y
 
     def il(self, с: float) -> float:
         res = float(0)

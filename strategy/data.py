@@ -9,6 +9,7 @@ Use ``PoolData`` by default and ``RawData`` if you want additional layer of cust
 """
 
 from __future__ import annotations
+from typing import List, Optional, Tuple
 from strategy.const import COLORS
 import pandas as pd
 import numpy as np
@@ -160,6 +161,7 @@ class PoolData:
     def __init__(
         self,
         data: pd.DataFrame,
+        swaps: pd.DataFrame,
         mints: pd.DataFrame,
         burns: pd.DataFrame,
         pool: Pool,
@@ -168,6 +170,7 @@ class PoolData:
         self._data = data
         self._pool = pool
         self._freq = freq
+        self._swaps = swaps
         self._mints = mints
         self._burns = burns
 
@@ -218,7 +221,7 @@ class PoolData:
         data["vol"] = data["vol0"] * data["c"] + data["vol1"]
         data["fee"] = data["vol"] * pool.fee.percent
 
-        return cls(data, raw_data.mints, raw_data.burns, pool, freq)
+        return cls(data, raw_data.swaps, raw_data.mints, raw_data.burns, pool, freq)
 
     @classmethod
     def from_pool(cls: PoolData, pool: Pool, freq: Frequency) -> PoolData:
@@ -245,6 +248,35 @@ class PoolData:
         Transformed pandas data
         """
         return self._data
+
+    @property
+    def swaps(self) -> pd.DataFrame:
+        """
+        Swap data
+        """
+        return self._swaps
+
+    def swap_prices(
+        self, start: Optional[datetime], end: Optional[datetime]
+    ) -> List[Tuple[float, float]]:
+        """
+        Price changes for every swap start ``start`` end ``end``.
+
+        :params start: Start of the period
+        :params end: End of the period
+        :return: List of tuples - first item is price before swap, second item is price after swap
+        """
+        df = pd.DataFrame()
+        df["c"] = self._swaps["sqrt_price_x96"].transform(
+            lambda x: Decimal(x)
+            * Decimal(x)
+            / Decimal(2 ** 192)
+            * Decimal(10 ** self._pool.decimals_diff)
+        )
+        df["c_1"] = df["c"].shift(1)
+        return [
+            (float(row["c_1"]), float(row["c"])) for _, row in df[start:end].iterrows()
+        ]
 
     def liquidity(self, t: datetime, c: float) -> float:
         """
@@ -329,6 +361,7 @@ class PoolData:
     def __getitem__(self, items) -> RawData:
         return PoolData(
             self._data.__getitem__(items),
+            self._swaps.__getitem__(items),
             self._mints,
             self._burns,
             self._pool,

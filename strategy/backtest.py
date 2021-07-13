@@ -129,7 +129,7 @@ class PositionHistory:
         self._data["il"][t] = self._pos.il(c)
         self._data["cost"][t] = cost
         self._data["costs"][t] = self.costs
-        self._data["fees"][t] = self._pos.fees
+        self._data["fees"][t] = self._pos.fees(c)
         self._data["net_y"][t] = (
             self._data["y"][t] + self._data["fees"][t] - self._data["costs"][t]
         )
@@ -353,7 +353,10 @@ class Backtest:
             c = data["c"][t]
             pool_fee = data["fee"][t]
             pool_l = pool_data.liquidity(t, c)
-            self._strategy.portfolio.charge_fees(c, pool_l, pool_fee)
+            for c_before, c_after in pool_data.swap_prices(prev_t, t):
+                self._strategy.portfolio.charge_fees(
+                    c_before, c_after, pool_data.pool.fee.percent
+                )
             self._history.snapshot(t, c, pool_fee, pool_l, cost)
             self._strategy.portfolio.reinvest_fees(c)
 
