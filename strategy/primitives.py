@@ -48,7 +48,7 @@ class Fee(Enum):
         """
         The actual uniswap percentage fee, i.e. 0.05%, 0.3% or 1%.
         """
-        return self.value / 100000
+        return self.value / 1000000
 
 
 @total_ordering

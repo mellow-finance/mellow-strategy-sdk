@@ -77,8 +77,10 @@ class Position:
 
         :return: tuple of fees for ``X`` and ``Y`` tokens
         """
-        x_before, y_before = self.xy(before_c)
-        x_after, y_after = self.xy(after_c)
+        c0 = min(max(self._a, before_c), self._b)
+        c1 = min(max(self._a, after_c), self._b)
+        x_before, y_before = self.xy(c0)
+        x_after, y_after = self.xy(c1)
         fee0, fee1 = 0, 0
         if y_after <= y_before:
             fee1 = (y_before - y_after) * fee_percent
