@@ -214,8 +214,8 @@ class Position:
         bicurrency_payoff = self._bi_x * c + self._bi_y
         return bicurrency_payoff - self.y(c)
 
-    def __str__(self):
-        return f"(a: {self._a}, b: {self._b}, l: {self._l})"
+    def __repr__(self):
+        return f"Position (a: {self._a}, b: {self._b}, l: {self._l}, f0: {self._fees0}, f1: {self._fees1})"
 
 
 class Portfolio(Position):
@@ -263,7 +263,7 @@ class Portfolio(Position):
 
         :return: a list of open positions.
         """
-        return self._positions.values()
+        return list(self._positions.values())
 
     def position(self, id: str) -> Optional[Position]:
         """

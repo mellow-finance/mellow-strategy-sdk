@@ -273,7 +273,7 @@ class PoolData:
             / Decimal(2 ** 192)
             * Decimal(10 ** self._pool.decimals_diff)
         )
-        df["c_1"] = df["c"].shift(1)
+        df["c_1"] = df["c"].shift(1).bfill()
         return [
             (float(row["c_1"]), float(row["c"])) for _, row in df[start:end].iterrows()
         ]
