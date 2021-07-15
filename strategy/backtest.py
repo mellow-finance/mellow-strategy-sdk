@@ -358,7 +358,7 @@ class Backtest:
                     c_before, c_after, pool_data.pool.fee.percent
                 )
             self._history.snapshot(t, c, pool_fee, pool_l, cost)
-            self._strategy.portfolio.reinvest_fees(c)
+            self._strategy.portfolio.reinvest_fees(c, pool_data.pool.fee.percent)
 
     def run_for_pool(self, pool: Pool, freq: Frequency, rebalance_cost_y: float):
         """
