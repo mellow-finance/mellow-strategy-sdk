@@ -83,7 +83,6 @@ class PositionHistory:
             "b",
             "y",
             "net_y",
-            "fee",
             "fees",
             "cost",
             "costs",

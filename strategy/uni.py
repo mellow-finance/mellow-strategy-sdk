@@ -74,6 +74,7 @@ def liq(x: float, y: float, a: float, b: float, c: float) -> float:
 
 
 def xy(l: float, a: float, b: float, c: float) -> Tuple[float, float]:
-    x = 1 / liq0(l, b, c)
-    y = 1 / liq1(l, a, c)
+    cc = min(max(a, c), b)
+    x = l / liq0(1, b, cc)
+    y = l / liq1(1, a, cc)
     return x, y
