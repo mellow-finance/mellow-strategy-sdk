@@ -82,6 +82,7 @@ class PositionHistory:
             "a",
             "b",
             "y",
+            "bi_y",
             "net_y",
             "fees",
             "cost",
@@ -116,6 +117,7 @@ class PositionHistory:
         self.pool_fees += pool_fee
         self.costs += cost
         y = self._pos.y(c)
+        bi_x, bi_y = self._pos.bi_xy
         fees = self._pos.fees(c)
         values = {
             "c": c,
@@ -125,6 +127,7 @@ class PositionHistory:
             "l": self._pos.l,
             "al": self._pos.active_l(c),
             "y": y,
+            "bi_y": bi_x * c + bi_y,
             "a": self._pos.a,
             "b": self._pos.b,
             "il": self._pos.il(c),
@@ -159,7 +162,9 @@ class PositionHistory:
         axes[1, 0].set_title("Pool liquidity")
         axes[1, 1].plot(self._data["al"], color=COLORS["l"])
         axes[1, 1].set_title("Active liquidity")
-        axes[2, 0].plot(self._data["y"], color=COLORS["y"])
+        axes[2, 0].plot(self._data["y"], label="y", color=COLORS["y"])
+        axes[2, 0].plot(self._data["bi_y"], ":", label="bi", color=COLORS["c"])
+        axes[2, 0].legend()
         axes[2, 0].set_title("Y value")
         axes[2, 1].plot(self._data["net_y"], color=COLORS["y"])
         axes[2, 1].set_title("Y value + accumulated fees - costs")

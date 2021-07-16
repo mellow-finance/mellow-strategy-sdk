@@ -119,8 +119,9 @@ class Position:
         x_c, y_c = align_for_liquidity(x, y, self._a, self._b, c, fee_percent)
         delta_l = liq(x_c, y_c, self._a, self._b, c)
         self._l += delta_l
-        self._bi_x += x_c
-        self._bi_y += y_c
+        if self._bi_x == 0 and self._bi_y == 0:
+            self._bi_x = x_c
+            self._bi_y = y_c
         return delta_l
 
     def withdraw(self, c: float, l: float) -> Tuple[float, float]:
@@ -134,8 +135,6 @@ class Position:
         """
         x, y = xy(l, self._a, self._b, c)
         self._l -= l
-        self._bi_x -= x
-        self._bi_y -= y
         return x, y
 
     def y(self, c: float) -> float:
@@ -156,6 +155,10 @@ class Position:
         :return: amount of ``X`` and ``Y`` tokens if the position is fully withdrawn
         """
         return xy(self._l, self._a, self._b, c)
+
+    @property
+    def bi_xy(self) -> Tuple[float, float]:
+        return self._bi_x, self._bi_y
 
     @property
     def l(self) -> float:
@@ -348,6 +351,15 @@ class Portfolio(Position):
         x, y = 0, 0
         for pos in self.positions:
             xc, yc = pos.xy(c)
+            x += xc
+            y += yc
+        return x, y
+
+    @property
+    def bi_xy(self) -> Tuple[float, float]:
+        x, y = 0, 0
+        for pos in self.positions:
+            xc, yc = pos.bi_xy
             x += xc
             y += yc
         return x, y
