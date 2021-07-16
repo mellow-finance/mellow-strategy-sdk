@@ -293,7 +293,8 @@ class AbstractStrategy:
         self,
         t: datetime,
         c: float,
-        vol: float,
+        c_avg: float,
+        vol_avg: float,
         l: Callable[[float], float],
         pool_data: PoolData,
     ) -> bool:
@@ -344,24 +345,27 @@ class Backtest:
             t = index[i]
             prev_t = index[i - 1]
             prev_c = data["c"][prev_t]
-            rebalance = self._strategy.rebalance(
-                prev_t,
-                data["c"][prev_t],
-                data["vol"][prev_t],
-                lambda c: pool_data.liquidity(prev_t, prev_c),
-                pool_data[:prev_t],
-            )
-
-            cost = rebalance_cost_y if rebalance else 0
             c = data["c"][t]
             pool_fee = data["fee"][t]
             pool_l = pool_data.liquidity(t, c)
             swap_prices = pool_data.swap_prices(prev_t, t)
+            total_cost = 0
             for c_before, c_after in swap_prices:
+                rebalance = self._strategy.rebalance(
+                    prev_t,
+                    c_before,
+                    data["c"][prev_t],
+                    data["vol"][prev_t],
+                    lambda c: pool_data.liquidity(prev_t, prev_c),
+                    pool_data[:prev_t],
+                )
+
+                cost = rebalance_cost_y if rebalance else 0
+                total_cost += cost
                 self._strategy.portfolio.charge_fees(
                     c_before, c_after, pool_data.pool.fee.percent
                 )
-            self._history.snapshot(t, c, pool_fee, pool_l, cost)
+            self._history.snapshot(t, c, pool_fee, pool_l, total_cost)
             self._strategy.portfolio.reinvest_fees(c, pool_data.pool.fee.percent)
 
     def run_for_pool(self, pool: Pool, freq: Frequency, rebalance_cost_y: float):
