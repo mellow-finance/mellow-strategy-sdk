@@ -70,7 +70,7 @@ class PositionHistory:
     :param pos: The position to track
     """
 
-    def __init__(self, pos: Position):
+    def __init__(self, pos: Position, index: pd.Index):
         self._pos = pos
         self.cols = [
             "c",
@@ -88,7 +88,7 @@ class PositionHistory:
             "costs",
             "il",
         ]
-        self._data = pd.DataFrame([], columns=self.cols)
+        self._data = pd.DataFrame([], columns=self.cols, index=index)
         self.pool_fees = 0
         self.costs = 0
 
@@ -111,7 +111,7 @@ class PositionHistory:
         :param pool_l: Total liquidity in the UniV3 pool at time ``t``
         :param cost: Rebalance cost
         """
-        if t in self._data.index:
+        if not np.isnan(self._data["c"].loc[t]):
             return
         self.pool_fees += pool_fee
         self.costs += cost
@@ -210,9 +210,10 @@ class PortfolioHistory(PositionHistory):
     :param portfolio: The portfolio to track
     """
 
-    def __init__(self, portfolio: Portfolio):
+    def __init__(self, portfolio: Portfolio, index: pd.Index):
         self._portfolio = portfolio
-        self._portfolio_history = PositionHistory(portfolio)
+        self._portfolio_history = PositionHistory(portfolio, index)
+        self._index = index
         self._positions_history = {}
 
     @property
@@ -229,7 +230,7 @@ class PortfolioHistory(PositionHistory):
         for id in self._portfolio.position_ids:
             pos = self._portfolio.position(id)
             if id not in self._positions_history:
-                self._positions_history[id] = PositionHistory(pos)
+                self._positions_history[id] = PositionHistory(pos, self._index)
             hist = self._positions_history[id]
             hist.snapshot(t, c, pool_fee, pool_l, 0)
 
@@ -335,7 +336,7 @@ class Backtest:
         :param rebalance_cost_y: The cost of each rebalance
         """
         portfolio = self._strategy.portfolio
-        self._history = PortfolioHistory(portfolio)
+        self._history = PortfolioHistory(portfolio, pool_data.data.index)
 
         data = pool_data.data
         index = data.index
