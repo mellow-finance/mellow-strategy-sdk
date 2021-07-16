@@ -205,6 +205,8 @@ class PoolData:
         df["l"] = raw_data.swaps["liquidity"].transform(
             lambda x: Decimal(x) / Decimal(10 ** pool.l_decimals_diff)
         )
+        raw_data.swaps["c"] = df["c"]
+        raw_data.swaps["c_1"] = df["c"].shift(1).bfill()
         data = pd.DataFrame()
         mean = lambda x: np.nan if len(x) == 0 else Decimal(np.mean(x))
         sum = lambda x: np.sum(x)
@@ -266,16 +268,9 @@ class PoolData:
         :params end: End of the period
         :return: List of tuples - first item is price before swap, second item is price after swap
         """
-        df = pd.DataFrame()
-        df["c"] = self._swaps["sqrt_price_x96"].transform(
-            lambda x: Decimal(x)
-            * Decimal(x)
-            / Decimal(2 ** 192)
-            * Decimal(10 ** self._pool.decimals_diff)
-        )
-        df["c_1"] = df["c"].shift(1).bfill()
         return [
-            (float(row["c_1"]), float(row["c"])) for _, row in df[start:end].iterrows()
+            (float(row["c_1"]), float(row["c"]))
+            for _, row in self._swaps[start:end].iterrows()
         ]
 
     def liquidity(self, t: datetime, c: float) -> float:

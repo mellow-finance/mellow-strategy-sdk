@@ -115,23 +115,25 @@ class PositionHistory:
             return
         self.pool_fees += pool_fee
         self.costs += cost
-        self._data.loc[t] = [np.nan] * len(self.cols)
-        self._data["c"][t] = c
-        self._data["pool_l"][t] = pool_l
-        self._data["pool_fee"][t] = pool_fee
-        self._data["pool_fees"][t] = self.pool_fees
-        self._data["l"][t] = self._pos.l
-        self._data["al"][t] = self._pos.active_l(c)
-        self._data["y"][t] = self._pos.y(c)
-        self._data["a"][t] = self._pos.a
-        self._data["b"][t] = self._pos.b
-        self._data["il"][t] = self._pos.il(c)
-        self._data["cost"][t] = cost
-        self._data["costs"][t] = self.costs
-        self._data["fees"][t] = self._pos.fees(c)
-        self._data["net_y"][t] = (
-            self._data["y"][t] + self._data["fees"][t] - self._data["costs"][t]
-        )
+        y = self._pos.y(c)
+        fees = self._pos.fees(c)
+        values = {
+            "c": c,
+            "pool_l": pool_l,
+            "pool_fee": pool_fee,
+            "pool_fees": self.pool_fees,
+            "l": self._pos.l,
+            "al": self._pos.active_l(c),
+            "y": y,
+            "a": self._pos.a,
+            "b": self._pos.b,
+            "il": self._pos.il(c),
+            "cost": cost,
+            "costs": self.costs,
+            "fees": fees,
+            "net_y": y + fees - self.costs,
+        }
+        self._data.loc[t] = [values[col] for col in self._data.columns]
 
     def plot(self, sizex=20, sizey=10):
         """
@@ -340,11 +342,12 @@ class Backtest:
         for i in range(1, len(index)):
             t = index[i]
             prev_t = index[i - 1]
+            prev_c = data["c"][prev_t]
             rebalance = self._strategy.rebalance(
                 prev_t,
                 data["c"][prev_t],
                 data["vol"][prev_t],
-                lambda c: pool_data.liquidity(prev_t, c),
+                lambda c: pool_data.liquidity(prev_t, prev_c),
                 pool_data[:prev_t],
             )
 
@@ -352,7 +355,8 @@ class Backtest:
             c = data["c"][t]
             pool_fee = data["fee"][t]
             pool_l = pool_data.liquidity(t, c)
-            for c_before, c_after in pool_data.swap_prices(prev_t, t):
+            swap_prices = pool_data.swap_prices(prev_t, t)
+            for c_before, c_after in swap_prices:
                 self._strategy.portfolio.charge_fees(
                     c_before, c_after, pool_data.pool.fee.percent
                 )

@@ -145,8 +145,8 @@ class Position:
         :param c: Current price
         :return: amount of ``Y`` token if the position is fully withdrawn and ``X`` token converted to ``Y`` at price `c`.
         """
-
-        return self._l * y_per_l(self._a, self._b, c)
+        x, y = self.xy(c)
+        return x * c + y
 
     def xy(self, c: float) -> Tuple[float, float]:
         """
