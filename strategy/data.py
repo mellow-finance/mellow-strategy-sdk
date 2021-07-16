@@ -268,10 +268,9 @@ class PoolData:
         :params end: End of the period
         :return: List of tuples - first item is price before swap, second item is price after swap
         """
-        return [
-            (float(row["c_1"]), float(row["c"]))
-            for _, row in self._swaps[start:end].iterrows()
-        ]
+        df = self._swaps[start:end]
+        rows = zip(df["c_1"], df["c"])
+        return [(float(c_1), float(c)) for _, (c_1, c) in enumerate(rows)]
 
     def liquidity(self, t: datetime, c: float) -> float:
         """
