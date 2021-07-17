@@ -10,7 +10,7 @@ from strategy.data import PoolData
 from typing import Callable, List, Optional, Tuple
 import numpy as np
 import pandas as pd
-from strategy.uni import align_for_liquidity, liq, xy, y_per_l
+from strategy.uni import align_for_liquidity, liq, xy
 
 
 class Position:

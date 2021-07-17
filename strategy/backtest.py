@@ -349,7 +349,6 @@ class Backtest:
         for i in range(1, len(index)):
             t = index[i]
             prev_t = index[i - 1]
-            prev_c = data["c"][prev_t]
             c = data["c"][t]
             pool_fee = data["fee"][t]
             pool_l = pool_data.liquidity(t, c)
@@ -361,7 +360,7 @@ class Backtest:
                     c_before,
                     data["c"][prev_t],
                     data["vol"][prev_t],
-                    lambda c: pool_data.liquidity(prev_t, prev_c),
+                    lambda c: pool_data.liquidity(prev_t, c),
                     pool_data[:prev_t],
                 )
 

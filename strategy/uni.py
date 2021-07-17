@@ -36,8 +36,10 @@ def l_per_y(a: float, b: float, c: float) -> float:
 
 def c_real(a: float, b: float, c: float) -> float:
     sa, sb, sc = np.sqrt(a), np.sqrt(b), np.sqrt(c)
-    if sb == sc:
+    if sb <= sc:
         return np.inf
+    if sa >= sc:
+        return 0
     return (sc - sa) * sb * sc / (sb - sc)
 
 
@@ -45,6 +47,8 @@ def align_for_liquidity(
     x: float, y: float, a: float, b: float, c: float, fee_percent: float
 ) -> Tuple[float, float]:
     cr = c_real(a, b, c)
+    if cr == np.inf:
+        return 0, y + c * x * (1 - fee_percent)
     z = cr * x - y
     d = 1 - fee_percent if z >= 0 else 1 / (1 - fee_percent)
     dx = z / (c * d + cr)
@@ -55,8 +59,6 @@ def liq0(x: float, b: float, c: float) -> float:
     if b <= c:
         return np.inf
     sb, sc = np.sqrt(b), np.sqrt(c)
-    if sb == sc:
-        return np.inf
     return x * sb * sc / (sb - sc)
 
 
@@ -64,8 +66,6 @@ def liq1(y: float, a: float, c: float) -> float:
     if a >= c:
         return np.inf
     sa, sc = np.sqrt(a), np.sqrt(c)
-    if sa == sc:
-        return np.inf
     return y / (sc - sa)
 
 
@@ -74,7 +74,6 @@ def liq(x: float, y: float, a: float, b: float, c: float) -> float:
 
 
 def xy(l: float, a: float, b: float, c: float) -> Tuple[float, float]:
-    cc = min(max(a, c), b)
-    x = l / liq0(1, b, cc)
-    y = l / liq1(1, a, cc)
+    x = l / liq0(1, b, c)
+    y = l / liq1(1, a, c)
     return x, y
