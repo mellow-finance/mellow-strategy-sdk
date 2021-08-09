@@ -33,7 +33,7 @@ from datetime import datetime
 from pandas.core.frame import DataFrame
 from strategy.primitives import Frequency, Pool
 from strategy.const import COLORS
-from typing import Callable, Optional
+from typing import Callable
 from strategy.data import PoolData
 import numpy as np
 import pandas as pd
@@ -41,7 +41,19 @@ import matplotlib.pyplot as plt
 from strategy.portfolio import Position, Portfolio
 
 
-class PositionHistory:
+class AbstractHistory:
+    @property
+    def data(self) -> pd.DataFrame:
+        raise Exception(NotImplemented)
+
+    def snapshot(self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float) -> None:
+        raise Exception(NotImplemented)
+
+    def plot(self, size_x: int, size_y: int) -> None:
+        raise Exception(NotImplemented)
+
+
+class PositionHistory(AbstractHistory):
     """
     ``PositionHistory`` tracks position values over time.
     Each time ``snapshot`` method is called it remembers current state in time.
@@ -96,13 +108,11 @@ class PositionHistory:
     @property
     def data(self) -> pd.DataFrame:
         """
-        Historical data
+        :return: Historical data
         """
         return self._data
 
-    def snapshot(
-        self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float
-    ):
+    def snapshot(self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float) -> None:
         """
         Write current state
 
@@ -138,14 +148,14 @@ class PositionHistory:
         }
         self._data.loc[t] = [values[col] for col in self._data.columns]
 
-    def plot(self, sizex=20, sizey=10):
+    def plot(self, size_x=20, size_y=10) -> None:
         """
         Plot historical data
 
-        :param sizex: `x` size of one chart
-        :param sizey: `y` size of one chart
+        :param size_x: `x` size of one chart
+        :param size_y: `y` size of one chart
         """
-        fig, axes = plt.subplots(6, 2, figsize=(sizex, sizey))
+        fig, axes = plt.subplots(6, 2, figsize=(size_x, size_y))
         fig.suptitle(
             f"Stats for {self._pos.id}",
             fontsize=16,
@@ -186,7 +196,7 @@ class PositionHistory:
                 axes[x, y].tick_params(axis="x", labelrotation=45)
 
 
-class PortfolioHistory(PositionHistory):
+class PortfolioHistory(AbstractHistory):
     """
     ``PortfolioHistory`` tracks portfolio values over time.
     Each time ``snapshot`` method is called it remembers current state in time.
@@ -217,6 +227,7 @@ class PortfolioHistory(PositionHistory):
 
     def __init__(self, portfolio: Portfolio, index: pd.Index):
         self._portfolio = portfolio
+        # ISSUE: PositionHistory takes Portfolio instance as variable instead of Position
         self._portfolio_history = PositionHistory(portfolio, index)
         self._index = index
         self._positions_history = {}
@@ -224,13 +235,19 @@ class PortfolioHistory(PositionHistory):
     @property
     def data(self) -> pd.DataFrame:
         """
-        Historical data
+        :return: Historical data
         """
         return self._portfolio_history.data
 
-    def snapshot(
-        self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float
-    ):
+    def snapshot(self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float) -> None:
+        """
+        Write current state
+        :param t: Time for state snapshot
+        :param c: Price at time ``t``
+        :param pool_fee: Total fees distributed in the UniV3 pool in the current period(denominated in ``Y`` token)
+        :param pool_l: Total liquidity in the UniV3 pool at time ``t``
+        :param cost: Rebalance cost
+        """
         self._portfolio_history.snapshot(t, c, pool_fee, pool_l, cost)
         for id in self._portfolio.position_ids:
             pos = self._portfolio.position(id)
@@ -239,12 +256,18 @@ class PortfolioHistory(PositionHistory):
             hist = self._positions_history[id]
             hist.snapshot(t, c, pool_fee, pool_l, 0)
 
-    def plot(self, sizex=20, sizey=10, with_positions: bool = False):
-        self._portfolio_history.plot(sizex, sizey)
+    def plot(self, size_x=20, size_y=10, with_positions: bool = False) -> None:
+        """
+        Plot historical data
+        :param size_x: `x` size of one chart
+        :param size_y: `y` size of one chart
+        :param with_positions:
+        """
+        self._portfolio_history.plot(size_x, size_y)
         if not with_positions:
             return
         for pos in self._positions_history.values():
-            pos.plot(sizex, sizey)
+            pos.plot(size_x, size_y)
 
 
 class AbstractStrategy:
@@ -294,15 +317,13 @@ class AbstractStrategy:
     def __init__(self):
         self._portfolio = Portfolio()
 
-    def rebalance(
-        self,
-        t: datetime,
-        c: float,
-        c_avg: float,
-        vol_avg: float,
-        l: Callable[[float], float],
-        pool_data: PoolData,
-    ) -> bool:
+    def rebalance(self,
+                  t: datetime,
+                  c: float,
+                  vol: float,
+                  l: Callable[[float], float],
+                  pool_data: PoolData,
+                  ) -> bool:
         """
         ``rebalance`` method defines how the strategy will be initialized and rebalanced.
         See :ref:`class AbstractStrategy` description for details
@@ -329,14 +350,14 @@ class Backtest:
     ``Backtest`` is used for backtesting strategy on pool data.
     It contains the logic of running strategy thrhough the data and tracks results.
 
-    :param strategy: Strategy to backtest
+    :param strategy_factory: Strategy to backtest
     """
 
     def __init__(self, strategy_factory: Callable[[], AbstractStrategy]):
         self._strategy = strategy_factory()
         self._history = None
 
-    def run(self, pool_data: PoolData, rebalance_cost_y: float):
+    def run(self, pool_data: PoolData, rebalance_cost_y: float) -> None:
         """
         :param pool_data: Data to run strategy on
         :param rebalance_cost_y: The cost of each rebalance
@@ -358,7 +379,6 @@ class Backtest:
                 rebalance = self._strategy.rebalance(
                     prev_t,
                     c_before,
-                    data["c"][prev_t],
                     data["vol"][prev_t],
                     lambda c: pool_data.liquidity(prev_t, c),
                     pool_data[:prev_t],
@@ -372,7 +392,7 @@ class Backtest:
             self._history.snapshot(t, c, pool_fee, pool_l, total_cost)
             self._strategy.portfolio.reinvest_fees(c, pool_data.pool.fee.percent)
 
-    def run_for_pool(self, pool: Pool, freq: Frequency, rebalance_cost_y: float):
+    def run_for_pool(self, pool: Pool, freq: Frequency, rebalance_cost_y: float) -> None:
         """
         Download the data and backtest strategy
 
@@ -393,13 +413,13 @@ class Backtest:
             raise Exception("Please call `run` method first")
         return self._history.data
 
-    def plot(self, sizex: int = 20, sizey: int = 50, with_positions: bool = False):
+    def plot(self, size_x: int = 20, size_y: int = 50, with_positions: bool = False) -> None:
         """
         Plot results of the run. If run was not called before this property ``Exception`` will be raised.
 
-        :param sizex: `x` size of one chart
-        :param sizey: `y` size of one chart
+        :param size_x: `x` size of one chart
+        :param size_y: `y` size of one chart
         """
         if not self._history:
             raise Exception("Please call `run` method first")
-        self._history.plot(sizex=sizex, sizey=sizey, with_positions=with_positions)
+        self._history.plot(size_x=size_x, size_y=size_y, with_positions=with_positions)

@@ -6,35 +6,13 @@ from typing import Tuple
 import numpy as np
 
 
-def y_per_l(a: float, b: float, c: float) -> float:
-    """
-    Amount of ``Y`` token equivalent to a unit of liquidity.
-
-    :param a: Left bound of liquidity interval (price)
-    :param b: Right bound of liquidity interval (price)
-    :param c: Current price
-    :returns: Amount of ``Y`` token you will receive if you remove one liquidity unit, get ``x`` and ``y`` tokens
-              and sell ``x`` at price `c` with no slippage
-    """
-    mc = min(max(a, c), b)
-    return c * (1 / np.sqrt(mc) - 1 / np.sqrt(b)) + np.sqrt(mc) - np.sqrt(a)
-
-
-def l_per_y(a: float, b: float, c: float) -> float:
-    """
-    Amount of liquidity equivalent to a unit of token ``Y``.
-
-    :param a: Left bound of liquidity interval (price)
-    :param b: Right bound of liquidity interval (price)
-    :param c: Current price
-    :return: Amount of liquidity you will receive if you invest one unit of ``Y``, convert optimal portion to token ``X``
-             with no slippage and invest into uniV3 pool
-    """
-
-    return 1 / y_per_l(a, b, c)
-
-
 def c_real(a: float, b: float, c: float) -> float:
+    """
+    :param a: Left bound of liquidity interval (price)
+    :param b: Right bound of liquidity interval (price)
+    :param c: Current price
+    :return: Optimal token ratio such that Lx = Ly
+    """
     sa, sb, sc = np.sqrt(a), np.sqrt(b), np.sqrt(c)
     if sb <= sc:
         return np.inf
@@ -46,6 +24,15 @@ def c_real(a: float, b: float, c: float) -> float:
 def align_for_liquidity(
     x: float, y: float, a: float, b: float, c: float, fee_percent: float
 ) -> Tuple[float, float]:
+    """
+    :param x: Amount of ``X`` token
+    :param y: Amount of ``Y`` token
+    :param a: Left bound of liquidity interval (price)
+    :param b: Right bound of liquidity interval (price)
+    :param c: Current price
+    :param fee_percent:  Fee for the current pool, e.g. 0.003
+    :return: Tuple of ``X`` and ``Y`` tokens
+    """
     cr = c_real(a, b, c)
     if cr == np.inf:
         return 0, y + c * x * (1 - fee_percent)
@@ -56,6 +43,12 @@ def align_for_liquidity(
 
 
 def liq0(x: float, b: float, c: float) -> float:
+    """
+    :param x: Amount of token ``X``
+    :param b: Right bound of liquidity interval (price)
+    :param c: Current price
+    :return: Liquidity of ``X`` token
+    """
     if b <= c:
         return np.inf
     sb, sc = np.sqrt(b), np.sqrt(c)
@@ -63,6 +56,12 @@ def liq0(x: float, b: float, c: float) -> float:
 
 
 def liq1(y: float, a: float, c: float) -> float:
+    """
+    :param y: Amount of token ``Y``
+    :param a: Left bound of liquidity interval (price)
+    :param c: Current price
+    :return: Liquidity of ``Y`` token
+    """
     if a >= c:
         return np.inf
     sa, sc = np.sqrt(a), np.sqrt(c)
@@ -70,11 +69,26 @@ def liq1(y: float, a: float, c: float) -> float:
 
 
 def liq(x: float, y: float, a: float, b: float, c: float) -> float:
+    """
+    :param x: Amount of token ``X``
+    :param y: Amount of token ``Y``
+    :param a: Left bound of liquidity interval (price)
+    :param b: Right bound of liquidity interval (price)
+    :param c: Current price
+    :return: Liquidity
+    """
     cc = min(max(a, c), b)
     return min(liq0(x, b, cc), liq1(y, a, cc))
 
 
 def xy(l: float, a: float, b: float, c: float) -> Tuple[float, float]:
+    """
+    :param l: Liquidity
+    :param a: Left bound of liquidity interval (price)
+    :param b: Right bound of liquidity interval (price)
+    :param c: Current price
+    :return: Amount of ``X`` and ``Y`` tokens if the position is fully withdrawn
+    """
     cc = min(max(a, c), b)
     x = l / liq0(1, b, cc)
     y = l / liq1(1, a, cc)
