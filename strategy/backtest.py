@@ -38,7 +38,7 @@ from strategy.data import PoolData
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from strategy.portfolio import Position, Portfolio
+from strategy.portfolio import AbstractPosition, Portfolio
 
 
 class AbstractHistory:
@@ -82,7 +82,7 @@ class PositionHistory(AbstractHistory):
     :param pos: The position to track
     """
 
-    def __init__(self, pos: Position, index: pd.Index):
+    def __init__(self, pos: AbstractPosition, index: pd.Index):
         self._pos = pos
         self.cols = [
             "c",
@@ -227,7 +227,6 @@ class PortfolioHistory(AbstractHistory):
 
     def __init__(self, portfolio: Portfolio, index: pd.Index):
         self._portfolio = portfolio
-        # ISSUE: PositionHistory takes Portfolio instance as variable instead of Position
         self._portfolio_history = PositionHistory(portfolio, index)
         self._index = index
         self._positions_history = {}
