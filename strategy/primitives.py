@@ -50,6 +50,13 @@ class Fee(Enum):
         """
         return self.value / 1000000
 
+    @property
+    def spacing(self) -> int:
+        """
+        Tick spacing for this fee
+        """
+        return SPACING[self]
+
 
 @total_ordering
 class Token(Enum):
@@ -269,3 +276,5 @@ POOLS = [
         "fee": Fee.HIGH,
     },
 ]
+
+SPACING = {Fee.LOW: 10, Fee.MIDDLE: 60, Fee.HIGH: 200}
