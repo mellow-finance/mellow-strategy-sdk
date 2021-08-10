@@ -303,8 +303,8 @@ class PoolData:
         """
         Plot pool data
 
-        :param sizex: `x` size of one chart
-        :param sizey: `y` size of one chart
+        :param size_x: `x` size of one chart
+        :param size_y: `y` size of one chart
         """
         fig, axes = plt.subplots(3, 2, figsize=(size_x, size_y))
         fig.suptitle(
