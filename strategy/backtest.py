@@ -39,16 +39,20 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from strategy.portfolio import AbstractPosition, Portfolio
+from abc import ABC, abstractmethod
 
 
-class AbstractHistory:
+class AbstractHistory(ABC):
     @property
+    @abstractmethod
     def data(self) -> pd.DataFrame:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def snapshot(self, t: datetime, c: float, pool_fee: float, pool_l: float, cost: float) -> None:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def plot(self, size_x: int, size_y: int) -> None:
         raise Exception(NotImplemented)
 
@@ -269,7 +273,7 @@ class PortfolioHistory(AbstractHistory):
             pos.plot(size_x, size_y)
 
 
-class AbstractStrategy:
+class AbstractStrategy(ABC):
     """
     ``AbstractStrategy`` is a base class for defining a strategy.
 
@@ -316,6 +320,7 @@ class AbstractStrategy:
     def __init__(self):
         self._portfolio = Portfolio()
 
+    @abstractmethod
     def rebalance(self,
                   t: datetime,
                   c: float,
@@ -334,7 +339,7 @@ class AbstractStrategy:
         :param pool_data: All historical data used for extra logic. See :ref:`class PoolData` for more.
         :return: ``True`` if the rebalance happened, ``False`` otherwise
         """
-        raise NotImplemented
+        raise Exception(NotImplemented)
 
     @property
     def portfolio(self):

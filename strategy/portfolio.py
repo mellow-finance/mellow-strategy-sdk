@@ -6,9 +6,10 @@ on Uniswap V3
 from typing import List, Optional, Tuple
 import numpy as np
 from strategy.uni import align_for_liquidity, liq, xy
+from abc import ABC, abstractmethod
 
 
-class AbstractPosition:
+class AbstractPosition(ABC):
     """
     ``AbstractPosition`` is a abstract class for Position and Portfolio classes
     :param id: Unique string id for the position
@@ -22,6 +23,7 @@ class AbstractPosition:
         return self._id
 
     @property
+    @abstractmethod
     def fees0(self) -> float:
         raise Exception(NotImplemented)
 
@@ -30,48 +32,62 @@ class AbstractPosition:
         raise Exception(NotImplemented)
 
     @property
+    @abstractmethod
     def a(self) -> float:
         raise Exception(NotImplemented)
 
     @property
+    @abstractmethod
     def b(self) -> float:
         raise Exception(NotImplemented)
 
     @property
+    @abstractmethod
     def bi_xy(self) -> Tuple[float, float]:
         raise Exception(NotImplemented)
 
     @property
+    @abstractmethod
     def l(self) -> float:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def fees(self, c: float) -> float:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def charge_fees(self, before_c: float, after_c: float, fee_percent: float) -> Tuple[float, float]:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def reinvest_fees(self, c: float, fee_percent: float) -> float:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def deposit(self, c: float, x: float, y: float, fee_percent: float) -> float:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def rebalance(self, a: float, b: float, c: float, fee_percent: float) -> float:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def withdraw(self, c: float, l: float) -> Tuple[float, float]:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def y(self, c: float) -> float:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def xy(self, c: float) -> Tuple[float, float]:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def il(self, c: float) -> float:
         raise Exception(NotImplemented)
 
+    @abstractmethod
     def active_l(self, c: float) -> float:
         raise Exception(NotImplemented)
 
@@ -452,7 +468,7 @@ class Portfolio(AbstractPosition):
     @property
     def a(self) -> float:
         """
-        :return: min bound of left interval
+        :return: min bound of all left intervals of all positions
         """
         res = np.infty
         for pos in self.positions:
@@ -462,7 +478,7 @@ class Portfolio(AbstractPosition):
     @property
     def b(self) -> float:
         """
-        :return: max bound of right interval
+        :return: max bound of all right intervals of all positions
         """
         res = float(0)
         for pos in self.positions:
@@ -488,3 +504,7 @@ class Portfolio(AbstractPosition):
         for pos in self.positions:
             res += pos.active_l(c)
         return res
+
+    def rebalance(self, a: float, b: float, c: float, fee_percent: float) -> float:
+        raise Exception(NotImplemented)
+
