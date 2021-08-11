@@ -92,15 +92,24 @@ class Token(Enum):
         """
         return TOKEN_DETAILS[self.value]["decimals"]
 
-    def _is_valid_operand(self, other):
+    def _is_valid_operand(self, other: 'Token') -> bool:
+        """
+        :param other: other Token
+        """
         return isinstance(other, Token)
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Token') -> bool:
+        """
+        :param other: other Token
+        """
         if not self._is_valid_operand(other):
             return NotImplemented
         return self.value == other.value
 
-    def __lt__(self, other):
+    def __lt__(self, other: 'Token') -> bool:
+        """
+        :param other: other Token
+        """
         if not self._is_valid_operand(other):
             return NotImplemented
 

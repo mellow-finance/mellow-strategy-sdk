@@ -1,19 +1,98 @@
 """
 ``portfolio`` module contains basic definitions for positions and composite positions (portfolio)
 on Uniswap V3
-
 """
 
-from datetime import datetime
-from strategy.primitives import Pool
-from strategy.data import PoolData
-from typing import Callable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 import numpy as np
-import pandas as pd
 from strategy.uni import align_for_liquidity, liq, xy
+from abc import ABC, abstractmethod
 
 
-class Position:
+class AbstractPosition(ABC):
+    """
+    ``AbstractPosition`` is a abstract class for Position and Portfolio classes
+    :param id: Unique string id for the position
+    """
+
+    def __init__(self, id: str) -> None:
+        self._id = id
+
+    @property
+    def id(self) -> str:
+        return self._id
+
+    @property
+    @abstractmethod
+    def fees0(self) -> float:
+        raise Exception(NotImplemented)
+
+    @property
+    def fees1(self) -> float:
+        raise Exception(NotImplemented)
+
+    @property
+    @abstractmethod
+    def a(self) -> float:
+        raise Exception(NotImplemented)
+
+    @property
+    @abstractmethod
+    def b(self) -> float:
+        raise Exception(NotImplemented)
+
+    @property
+    @abstractmethod
+    def bi_xy(self) -> Tuple[float, float]:
+        raise Exception(NotImplemented)
+
+    @property
+    @abstractmethod
+    def l(self) -> float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def fees(self, c: float) -> float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def charge_fees(self, before_c: float, after_c: float, fee_percent: float) -> Tuple[float, float]:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def reinvest_fees(self, c: float, fee_percent: float) -> float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def deposit(self, c: float, x: float, y: float, fee_percent: float) -> float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def rebalance(self, a: float, b: float, c: float, fee_percent: float) -> float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def withdraw(self, c: float, l: float) -> Tuple[float, float]:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def y(self, c: float) -> float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def xy(self, c: float) -> Tuple[float, float]:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def il(self, c: float) -> float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def active_l(self, c: float) -> float:
+        raise Exception(NotImplemented)
+
+
+class Position(AbstractPosition):
     """
     ``Position`` is a primitive corresponding to one investment into UniV3 interval.
     It's defined by lower and upper bounds ``a`` and ``b``, current invested virtual liquidity ``l``
@@ -25,7 +104,7 @@ class Position:
     """
 
     def __init__(self, id: str, a: float, b: float):
-        self._id = id
+        super().__init__(id)
         self._a = a
         self._b = b
         self._l = 0
@@ -33,13 +112,6 @@ class Position:
         self._bi_x = 0
         self._fees0 = 0
         self._fees1 = 0
-
-    @property
-    def id(self) -> str:
-        """
-        Unique id of the position
-        """
-        return self._id
 
     @property
     def fees0(self) -> float:
@@ -62,11 +134,10 @@ class Position:
         :param c: Current price
         :return: Total fees measured in ``Y`` token
         """
-
         return self._fees0 * c + self._fees1
 
     def charge_fees(
-        self, before_c: float, after_c: float, fee_percent: float
+            self, before_c: float, after_c: float, fee_percent: float
     ) -> Tuple[float, float]:
         """
         Takes a price movement for a specific swap and adjusts the fees account
@@ -99,7 +170,6 @@ class Position:
 
         :return: Increase of the liquidity after reinvestment
         """
-
         res = self.deposit(c, self.fees0, self.fees1, fee_percent)
         self._fees0 = 0
         self._fees1 = 0
@@ -108,14 +178,12 @@ class Position:
     def deposit(self, c: float, x: float, y: float, fee_percent: float) -> float:
         """
         Adds ``x`` and ``y`` tokens to position.
-
         :param c: Current price
         :param x: Amount of ``X`` token
         :param y: Amount of ``Y`` token
         :param fee_percent: Fee for the current pool, e.g. 0.003
         :return: Liquidity added
         """
-
         x_c, y_c = align_for_liquidity(x, y, self._a, self._b, c, fee_percent)
         delta_l = liq(x_c, y_c, self._a, self._b, c)
         self._l += delta_l
@@ -128,7 +196,6 @@ class Position:
         """
         Withdraws ``l`` liquidity from the position. UniV3 returns ``X`` and ``Y`` tokens and all ``X`` tokens
         are converted to ``Y`` tokens at current price with no slippage.
-
         :param c: Current price
         :param l: Amount of liquidity to withdraw
         :return: amount of ``Y`` token actually withdrawn
@@ -140,7 +207,6 @@ class Position:
     def y(self, c: float) -> float:
         """
         The value of the current position denominated in ``Y`` token. Doesn't include fees collected.
-
         :param c: Current price
         :return: amount of ``Y`` token if the position is fully withdrawn and ``X`` token converted to ``Y`` at price `c`.
         """
@@ -150,7 +216,6 @@ class Position:
     def xy(self, c: float) -> Tuple[float, float]:
         """
         Values of x and y tokens corresponding to current liquidity at price
-
         :param c: Current price
         :return: amount of ``X`` and ``Y`` tokens if the position is fully withdrawn
         """
@@ -163,28 +228,26 @@ class Position:
     @property
     def l(self) -> float:
         """
-        Current liquidity
+        :return: Current liquidity
         """
         return self._l
 
     @property
     def a(self) -> float:
         """
-        Left bound of the price interval
+        :return: Left bound of the price interval
         """
         return self._a
 
     def rebalance(self, a: float, b: float, c: float, fee_percent: float) -> float:
         """
         Puts all liquidity into new interval
-
         :param a: New Left price bound value
         :param b: New Right price bound value
         :param c: Current price
         :param fee_percent: Fee for the current pool, e.g. 0.003
         :returns: Liquidity after rebalance
         """
-
         x, y = self.withdraw(c, self._l)
         self._a = a
         self._b = b
@@ -193,26 +256,23 @@ class Position:
     @property
     def b(self) -> float:
         """
-        Right bound of the price interval
+        :return: Right bound of the price interval
         """
-
         return self._b
 
     def active_l(self, c: float) -> float:
         """
         The amount of currently active liquidity
-
         :param c: Current price
         :return: The amount of liquidity or 0 if price is out of (a, b) bounds
         """
-        if c <= self._b and c >= self._a:
+        if self._a <= c <= self._b:
             return self._l
         return float(0)
 
     def il(self, c: float) -> float:
         """
         The amount of current impermanent loss
-
         :param c: Current price
         :return: The amount of current impermanent loss
         """
@@ -223,27 +283,21 @@ class Position:
         return f"Position (a: {self._a}, b: {self._b}, l: {self._l}, f0: {self._fees0}, f1: {self._fees1})"
 
 
-class Portfolio(Position):
+class Portfolio(AbstractPosition):
     """
     ``Portfolio`` is a container for several open positions.
     It also conforms to ``Position`` interface, aggregating all positions values.
     Note that children positions of ``Portfolio`` can also be other ``Portfolio`` objects.
 
-    :param pool: Pool for the portfolio
     :param id: Id of the portfolio
     :param positions: List of initial positions
     """
 
-    def __init__(self, id: str = "Portfolio", positions: List[Position] = []):
+    def __init__(self, id: str = "Portfolio", positions: List[Position] = None):
+        super().__init__(id)
+        if positions is None:
+            positions = []
         self._positions = {pos.id: pos for pos in positions}
-        self._id = id
-
-    @property
-    def id(self):
-        """
-        Id of the portfolio
-        """
-        return self._id
 
     def add_position(self, position: Position):
         """
@@ -256,7 +310,6 @@ class Portfolio(Position):
     def remove_position(self, position_id: str):
         """
         Removes a position from portfolio
-
         :param position_id: Id of the position to remove
         """
         del self._positions[position_id]
@@ -265,7 +318,6 @@ class Portfolio(Position):
     def positions(self) -> List[Position]:
         """
         A set of all open positions
-
         :return: a list of open positions.
         """
         return list(self._positions.values())
@@ -273,41 +325,59 @@ class Portfolio(Position):
     def position(self, id: str) -> Optional[Position]:
         """
         A position with specified ``id``
-
         :param id: Id of the position
         :returns: A position with that id. None if id not found.
         """
-        if not id in self._positions:
+        if id not in self._positions:
             return None
         return self._positions[id]
 
     @property
     def position_ids(self) -> List[str]:
         """
-        Ids of all positions in portfolio
+        :return: Ids of all positions in portfolio
         """
-        return self._positions.keys()
+        return list(self._positions.keys())
 
     @property
     def fees0(self) -> float:
+        """
+        :return: Accumulated fees for the position for the ``X`` token
+        """
         res = float(0)
-        [res := res + pos.fees0 for pos in self.positions]
+        for pos in self.positions:
+            res += pos.fees0
         return res
 
     @property
     def fees1(self) -> float:
+        """
+        :return: Accumulated fees for the position for the ``Y`` token
+        """
         res = float(0)
-        [res := res + pos.fees1 for pos in self.positions]
+        for pos in self.positions:
+            res += pos.fees1
         return res
 
     def fees(self, c: float) -> float:
+        """
+        :param c: Current price
+        :return: Total fees measured in ``Y`` token
+        """
         res = float(0)
-        [res := res + pos.fees(c) for pos in self.positions]
+        for pos in self.positions:
+            res += pos.fees(c)
         return res
 
     def charge_fees(
-        self, before_c: float, after_c: float, fee_percent: float
+            self, before_c: float, after_c: float, fee_percent: float
     ) -> Tuple[float, float]:
+        """
+        :param before_c: Price before the swap
+        :param after_c: Price after the swap
+        :param fee_percent: Fee for the current pool, e.g. 0.003
+        :return: tuple of fees for ``X`` and ``Y`` tokens
+        """
         f0, f1 = 0, 0
         for pos in self.positions:
             fd0, fd1 = pos.charge_fees(before_c, after_c, fee_percent)
@@ -316,38 +386,59 @@ class Portfolio(Position):
         return f0, f1
 
     def reinvest_fees(self, c: float, fee_percent: float) -> float:
+        """
+        :param c: Current price
+        :param fee_percent: Fee for the current pool, e.g. 0.003
+        :return: Accumulated increase of the liquidity after reinvestment
+        """
         res = float(0)
-        [res := res + pos.reinvest_fees(c, fee_percent) for pos in self.positions]
-        return res
-
-    def deposit(self, с: float, y: float) -> float:
-        res = float(0)
-        total_y = self.y(с)
         for pos in self.positions:
-            res += pos.deposit(с, pos.y(с) / total_y * y)
+            res += pos.reinvest_fees(c, fee_percent)
         return res
 
-    def withdraw(self, с: float, l: float) -> float:
+    def deposit(self, c: float, x: float, y: float, fee_percent: float) -> float:
+        """
+        Adds ``x`` and ``y`` tokens to portfolio
+        :param c: Current price
+        :param x: Amount of ``X`` token
+        :param y: Amount of ``Y`` token
+        :param fee_percent: Fee for the current pool, e.g. 0.003
+        :return: Liquidity added
+        """
+        res = float(0)
+        total_y = self.y(c)
+        for pos in self.positions:
+            res += pos.deposit(c, x, pos.y(c) / total_y * y, fee_percent)
+        return res
+
+    def withdraw(self, c: float, l: float) -> float:
+        """
+        :param c: Current price
+        :param l: Amount of liquidity to withdraw
+        :return: Accumulated amount of ``Y`` token actually withdrawn
+        """
         res = float(0)
         total_l = self.l
         for pos in self.positions:
-            res += pos.withdraw(с, pos.l / total_l * l)
+            res += pos.withdraw(c, pos.l / total_l * l)
         return res
 
-    def withdraw_y(self, c: float, y: float) -> float:
+    def y(self, c: float) -> float:
+        """
+        :param c: Current price
+        :return: Accumulated amount of ``Y`` token if the position is fully withdrawn and ``X``
+        token converted to ``Y`` at price `c`.
+        """
         res = float(0)
-        total_y = self.y(c)
-        y = min(y, total_y)
         for pos in self.positions:
-            res += pos.withdraw(c, pos.y(c) / total_y * y)
-        return res
-
-    def y(self, с: float) -> float:
-        res = float(0)
-        [res := res + pos.y(с) for pos in self.positions]
+            res += pos.y(c)
         return res
 
     def xy(self, c: float) -> Tuple[float, float]:
+        """
+        :param c: Current price
+        :return: Accumulated amount of ``X`` and ``Y`` tokens if the position is fully withdrawn
+        """
         x, y = 0, 0
         for pos in self.positions:
             xc, yc = pos.xy(c)
@@ -364,30 +455,56 @@ class Portfolio(Position):
             y += yc
         return x, y
 
-    def il(self, с: float) -> float:
+    def il(self, c: float) -> float:
+        """
+        :param c: Current price
+        :return: Accumulated amount of current impermanent loss
+        """
         res = float(0)
-        [res := res + pos.il(с) for pos in self.positions]
+        for pos in self.positions:
+            res += pos.il(c)
         return res
 
     @property
     def a(self) -> float:
+        """
+        :return: min bound of all left intervals of all positions
+        """
         res = np.infty
-        [res := min(res, pos.a) for pos in self.positions]
+        for pos in self.positions:
+            res = min(res, pos.a)
         return res
 
     @property
     def b(self) -> float:
+        """
+        :return: max bound of all right intervals of all positions
+        """
         res = float(0)
-        [res := max(res, pos.b) for pos in self.positions]
+        for pos in self.positions:
+            res = max(res, pos.b)
         return res
 
     @property
     def l(self) -> float:
+        """
+        :return: Accumulated liquidity
+        """
         res = float(0)
-        [res := res + pos.l for pos in self.positions]
+        for pos in self.positions:
+            res += pos.l
         return res
 
     def active_l(self, c: float) -> float:
+        """
+        :param c: Current price
+        :return: Accumulated amount of liquidity or 0 if price is out of (a, b) bounds
+        """
         res = float(0)
-        [res := res + pos.active_l(c) for pos in self.positions]
+        for pos in self.positions:
+            res += pos.active_l(c)
         return res
+
+    def rebalance(self, a: float, b: float, c: float, fee_percent: float) -> float:
+        raise Exception(NotImplemented)
+

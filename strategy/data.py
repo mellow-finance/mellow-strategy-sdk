@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import os
 
 from pandas.core.frame import DataFrame
-from strategy.primitives import Pool, Token, Frequency
+from strategy.primitives import Pool, Frequency
 from decimal import Decimal
 from datetime import datetime
 from intervaltree import IntervalTree, Interval
@@ -31,9 +31,11 @@ class RawData:
     Constructor is considered to be private, you want to use ``from_pool`` method to instantiate ``RawData``.
     """
 
-    def __init__(
-        self, swaps: pd.DataFrame, mints: pd.DataFrame, burns: pd.DataFrame, pool: Pool
-    ):
+    def __init__(self,
+                 swaps: pd.DataFrame,
+                 mints: pd.DataFrame,
+                 burns: pd.DataFrame,
+                 pool: Pool):
         self._swaps = swaps
         self._mints = mints
         self._burns = burns
@@ -95,35 +97,35 @@ class RawData:
     @property
     def swaps(self) -> DataFrame:
         """
-        Swap data
+        :return: Swap data
         """
         return self._swaps
 
     @property
     def mints(self) -> DataFrame:
         """
-        Mints data
+        :return: Mints data
         """
-
         return self._mints
 
     @property
     def burns(self) -> DataFrame:
         """
-        Burns data
+        :return: Burns data
         """
         return self._burns
 
     @property
     def pool(self) -> Pool:
         """
-        Pool specification
+        :return: Pool specification
         """
         return self._pool
 
+    @staticmethod
     def _get_download_url(kind, pool: Pool):
         host = (
-            os.getenv("AWS_DATA_HOST") or "mellow-uni-data.s3.us-east-2.amazonaws.com"
+                os.getenv("AWS_DATA_HOST") or "mellow-uni-data.s3.us-east-2.amazonaws.com"
         )
         return f"https://{host}/{kind}-{pool.name}.csv"
 
@@ -159,13 +161,13 @@ class PoolData:
     """
 
     def __init__(
-        self,
-        data: pd.DataFrame,
-        swaps: pd.DataFrame,
-        mints: pd.DataFrame,
-        burns: pd.DataFrame,
-        pool: Pool,
-        freq: Frequency,
+            self,
+            data: pd.DataFrame,
+            swaps: pd.DataFrame,
+            mints: pd.DataFrame,
+            burns: pd.DataFrame,
+            pool: Pool,
+            freq: Frequency,
     ):
         self._data = data
         self._pool = pool
@@ -187,20 +189,20 @@ class PoolData:
         pool = raw_data.pool
         df["c"] = raw_data.swaps["sqrt_price_x96"].transform(
             lambda x: Decimal(x)
-            * Decimal(x)
-            / Decimal(2 ** 192)
-            * Decimal(10 ** pool.decimals_diff)
+                      * Decimal(x)
+                      / Decimal(2 ** 192)
+                      * Decimal(10 ** pool.decimals_diff)
         )
         df["c_inv"] = 1 / df["c"]
         df["vol0"] = (
             (-raw_data.swaps["amount0"].where(raw_data.swaps["amount0"] < 0))
-            .fillna(0)
-            .transform(lambda x: Decimal(x) / 10 ** pool.token0.decimals)
+                .fillna(0)
+                .transform(lambda x: Decimal(x) / 10 ** pool.token0.decimals)
         )
         df["vol1"] = (
             (-raw_data.swaps["amount1"].where(raw_data.swaps["amount1"] < 0))
-            .fillna(0)
-            .transform(lambda x: Decimal(x) / 10 ** pool.token1.decimals)
+                .fillna(0)
+                .transform(lambda x: Decimal(x) / 10 ** pool.token1.decimals)
         )
         df["l"] = raw_data.swaps["liquidity"].transform(
             lambda x: Decimal(x) / Decimal(10 ** pool.l_decimals_diff)
@@ -240,26 +242,26 @@ class PoolData:
     @property
     def pool(self) -> Pool:
         """
-        Pool specification
+        :return: Pool specification
         """
         return self._pool
 
     @property
     def data(self) -> pd.DataFrame:
         """
-        Transformed pandas data
+        :return: Transformed pandas data
         """
         return self._data
 
     @property
     def swaps(self) -> pd.DataFrame:
         """
-        Swap data
+        :return: Swap data
         """
         return self._swaps
 
     def swap_prices(
-        self, start: Optional[datetime], end: Optional[datetime]
+            self, start: Optional[datetime], end: Optional[datetime]
     ) -> List[Tuple[float, float]]:
         """
         Price changes for every swap start ``start`` end ``end``.
@@ -297,14 +299,14 @@ class PoolData:
                 res -= burn["amount"]
         return res / 10 ** self._pool.l_decimals_diff
 
-    def plot(self, sizex=20, sizey=30):
+    def plot(self, size_x=20, size_y=30):
         """
         Plot pool data
 
-        :param sizex: `x` size of one chart
-        :param sizey: `y` size of one chart
+        :param size_x: `x` size of one chart
+        :param size_y: `y` size of one chart
         """
-        fig, axes = plt.subplots(3, 2, figsize=(sizex, sizey))
+        fig, axes = plt.subplots(3, 2, figsize=(size_x, size_y))
         fig.suptitle(
             f"Stats for {self._pool.token0.value} - {self._pool.token1.value} pool",
             fontsize=16,
@@ -352,7 +354,7 @@ class PoolData:
             f"{self._pool.token1.value} / {self._pool.token0.value} price"
         )
 
-    def __getitem__(self, items) -> RawData:
+    def __getitem__(self, items) -> PoolData:
         return PoolData(
             self._data.__getitem__(items),
             self._swaps.__getitem__(items),
@@ -369,6 +371,11 @@ class LiquidityDistribution:
         self._burns = IntervalTree()
 
     def append(self, mints: pd.DataFrame, burns: pd.DataFrame):
+        """
+        Constructing interval tree
+        :param mints: Mints df
+        :param mints: Burns df
+        """
         self._mints.update(
             [
                 Interval(mint["tick_lower"], mint["tick_upper"], int(mint["amount"]))
@@ -382,9 +389,19 @@ class LiquidityDistribution:
             ]
         )
 
-    def at(self, tick: float):
+    def at(self, tick: int) -> float:
+        """
+        :param tick: Current tick
+        :return: The amount liquidity at tick t
+        """
         mint = 0
-        [mint := mint + interval.data for interval in self._mints[tick]]
         burn = 0
-        [burn := burn + interval.data for interval in self._burns[tick]]
-        return mint - burn
+
+        for interval in self._mints[tick]:
+            mint += interval.data
+
+        for interval in self._burns[tick]:
+            burn += interval.data
+
+        diff = mint - burn
+        return diff
