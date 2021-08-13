@@ -3,13 +3,19 @@ portfolio
 
 .. automodule:: strategy.portfolio
 
-class Position
-~~~~~~~~~~~~~~
-.. autoclass:: Position
+class AbstractPosition
+~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: AbstractPosition
     :members:
 
+class Position
+~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: Position
+    :members:
+    :show-inheritance:
+
 class Portfolio
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: Portfolio
     :members:
     :show-inheritance:
