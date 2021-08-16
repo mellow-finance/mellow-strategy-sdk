@@ -205,7 +205,7 @@ class Position(AbstractPosition):
         x, y = xy(l, self._a, self._b, c)
         self._bi_x -= x
         self._bi_y -= y
-        self.pl += self.il(c) / self._l
+        self.pl += self.il(c) * l / self._l
         self._l -= l
         return x, y
 
