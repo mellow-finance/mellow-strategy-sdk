@@ -185,7 +185,6 @@ class Position(AbstractPosition):
         :param fee_percent: Fee for the current pool, e.g. 0.003
         :return: Liquidity added
         """
-        # assert np.isclose(c*x, y, atol=1e-6), 'Token amounts do not match.'
         x_c, y_c = align_for_liquidity(x, y, self._a, self._b, c, fee_percent)
         delta_l = liq(x_c, y_c, self._a, self._b, c)
         self._l += delta_l
@@ -206,8 +205,8 @@ class Position(AbstractPosition):
         x, y = xy(l, self._a, self._b, c)
         self._bi_x -= x
         self._bi_y -= y
+        self.pl += self.il(c) / self._l
         self._l -= l
-        self.pl += self.il(c)
         return x, y
 
     def y(self, c: float) -> float:
