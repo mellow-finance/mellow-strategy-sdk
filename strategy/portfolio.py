@@ -112,6 +112,7 @@ class Position(AbstractPosition):
         self._bi_x = 0
         self._fees0 = 0
         self._fees1 = 0
+        self.pl = 0
 
     @property
     def fees0(self) -> float:
@@ -188,8 +189,8 @@ class Position(AbstractPosition):
         delta_l = liq(x_c, y_c, self._a, self._b, c)
         self._l += delta_l
         if self._bi_x == 0 and self._bi_y == 0:
-            self._bi_x = x_c
-            self._bi_y = y_c
+            self._bi_x += x_c
+            self._bi_y += y_c
         return delta_l
 
     def withdraw(self, c: float, l: float) -> Tuple[float, float]:
@@ -200,7 +201,11 @@ class Position(AbstractPosition):
         :param l: Amount of liquidity to withdraw
         :return: amount of ``Y`` token actually withdrawn
         """
+        assert l <= self._l, 'Too mush liquidity to withdraw.'
         x, y = xy(l, self._a, self._b, c)
+        self._bi_x -= x
+        self._bi_y -= y
+        self.pl += self.il(c) * l / self._l
         self._l -= l
         return x, y
 
