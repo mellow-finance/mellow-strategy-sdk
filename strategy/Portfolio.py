@@ -49,3 +49,8 @@ class Portfolio(AbstractPosition):
             total_x += x
             total_y += y
         return total_x, total_y
+
+    def snapshot(self, price: float) -> None:
+        for name, pos in self.positions.items():
+            pos.snapshot(price)
+        return None
