@@ -121,9 +121,7 @@ class UniV3Position(AbstractPosition):
 
         self.history_y = []
         self.history_il = []
-        self.history_fees_x = []
         self.history_fees_y = []
-        self.history_fees = []
 
     def deposit(self, x: float, y: float, price: float) -> None:
         self.mint(x, y, price)
@@ -185,7 +183,9 @@ class UniV3Position(AbstractPosition):
     def impermanent_loss(self, liq: float, price: float) -> float:
         sqrt_price_init = np.sqrt(self.price_init)
         volume_y_held = liq * (sqrt_price_init - self.sqrt_lower + price * (1 / sqrt_price_init - 1 / self.sqrt_upper))
-        il = volume_y_held - self._liq_to_y_(liq, price)
+        x_stake, y_stake = self._liq_to_xy_(liq, price)
+        volume_y_held_staked = x_stake * price + y_stake
+        il = volume_y_held - volume_y_held_staked
         return il
 
     def to_x(self, price: float) -> float:
@@ -203,17 +203,14 @@ class UniV3Position(AbstractPosition):
         return x, y
 
     def snapshot(self, price: float) -> None:
-        volume_y = self.to_y(price)
+        total_fees = price * self.fees_x + self.fees_y
+        self.history_fees_y.append(total_fees)
+
+        volume_y = self.to_y(price) + total_fees
         self.history_y.append(volume_y)
 
         il = self.impermanent_loss(self.liquidity, price)
         self.history_il.append(il)
-
-        self.history_fees_x.append(self.fees_x)
-        self.history_fees_y.append(self.fees_y)
-
-        total_fees = price * self.fees_x + self.fees_y
-        self.history_fees.append(total_fees)
         return None
 
     def _average_init_price_(self, x: float, y: float, price: float):
