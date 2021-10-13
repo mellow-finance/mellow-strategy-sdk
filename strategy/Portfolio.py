@@ -1,5 +1,10 @@
 from .Positions import AbstractPosition
 from typing import List
+from datetime import datetime
+
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
 
 
 class Portfolio(AbstractPosition):
@@ -50,7 +55,8 @@ class Portfolio(AbstractPosition):
             total_y += y
         return total_x, total_y
 
-    def snapshot(self, price: float) -> None:
+    def snapshot(self, date: datetime, price: float) -> None:
         for name, pos in self.positions.items():
-            pos.snapshot(price)
+            pos.snapshot(date, price)
         return None
+

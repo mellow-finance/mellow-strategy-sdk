@@ -1,6 +1,7 @@
 from typing import Tuple
 from abc import ABC, abstractmethod
 import numpy as np
+from datetime import datetime
 
 
 class AbstractPosition(ABC):
@@ -20,7 +21,7 @@ class AbstractPosition(ABC):
         raise Exception(NotImplemented)
 
     @abstractmethod
-    def snapshot(self, price: float) -> None:
+    def snapshot(self, date: datetime, price: float) -> None:
         raise Exception(NotImplemented)
 
 
@@ -31,16 +32,12 @@ class BiCurrencyPosition(AbstractPosition):
                  y: float = None,
                  ) -> None:
         super().__init__(name)
-        self.x = 0
-        if x is not None:
-            self.x = x
 
-        self.y = 0
-        if y is not None:
-            self.y = y
+        self.x = x if x is not None else 0
+        self.y = y if y is not None else 0
 
         self.swap_fee = swap_fee
-        self.history_y = []
+        self.history_y = {}
 
     def deposit(self, x: float, y: float) -> None:
         self.x += x
@@ -52,8 +49,7 @@ class BiCurrencyPosition(AbstractPosition):
         self.y -= y
         return x, y
 
-    def adjust(self, price: float) -> None:
-        '''implement UniswapV3 swaping math: add liqudity dependency on swaping price'''
+    def equalize(self, price: float) -> None:
         dV = price * self.x - self.y
         denom = 2 - self.swap_fee
         if dV > 0:
@@ -67,12 +63,10 @@ class BiCurrencyPosition(AbstractPosition):
         return None
 
     def to_x(self, price: float) -> float:
-        # price = x/y
         res = self.x + self.y / price
         return res
 
     def to_y(self, price: float) -> float:
-        # price = x/y
         res = self.x * price + self.y
         return res
 
@@ -80,20 +74,18 @@ class BiCurrencyPosition(AbstractPosition):
         return self.x, self.y
 
     def swap_x_to_y(self, dx: float, price: float) -> None:
-        '''implement UniswapV3 swaping math: add liqudity dependency on swaping price'''
         self.x -= dx
         self.y += price * (1 - self.swap_fee) * dx
         return None
 
     def swap_y_to_x(self, dy: float, price: float) -> None:
-        '''implement UniswapV3 swaping math: add liqudity dependency on swaping price'''
         self.y -= dy
         self.x += (1 - self.swap_fee) * dy / price
         return None
 
-    def snapshot(self, price: float) -> None:
+    def snapshot(self, date: datetime, price: float) -> None:
         volume_y = self.to_y(price)
-        self.history_y.append(volume_y)
+        self.history_y[date] = volume_y
         return None
 
 
@@ -119,9 +111,9 @@ class UniV3Position(AbstractPosition):
         self.fees_x = 0
         self.fees_y = 0
 
-        self.history_y = []
-        self.history_il = []
-        self.history_fees_y = []
+        self.history_y = {}
+        self.history_il = {}
+        self.history_fees_y = {}
 
     def deposit(self, x: float, y: float, price: float) -> None:
         self.mint(x, y, price)
@@ -141,7 +133,7 @@ class UniV3Position(AbstractPosition):
         #     self.price_init = price_init_new
 
         x_aligned, y_aligned = self._liqudity_aligning_(x, y, price)
-        dliq = self._liq_(x_aligned, y_aligned, price)
+        dliq = self._xy_to_liq_(x_aligned, y_aligned, price)
         self.liquidity += dliq
         return None
 
@@ -202,15 +194,15 @@ class UniV3Position(AbstractPosition):
         x, y = self._liq_to_xy_(self.liquidity, price)
         return x, y
 
-    def snapshot(self, price: float) -> None:
+    def snapshot(self, date: datetime, price: float) -> None:
         total_fees = price * self.fees_x + self.fees_y
-        self.history_fees_y.append(total_fees)
+        self.history_fees_y[date] = total_fees
 
         volume_y = self.to_y(price) + total_fees
-        self.history_y.append(volume_y)
+        self.history_y[date] = volume_y
 
         il = self.impermanent_loss(self.liquidity, price)
-        self.history_il.append(il)
+        self.history_il[date] = il
         return None
 
     def _average_init_price_(self, x: float, y: float, price: float):
@@ -220,23 +212,23 @@ class UniV3Position(AbstractPosition):
         adj_price = min(max(self.lower_price, price), self.upper_price)
         return adj_price
 
-    def _liq_x_(self, x: float, price: float) -> float:
+    def _x_to_liq_(self, x: float, price: float) -> float:
         if self.upper_price <= price:
             return np.inf
         sqrt_price = np.sqrt(price)
         l_x = (x * sqrt_price * self.sqrt_upper) / (self.sqrt_upper - sqrt_price)
         return l_x
 
-    def _liq_y_(self, y: float, price: float) -> float:
+    def _y_to_liq_(self, y: float, price: float) -> float:
         if self.lower_price >= price:
             return np.inf
         sqrt_price = np.sqrt(price)
         l_y = y / (sqrt_price - self.sqrt_lower)
         return l_y
 
-    def _liq_(self, x: float, y: float, price: float) -> float:
+    def _xy_to_liq_(self, x: float, y: float, price: float) -> float:
         adj_price = self._adj_price_(price)
-        liq = min(self._liq_x_(x, adj_price), self._liq_y_(y, adj_price))
+        liq = min(self._x_to_liq_(x, adj_price), self._y_to_liq_(y, adj_price))
         return liq
 
     def _liq_to_x_(self, liq: float, price: float) -> float:
