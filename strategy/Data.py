@@ -21,6 +21,8 @@ class PoolDataUniV3:
         self.burns = burns
         self.swaps = swaps
 
+        self.spot_prices = None
+
     @classmethod
     def from_folder(cls, pool: Pool, folder: Path = '../scripts/data/') -> 'RawData':
         mints_converters = {
@@ -93,11 +95,13 @@ class PoolDataUniV3:
                         )
         df["price_before"] = df["price"].shift(1)
         df["price_before"] = df["price_before"].fillna(df["price"])
+
+        spot_prices = df[['price']].resample('D').mean()
+        self.spot_prices = spot_prices
+
         return df
 
     def plot(self):
-        spot_price = self.swaps[['price']].resample('D').mean()
-
         daily_mints = self.mints[['amount']].resample('D').sum()
         daily_burns = self.burns[['amount']].resample('D').sum()
         daily_liq = daily_mints - daily_burns
@@ -107,8 +111,8 @@ class PoolDataUniV3:
 
         fig.add_trace(
             go.Scatter(
-                x=spot_price.index,
-                y=spot_price['price'],
+                x=self.spot_prices.index,
+                y=self.spot_prices['price'],
                 name="Price",
             ),
             secondary_y=False)

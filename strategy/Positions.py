@@ -49,6 +49,10 @@ class BiCurrencyPosition(AbstractPosition):
         self.y -= y
         return x, y
 
+    def withdraw_fraction(self, fraction: float) -> Tuple[float, float]:
+        x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
+        return x_out, y_out
+
     def equalize(self, price: float) -> None:
         dV = price * self.x - self.y
         denom = 2 - self.swap_fee
@@ -109,10 +113,13 @@ class UniV3Position(AbstractPosition):
         self.price_init = None
 
         self.fees_x = 0
+        self._fees_x_tracked_ = 0
+
         self.fees_y = 0
+        self._fees_y_tracked_ = 0
 
         self.history_y = {}
-        self.history_il = {}
+        self.history_il_y = {}
         self.history_fees_y = {}
 
     def deposit(self, x: float, y: float, price: float) -> None:
@@ -153,11 +160,19 @@ class UniV3Position(AbstractPosition):
 
         fee_x, fee_y = 0, 0
         if y_0 >= y_1:
-            fee_y = (y_0 - y_1) * self.fee_percent
+            fee_x = (x_1 - x_0) * self.fee_percent
+            if fee_x < 0:
+                print('NEGATIVE X:', fee_x)
         else:
-            fee_x = (x_0 - x_1) * self.fee_percent
+            fee_y = (y_1 - y_0) * self.fee_percent
+            if fee_y < 0:
+                print('NEGATIVE Y:', fee_y)
+
         self.fees_x += fee_x
+        self._fees_x_tracked_ += fee_x
+
         self.fees_y += fee_y
+        self._fees_y_tracked_ += fee_y
         return None
 
     def collect_fees(self) -> Tuple[float, float]:
@@ -177,8 +192,8 @@ class UniV3Position(AbstractPosition):
         volume_y_held = liq * (sqrt_price_init - self.sqrt_lower + price * (1 / sqrt_price_init - 1 / self.sqrt_upper))
         x_stake, y_stake = self._liq_to_xy_(liq, price)
         volume_y_held_staked = x_stake * price + y_stake
-        il = volume_y_held - volume_y_held_staked
-        return il
+        il_y = volume_y_held - volume_y_held_staked
+        return il_y
 
     def to_x(self, price: float) -> float:
         x, y = self.to_xy(price)
@@ -195,14 +210,15 @@ class UniV3Position(AbstractPosition):
         return x, y
 
     def snapshot(self, date: datetime, price: float) -> None:
-        total_fees = price * self.fees_x + self.fees_y
-        self.history_fees_y[date] = total_fees
+        _total_fees_tracked_ = price * self._fees_x_tracked_ + self._fees_y_tracked_
+        self.history_fees_y[date] = _total_fees_tracked_
 
-        volume_y = self.to_y(price) + total_fees
-        self.history_y[date] = volume_y
+        volume_y = self.to_y(price)
+        volume_fees = price * self.fees_x + self.fees_y
+        self.history_y[date] = volume_y + volume_fees
 
         il = self.impermanent_loss(self.liquidity, price)
-        self.history_il[date] = il
+        self.history_il_y[date] = il
         return None
 
     def _average_init_price_(self, x: float, y: float, price: float):

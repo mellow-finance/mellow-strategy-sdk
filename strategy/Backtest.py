@@ -22,7 +22,7 @@ class Backtest:
     def __init__(self, strategy: AbstractStrategy):
         self.strategy = strategy
 
-    def backtest(self, pool_data: PoolDataUniV3, start_day=None, end_date=None):
+    def backtest(self, pool_data: PoolDataUniV3, start_day=None, end_date=None) -> None:
         df_swaps = pool_data.swaps
         if start_day is None:
             start_day = df_swaps.index.min().normalize()
@@ -37,5 +37,5 @@ class Backtest:
             for idx, row in df_swap_introday_slice.iterrows():
                 self.strategy.rebalance(timestamp=idx, row=row)
 
-            self.strategy.snapshot(row['price'])
-
+            self.strategy.snapshot(left, row['price'])
+        return None
