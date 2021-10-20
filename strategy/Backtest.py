@@ -14,7 +14,7 @@ class AbstractStrategy:
     def rebalance(self, *args, **kwargs) -> None:
         raise Exception(NotImplemented)
 
-    def snapshot(self, price: float) -> None:
+    def snapshot(self, date, price: float) -> None:
         raise Exception(NotImplemented)
 
 

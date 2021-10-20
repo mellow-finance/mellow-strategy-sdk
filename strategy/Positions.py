@@ -71,6 +71,14 @@ class BiCurrencyPosition(AbstractPosition):
 
         return None
 
+    # def equalize(self, price: float) -> None:
+    #     v = price * self.x + self.y
+    #     x_new = v / (2*price)
+    #     y_new = v / 2
+    #     self.x = x_new
+    #     self.y = y_new
+    #     return None
+
     def to_x(self, price: float) -> float:
         res = self.x + self.y / price
         return res
@@ -124,7 +132,8 @@ class UniV3Position(AbstractPosition):
         self.liquidity = 0
         self.bi_currency = BiCurrencyPosition('Virtual', self.fee_percent)
 
-        self.realized_loss_y = 0
+        self.realized_loss_to_x = 0
+        self.realized_loss_to_y = 0
 
         self.fees_x = 0
         self._fees_x_earned_ = 0
@@ -154,6 +163,9 @@ class UniV3Position(AbstractPosition):
         self.history_earned_fees_to_x = {}
         self.history_earned_fees_to_y = {}
 
+        self.history_realized_loss_to_x = {}
+        self.history_realized_loss_to_y = {}
+
     def deposit(self, x: float, y: float, price: float) -> None:
         self.mint(x, y, price)
         return None
@@ -172,16 +184,19 @@ class UniV3Position(AbstractPosition):
         return None
 
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
-        il_0 = self.impermanent_loss_to_y(price)
+        il_x_0 = self.impermanent_loss_to_x(price)
+        il_y_0 = self.impermanent_loss_to_y(price)
+
         x_out, y_out = self._liq_to_xy_(liq, price)
 
         self.bi_currency.withdraw_fraction(liq / self.liquidity)
         self.liquidity -= liq
 
-        il_1 = self.impermanent_loss_to_y(price)
+        il_x_1 = self.impermanent_loss_to_x(price)
+        il_y_1 = self.impermanent_loss_to_y(price)
 
-        self.realized_loss_y += (il_0 - il_1)
-
+        self.realized_loss_to_x += (il_x_0 - il_x_1)
+        self.realized_loss_to_y += (il_y_0 - il_y_1)
         return x_out, y_out
 
     def charge_fees(self, price_0: float, price_1: float) -> None:
@@ -287,6 +302,10 @@ class UniV3Position(AbstractPosition):
 
         _total_fees_earned_y_ = price * self._fees_x_earned_ + self._fees_y_earned_
         self.history_earned_fees_to_y[date] = _total_fees_earned_y_
+
+        self.history_realized_loss_to_x[date] = self.realized_loss_to_x
+        self.history_realized_loss_to_y[date] = self.realized_loss_to_y
+
         return None
 
     def _adj_price_(self, price: float) -> float:

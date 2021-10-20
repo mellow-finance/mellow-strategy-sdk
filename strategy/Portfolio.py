@@ -12,6 +12,7 @@ class Portfolio(AbstractPosition):
         if positions is None:
             positions = []
         self.positions = {pos.name: pos for pos in positions}
+        self.positions_removed = {}
 
         self.portfolio_history = {}
 
@@ -22,6 +23,7 @@ class Portfolio(AbstractPosition):
     def remove(self, name: str) -> None:
         if name not in self.positions:
             raise Exception(f'Invalid name = {name}')
+        self.positions_removed[name] = copy.copy(self.positions[name])
         del self.positions[name]
         return None
 
@@ -29,6 +31,14 @@ class Portfolio(AbstractPosition):
         if name not in self.positions:
             raise Exception(f'Invalid name = {name}')
         return self.positions[name]
+
+    def get_last_position(self) -> AbstractPosition:
+        if self.positions:
+            last_key = list(self.positions.keys())[-1]
+            pos = self.get_position(last_key)
+            return pos
+        else:
+            raise Exception(f'Position not found')
 
     def positions_list(self) -> List:
         return list(self.positions.values())
