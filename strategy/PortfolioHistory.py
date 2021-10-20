@@ -228,7 +228,7 @@ class PortfolioHistory:
         )
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Volume to X", secondary_y=False)
+        fig.update_yaxes(title_text="Value to X", secondary_y=False)
         fig.update_yaxes(title_text='Earned fees to X', secondary_y=True)
         fig.update_layout(title='Portfolio Value, Fees and Loss to X')
         return fig
@@ -264,7 +264,7 @@ class PortfolioHistory:
         )
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Volume to Y", secondary_y=False)
+        fig.update_yaxes(title_text="Value to Y", secondary_y=False)
         fig.update_yaxes(title_text='Earned fees to Y', secondary_y=True)
         fig.update_layout(title='Portfolio Value and Fees Y')
         return fig
