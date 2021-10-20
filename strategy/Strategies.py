@@ -148,7 +148,7 @@ class UniV3(AbstractStrategy):
                 self.previous_uni_tick = center_tick
             else:
                 diff = abs(self.previous_uni_tick - current_tick)
-                if self.burn_tolerance < diff:
+                if diff > self.burn_tolerance:
                     last_pos = self.portfolio.get_last_position()
                     x_out, y_out = last_pos.withdraw(price_1)
                     self.portfolio.snapshot(timestamp.normalize(), price_1)

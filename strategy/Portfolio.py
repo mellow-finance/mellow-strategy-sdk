@@ -12,7 +12,7 @@ class Portfolio(AbstractPosition):
         if positions is None:
             positions = []
         self.positions = {pos.name: pos for pos in positions}
-        self.positions_removed = {}
+        self.positions_closed = {}
 
         self.portfolio_history = {}
 
@@ -23,7 +23,7 @@ class Portfolio(AbstractPosition):
     def remove(self, name: str) -> None:
         if name not in self.positions:
             raise Exception(f'Invalid name = {name}')
-        self.positions_removed[name] = copy.copy(self.positions[name])
+        self.positions_closed[name] = copy.copy(self.positions[name])
         del self.positions[name]
         return None
 
