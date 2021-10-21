@@ -79,7 +79,7 @@ class UniV3Passive(AbstractStrategy):
                  portfolio: Portfolio = None,
                  ):
         super().__init__(portfolio)
-        self.decimal_diff = pool.decimals_diff
+        self.decimal_diff = -pool.decimals_diff
         self.fees_percent = pool.fee.percent
 
         self.reinvest_prev_timestamp = pd.Timestamp('2021-05-04')
@@ -116,6 +116,8 @@ class UniV3Active(AbstractStrategy):
                  burn_tolerance: int,
                  grid_width: int,
                  grid_num: int,
+                 lower_0: float,
+                 upper_0: float,
                  pool: Pool,
                  portfolio: Portfolio = None,
                  ):
@@ -126,7 +128,10 @@ class UniV3Active(AbstractStrategy):
         self.grid_width = grid_width
         self.grid_num = grid_num
 
-        self.decimal_diff = pool.decimals_diff
+        self.lower_0 = lower_0
+        self.upper_0 = upper_0
+
+        self.decimal_diff = -pool.decimals_diff
         self.fees_percent = pool.fee.percent
 
         self.previous_uni_tick = None
@@ -135,7 +140,7 @@ class UniV3Active(AbstractStrategy):
         timestamp, row = kwargs['timestamp'], kwargs['row']
         price_0, price_1 = row['price_before'], row['price']
         current_tick = self._price_to_tick_(price_1)
-        lower_tick, center_tick, upper_tick = self._get_bounds_(price_1, self.grid_width, self.grid_num)
+        lower_tick, center_tick, upper_tick = self._get_bounds_(current_tick, self.grid_width, self.grid_num)
 
         last_pos = self.portfolio.get_last_position()
         if hasattr(last_pos, 'charge_fees'):
@@ -163,10 +168,8 @@ class UniV3Active(AbstractStrategy):
                     self.previous_uni_tick = center_tick
         return None
 
-
-
     def create_uni_pos(self, timestamp, lower_tick, upper_tick, price_tick):
-        fraction = self._calc_fraction_(lower_tick, upper_tick, price_tick)
+        fraction = self._calc_fraction_(self._tick_to_price_(lower_tick), self._tick_to_price_(upper_tick), self._tick_to_price_(price_tick))
         x_fraction, y_fraction = self.portfolio.get_position('Vault').withdraw_fraction(fraction)
 
         lower_price = self._tick_to_price_(lower_tick)
@@ -189,16 +192,23 @@ class UniV3Active(AbstractStrategy):
         tick = math.log(price, 1.0001) + self.decimal_diff * math.log(10, 1.0001)
         return int(round(tick))
 
-    def _calc_fraction_(self, lower_tick, upper_tick, price_tick):
+    def _calc_fraction_(self, lower_price, upper_price, price):
+        numer = 2 * np.sqrt(price) - np.sqrt(lower_price) - price / np.sqrt(upper_price)
+        denom = 2 * np.sqrt(price) - np.sqrt(self.lower_0) - price / np.sqrt(self.upper_0)
+        res = numer / denom
+        return res
+
+    def _calc_fraction_as_univ2_(self, lower_tick, upper_tick, price_tick):
         numer = np.power(1.0001, (lower_tick - price_tick) / 2) + np.power(1.0001, (price_tick - upper_tick) / 2)
         res = 1 - numer / 2
         return res
 
-    def _get_bounds_(self, price, grid_width, width_num):
-        current_tick = self._price_to_tick_(price)
+    def _get_bounds_(self, current_tick, grid_width, width_num):
         center_num = int(current_tick // grid_width)
         center_tick = grid_width * center_num
 
         tick_lower_bound = grid_width * (center_num - width_num)
         tick_upper_bound = grid_width * (center_num + width_num)
         return tick_lower_bound, center_tick, tick_upper_bound
+
+

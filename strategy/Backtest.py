@@ -35,7 +35,8 @@ class Backtest:
             left, right = time_range[i - 1], time_range[i]
             df_swap_introday_slice = df_swaps[left:right]
             for idx, row in df_swap_introday_slice.iterrows():
-                self.strategy.rebalance(timestamp=idx, row=row)
+                df_swaps_prev = None #df_swaps[:idx]
+                self.strategy.rebalance(timestamp=idx, row=row, prev_swaps=df_swaps_prev)
 
             self.strategy.snapshot(left, row['price'])
         return None

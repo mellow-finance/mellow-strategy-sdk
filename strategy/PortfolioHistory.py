@@ -137,8 +137,14 @@ class PortfolioHistory:
             out = df.iloc[-1] ** (365 / df.shape[0])
             return out
         stats_df['profit_bicurrency_to_y'] = (stats_df['total_value_to_y'] - stats_df['total_value_to_y'].shift()).cumsum()
-        stats_df['portfolio_performance'] = (stats_df['portfolio_value_to_y'] / stats_df['portfolio_value_to_y'].shift()).cumprod()
-        stats_df['portfolio_performance_to_y_to_year'] = stats_df['portfolio_performance'].expanding().apply(yearly_adj)
+
+        stats_df['portfolio_performance_to_x'] = (stats_df['portfolio_value_to_x'] / stats_df['portfolio_value_to_x'].shift()).cumprod()
+        stats_df['portfolio_performance_to_y'] = (stats_df['portfolio_value_to_y'] / stats_df['portfolio_value_to_y'].shift()).cumprod()
+
+        stats_df['portfolio_performance_to_x_to_year'] = stats_df['portfolio_performance_to_x'].expanding().apply(yearly_adj)
+        stats_df['portfolio_performance_to_y_to_year'] = stats_df['portfolio_performance_to_y'].expanding().apply(yearly_adj)
+
+        stats_df['portfolio_performance_to_x_to_year'] -= 1
         stats_df['portfolio_performance_to_y_to_year'] -= 1
         return stats_df
 
@@ -154,14 +160,6 @@ class PortfolioHistory:
         fees_collected = self.calculate_earned_fees(possitions)
 
         res = pd.concat([values, il, rl, fees, fees_collected], axis=1)
-        # res = res.ffill()
-        # res = res.fillna(0)
-
-        # res['total_value_to_x'] = res['active_value_to_x'] + res['closed_value_to_x']
-        # res['total_value_to_y'] = res['active_value_to_y'] + res['closed_value_to_y']
-        #
-        # res['total_earned_fees_to_x'] = res['active_earned_fees_to_x'] + res['closed_earned_fees_to_x']
-        # res['total_earned_fees_to_y'] = res['active_earned_fees_to_y'] + res['closed_earned_fees_to_y']
 
         if 'total_fees_to_x' in res.columns:
             res['portfolio_value_to_x'] = res['total_value_to_x'] + res['total_fees_to_x']
@@ -192,10 +190,9 @@ class PortfolioHistory:
         portfolio_df = self.portfolio_stats()
         fig1 = self.draw_portfolio_to_x(portfolio_df)
         fig2 = self.draw_portfolio_to_y(portfolio_df)
-        # fig3 = self.draw_performance_x(portfolio_df)
+        fig3 = self.draw_performance_x(portfolio_df)
         fig4 = self.draw_performance_y(portfolio_df)
-
-        return fig1, fig2, fig4
+        return fig1, fig2, fig3, fig4
 
     def draw_portfolio_to_x(self, portfolio_df):
         fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -256,7 +253,7 @@ class PortfolioHistory:
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df.index,
-                y=portfolio_df['total_loss_to_y'],
+                y=portfolio_df['total_rl_to_y'],
                 name="Loss to Y",
                 yaxis="y2"
             ),
@@ -290,58 +287,38 @@ class PortfolioHistory:
             secondary_y=True
         )
 
-        # fig.add_trace(
-        #     go.Scatter(
-        #         x=portfolio_df.index,
-        #         y=portfolio_df['performance_to_y_year_gmean'],
-        #         name="Performance gmean yearly to Y",
-        #         yaxis="y2"
-        #     ),
-        #     secondary_y=True
-        # )
-
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to Y", secondary_y=False)
         fig.update_yaxes(title_text='Performance to Y', secondary_y=True)
         fig.update_layout(title='Portfolio Value and Performance Y')
         return fig
 
-    # def draw_performance_x(self, portfolio_df):
-    #     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    #
-    #     fig.add_trace(
-    #         go.Scatter(
-    #             x=portfolio_df.index,
-    #             y=portfolio_df['total_volume_to_x'] + portfolio_df['total_fees_to_x'],
-    #             name="Volume to X",
-    #         ),
-    #         secondary_y=False)
-    #
-    #     fig.add_trace(
-    #         go.Scatter(
-    #             x=portfolio_df.index,
-    #             y=portfolio_df['performance_to_x_yearly'],
-    #             name="Performance yearly to X",
-    #             yaxis="y2"
-    #         ),
-    #         secondary_y=True
-    #     )
-    #
-    #     fig.add_trace(
-    #         go.Scatter(
-    #             x=portfolio_df.index,
-    #             y=portfolio_df['performance_to_x_year_gmean'],
-    #             name="Performance gmean yearly to X",
-    #             yaxis="y2"
-    #         ),
-    #         secondary_y=True
-    #     )
-    #
-    #     fig.update_xaxes(title_text="Timeline")
-    #     fig.update_yaxes(title_text="Volume to X", secondary_y=False)
-    #     fig.update_yaxes(title_text='Performance to X', secondary_y=True)
-    #     fig.update_layout(title='Volume and Performance X')
-    #     return fig
+    def draw_performance_x(self, portfolio_df):
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_value_to_x'],
+                name="Volume to X",
+            ),
+            secondary_y=False)
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_performance_to_x_to_year'],
+                name="Performance yearly to X",
+                yaxis="y2"
+            ),
+            secondary_y=True
+        )
+
+        fig.update_xaxes(title_text="Timeline")
+        fig.update_yaxes(title_text="Value to X", secondary_y=False)
+        fig.update_yaxes(title_text='Performance to X', secondary_y=True)
+        fig.update_layout(title='Portfolio Value and Performance X')
+        return fig
 
 
     def uniswap_intervals(self):

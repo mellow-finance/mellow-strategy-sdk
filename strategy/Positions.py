@@ -381,12 +381,3 @@ class UniV3Position(AbstractPosition):
         new_y = y + multiplier * price * dx
         return new_x, new_y
 
-
-
-    # def _impermanent_loss_(self, liq: float, price: float, price_init: float) -> float:
-    #     sqrt_price_init = np.sqrt(price_init)
-    #     volume_y_held = liq * (sqrt_price_init - self.sqrt_lower + price * (1 / sqrt_price_init - 1 / self.sqrt_upper))
-    #     x_stake, y_stake = self._liq_to_xy_(liq, price)
-    #     volume_y_held_staked = x_stake * price + y_stake
-    #     il_y = volume_y_held - volume_y_held_staked
-    #     return il_y
