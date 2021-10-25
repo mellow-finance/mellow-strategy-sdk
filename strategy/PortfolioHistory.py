@@ -253,7 +253,7 @@ class PortfolioHistory:
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df.index,
-                y=portfolio_df['total_rl_to_y'],
+                y=portfolio_df['total_loss_to_y'],
                 name="Loss to Y",
                 yaxis="y2"
             ),

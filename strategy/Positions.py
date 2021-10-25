@@ -58,26 +58,14 @@ class BiCurrencyPosition(AbstractPosition):
         x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
         return x_out, y_out
 
-    def equalize(self, price: float) -> None:
-        dV = price * self.x - self.y
-        denom = 2 - self.swap_fee
-        if dV > 0:
-            dx = dV / (price * denom)
-            self.swap_x_to_y(dx, price)
-
-        elif dV < 0:
-            dy = abs(dV) / denom
-            self.swap_y_to_x(dy, price)
-
+    def rebalance(self, x_fraction, y_fraction, price):
+        # Implement add swaps with fee
+        v = price * self.x + self.y
+        new_x = x_fraction * v / price
+        new_y = y_fraction * v
+        self.x = new_x
+        self.y = new_y
         return None
-
-    # def equalize(self, price: float) -> None:
-    #     v = price * self.x + self.y
-    #     x_new = v / (2*price)
-    #     y_new = v / 2
-    #     self.x = x_new
-    #     self.y = y_new
-    #     return None
 
     def to_x(self, price: float) -> float:
         res = self.x + self.y / price
@@ -111,6 +99,19 @@ class BiCurrencyPosition(AbstractPosition):
         self.history_to_x[date] = volume_x
         self.history_to_y[date] = volume_y
         return None
+
+    # def equalize(self, price: float) -> None:
+    #     dV = price * self.x - self.y
+    #     denom = 2 - self.swap_fee
+    #     if dV > 0:
+    #         dx = dV / (price * denom)
+    #         self.swap_x_to_y(dx, price)
+    #
+    #     elif dV < 0:
+    #         dy = abs(dV) / denom
+    #         self.swap_y_to_x(dy, price)
+    #
+    #     return None
 
 
 class UniV3Position(AbstractPosition):
@@ -177,13 +178,13 @@ class UniV3Position(AbstractPosition):
         return x_res, y_res
 
     def mint(self, x: float, y: float, price: float) -> None:
-        x_aligned, y_aligned = self._liqudity_aligning_(x, y, price)
-        self.bi_currency.deposit(x_aligned, y_aligned)
-        dliq = self._xy_to_liq_(x_aligned, y_aligned, price)
-        self.liquidity += dliq
+        self.bi_currency.deposit(x, y)
+        d_liq = self._xy_to_liq_(x, y, price)
+        self.liquidity += d_liq
         return None
 
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
+        assert liq <= self.liquidity, 'Too much liquidity too withdraw'
         il_x_0 = self.impermanent_loss_to_x(price)
         il_y_0 = self.impermanent_loss_to_y(price)
 
@@ -210,11 +211,11 @@ class UniV3Position(AbstractPosition):
         if y_0 >= y_1:
             fee_x = (x_1 - x_0) * self.fee_percent
             if fee_x < 0:
-                print('NEGATIVE X:', fee_x)
+                raise Exception(f'Negative X fees earned: {fee_x}')
         else:
             fee_y = (y_1 - y_0) * self.fee_percent
             if fee_y < 0:
-                print('NEGATIVE Y:', fee_y)
+                raise Exception(f'Negative Y fees earned: {fee_y}')
 
         self.fees_x += fee_x
         self._fees_x_earned_ += fee_x
@@ -268,6 +269,51 @@ class UniV3Position(AbstractPosition):
         x, y = self._liq_to_xy_(self.liquidity, price)
         return x, y
 
+    def _adj_price_(self, price: float) -> float:
+        adj_price = min(max(self.lower_price, price), self.upper_price)
+        return adj_price
+
+    def _x_to_liq_(self, x: float, price: float) -> float:
+        if self.upper_price <= price:
+            return np.inf
+        sqrt_price = np.sqrt(price)
+        l_x = (x * sqrt_price * self.sqrt_upper) / (self.sqrt_upper - sqrt_price)
+        return l_x
+
+    def _y_to_liq_(self, y: float, price: float) -> float:
+        if self.lower_price >= price:
+            return np.inf
+        sqrt_price = np.sqrt(price)
+        l_y = y / (sqrt_price - self.sqrt_lower)
+        return l_y
+
+    def _xy_to_liq_(self, x: float, y: float, price: float) -> float:
+        adj_price = self._adj_price_(price)
+        x_liq = self._x_to_liq_(x, adj_price)
+        y_liq = self._y_to_liq_(y, adj_price)
+        assert abs(x_liq - y_liq) < 1e-6, f'Lx != Ly: Lx={x_liq}, Ly={y_liq}'
+        liq = min(x_liq, y_liq)
+        return liq
+
+    def _liq_to_x_(self, liq: float, price: float) -> float:
+        adj_price = self._adj_price_(price)
+        sqrt_price = np.sqrt(adj_price)
+        numer = self.sqrt_upper - sqrt_price
+        denom = self.sqrt_upper * sqrt_price
+        x = liq * numer / denom
+        return x
+
+    def _liq_to_y_(self, liq: float, price: float) -> float:
+        adj_price = self._adj_price_(price)
+        sqrt_price = np.sqrt(adj_price)
+        y = liq * (sqrt_price - self.sqrt_lower)
+        return y
+
+    def _liq_to_xy_(self, liq: float, price: float) -> Tuple[float, float]:
+        x = self._liq_to_x_(liq, price)
+        y = self._liq_to_y_(liq, price)
+        return x, y
+
     def snapshot(self, date: datetime, price: float) -> None:
         x, y = self.to_xy(price)
         self.history_x[date] = x
@@ -307,77 +353,3 @@ class UniV3Position(AbstractPosition):
         self.history_realized_loss_to_y[date] = self.realized_loss_to_y
 
         return None
-
-    def _adj_price_(self, price: float) -> float:
-        adj_price = min(max(self.lower_price, price), self.upper_price)
-        return adj_price
-
-    def _x_to_liq_(self, x: float, price: float) -> float:
-        if self.upper_price <= price:
-            return np.inf
-        sqrt_price = np.sqrt(price)
-        l_x = (x * sqrt_price * self.sqrt_upper) / (self.sqrt_upper - sqrt_price)
-        return l_x
-
-    def _y_to_liq_(self, y: float, price: float) -> float:
-        if self.lower_price >= price:
-            return np.inf
-        sqrt_price = np.sqrt(price)
-        l_y = y / (sqrt_price - self.sqrt_lower)
-        return l_y
-
-    def _xy_to_liq_(self, x: float, y: float, price: float) -> float:
-        adj_price = self._adj_price_(price)
-        liq = min(self._x_to_liq_(x, adj_price), self._y_to_liq_(y, adj_price))
-        return liq
-
-    def _liq_to_x_(self, liq: float, price: float) -> float:
-        adj_price = self._adj_price_(price)
-        sqrt_price = np.sqrt(adj_price)
-        numer = self.sqrt_upper - sqrt_price
-        denom = self.sqrt_upper * sqrt_price
-        x = liq * numer / denom
-        return x
-
-    def _liq_to_y_(self, liq: float, price: float) -> float:
-        adj_price = self._adj_price_(price)
-        sqrt_price = np.sqrt(adj_price)
-        y = liq * (sqrt_price - self.sqrt_lower)
-        return y
-
-    def _liq_to_xy_(self, liq: float, price: float) -> Tuple[float, float]:
-        x = self._liq_to_x_(liq, price)
-        y = self._liq_to_y_(liq, price)
-        return x, y
-
-    def _optimal_ratio_(self, price: float) -> float:
-        sqrt_price = np.sqrt(price)
-        if self.sqrt_upper <= sqrt_price:
-            return np.inf
-        if self.sqrt_lower >= sqrt_price:
-            return 0
-        numer = (sqrt_price - self.sqrt_lower) * self.sqrt_upper * sqrt_price
-        denom = self.sqrt_upper - sqrt_price
-        ratio = numer / denom
-        return ratio
-
-    def _liqudity_aligning_(self, x: float, y: float, price: float) -> Tuple[float, float]:
-        """implement as swaping mechanics"""
-        ratio_opt = self._optimal_ratio_(price)
-
-        if ratio_opt == np.inf:
-            return 0, y + price * x * (1 - self.fee_percent)
-
-        dy = ratio_opt * x - y
-
-        if dy >= 0:
-            multiplier = 1 - self.fee_percent
-        else:
-            multiplier = 1 / (1 - self.fee_percent)
-
-        denom = multiplier * price + ratio_opt
-        dx = dy / denom
-        new_x = x - dx
-        new_y = y + multiplier * price * dx
-        return new_x, new_y
-
