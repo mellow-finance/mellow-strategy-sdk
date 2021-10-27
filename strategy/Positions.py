@@ -21,7 +21,7 @@ class AbstractPosition(ABC):
         raise Exception(NotImplemented)
 
     @abstractmethod
-    def snapshot(self, date: datetime, price: float) -> None:
+    def snapshot(self, date: datetime, price: float) -> dict:
         raise Exception(NotImplemented)
 
 
@@ -37,12 +37,6 @@ class BiCurrencyPosition(AbstractPosition):
         self.y = y if y is not None else 0
 
         self.swap_fee = swap_fee
-
-        # history variables
-        self.history_x = {}
-        self.history_y = {}
-        self.history_to_x = {}
-        self.history_to_y = {}
 
     def deposit(self, x: float, y: float) -> None:
         self.x += x
@@ -88,17 +82,12 @@ class BiCurrencyPosition(AbstractPosition):
         self.x += (1 - self.swap_fee) * dy / price
         return None
 
-    def snapshot(self, date: datetime, price: float) -> None:
-        x, y = self.to_xy(price)
-        volume_x = self.to_x(price)
-        volume_y = self.to_y(price)
-
-        self.history_x[date] = x
-        self.history_y[date] = y
-
-        self.history_to_x[date] = volume_x
-        self.history_to_y[date] = volume_y
-        return None
+    def snapshot(self, date: datetime, price: float) -> dict:
+        value_to_x = self.to_x(price)
+        value_to_y = self.to_y(price)
+        snapshot = {f'{self.name}_value_to_x': value_to_x,
+                    f'{self.name}_value_to_y': value_to_y}
+        return snapshot
 
     # def equalize(self, price: float) -> None:
     #     dV = price * self.x - self.y
@@ -142,31 +131,6 @@ class UniV3Position(AbstractPosition):
         self.fees_y = 0
         self._fees_y_earned_ = 0
 
-        # history variables
-        self.history_x = {}
-        self.history_y = {}
-
-        self.history_to_x = {}
-        self.history_to_y = {}
-
-        self.history_fees_x = {}
-        self.history_fees_y = {}
-
-        self.history_fees_to_x = {}
-        self.history_fees_to_y = {}
-
-        self.history_il_to_x = {}
-        self.history_il_to_y = {}
-
-        self.history_earned_fees_x = {}
-        self.history_earned_fees_y = {}
-
-        self.history_earned_fees_to_x = {}
-        self.history_earned_fees_to_y = {}
-
-        self.history_realized_loss_to_x = {}
-        self.history_realized_loss_to_y = {}
-
     def deposit(self, x: float, y: float, price: float) -> None:
         self.mint(x, y, price)
         return None
@@ -184,7 +148,8 @@ class UniV3Position(AbstractPosition):
         return None
 
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
-        assert liq <= self.liquidity, 'Too much liquidity too withdraw'
+        assert liq <= self.liquidity, f'Too much liquidity too withdraw = {liq}'
+        assert liq > 1e-6, f'Too small liquidity too withdraw = {liq}'
         il_x_0 = self.impermanent_loss_to_x(price)
         il_y_0 = self.impermanent_loss_to_y(price)
 
@@ -314,42 +279,34 @@ class UniV3Position(AbstractPosition):
         y = self._liq_to_y_(liq, price)
         return x, y
 
-    def snapshot(self, date: datetime, price: float) -> None:
-        x, y = self.to_xy(price)
-        self.history_x[date] = x
-        self.history_y[date] = y
+    def snapshot(self, date: datetime, price: float) -> dict:
+        volume_to_x = self.to_x(price)
+        volume_to_y = self.to_y(price)
 
-        volume_x = self.to_x(price)
-        self.history_to_x[date] = volume_x
+        fees_earned_to_x = self._fees_x_earned_ + self._fees_y_earned_ / price
+        fees_earned_to_y = price * self._fees_x_earned_ + self._fees_y_earned_
 
-        volume_y = self.to_y(price)
-        self.history_to_y[date] = volume_y
+        fees_to_x = self.fees_x + self.fees_y / price
+        fees_to_y = price * self.fees_x + self.fees_y
 
-        self.history_fees_x[date] = self.fees_x
-        self.history_fees_y[date] = self.fees_y
+        il_to_x = self.impermanent_loss_to_x(price)
+        il_to_y = self.impermanent_loss_to_y(price)
 
-        volume_fees_x = self.fees_x + self.fees_y / price
-        self.history_fees_to_x[date] = volume_fees_x
+        snapshot = {f'{self.name}_value_to_x': volume_to_x,
+                    f'{self.name}_value_to_y': volume_to_y,
 
-        volume_fees_y = price * self.fees_x + self.fees_y
-        self.history_fees_to_y[date] = volume_fees_y
+                    f'{self.name}_earned_fees_to_x': fees_earned_to_x,
+                    f'{self.name}_earned_fees_to_y': fees_earned_to_y,
 
-        il_x = self.impermanent_loss_to_x(price)
-        self.history_il_to_x[date] = il_x
+                    f'{self.name}_current_fees_to_x': fees_to_x,
+                    f'{self.name}_current_fees_to_y': fees_to_y,
 
-        il_y = self.impermanent_loss_to_y(price)
-        self.history_il_to_y[date] = il_y
+                    f'{self.name}_il_to_x': il_to_x,
+                    f'{self.name}_il_to_y': il_to_y,
 
-        self.history_earned_fees_x[date] = self._fees_x_earned_
-        self.history_earned_fees_y[date] = self._fees_y_earned_
+                    f'{self.name}_realized_loss_to_x': self.realized_loss_to_x,
+                    f'{self.name}_realized_loss_to_y': self.realized_loss_to_y,
+                    }
 
-        _total_fees_earned_x_ = self._fees_x_earned_ + self._fees_y_earned_ / price
-        self.history_earned_fees_to_x[date] = _total_fees_earned_x_
+        return snapshot
 
-        _total_fees_earned_y_ = price * self._fees_x_earned_ + self._fees_y_earned_
-        self.history_earned_fees_to_y[date] = _total_fees_earned_y_
-
-        self.history_realized_loss_to_x[date] = self.realized_loss_to_x
-        self.history_realized_loss_to_y[date] = self.realized_loss_to_y
-
-        return None

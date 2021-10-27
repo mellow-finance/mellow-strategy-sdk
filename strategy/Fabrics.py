@@ -1,7 +1,6 @@
 import numpy as np
 
 from .Portfolio import Portfolio
-from .primitives import Pool
 from .Positions import UniV3Position
 
 
@@ -27,12 +26,12 @@ class UniswapV3Fabric:
         x_uni_aligned, y_uni_aligned = self._align_to_liq_(x_uni, y_uni, lower_price, upper_price, price)
         vault.withdraw(x_uni_aligned, y_uni_aligned)
 
+        univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent)
+        univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
+
         fraction_x = self._calc_fraction_to_x_(upper_price, price) / (1 - fraction_uni)
         fraction_y = self._calc_fraction_to_y_(lower_price, price) / (1 - fraction_uni)
         vault.rebalance(fraction_x, fraction_y, price)
-
-        univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent)
-        univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
         return univ3_pos
 
     def _calc_fraction_to_uni_(self, lower_price, upper_price, price):

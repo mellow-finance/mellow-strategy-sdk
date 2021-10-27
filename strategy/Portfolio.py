@@ -13,7 +13,6 @@ class Portfolio(AbstractPosition):
             positions = []
         self.positions = {pos.name: pos for pos in positions}
         self.positions_closed = {}
-
         self.portfolio_history = {}
 
     def append(self, position: AbstractPosition) -> None:
@@ -64,9 +63,10 @@ class Portfolio(AbstractPosition):
             total_y += y
         return total_x, total_y
 
-    def snapshot(self, date: datetime, price: float) -> None:
+    def snapshot(self, date: datetime, price: float) -> dict:
+        snapshot = {'timestamp': date}
         for name, pos in self.positions.items():
-            pos.snapshot(date, price)
+            snapshot.update(pos.snapshot(date, price))
         self.portfolio_history[date] = copy.copy(self.positions)
-        return None
+        return snapshot
 
