@@ -47,6 +47,8 @@ class BiCurrencyEqualized(AbstractStrategy):
         self.fee_percent = pool.fee.percent
 
         self.prev_rebalance_tick = None
+        self.prev_gain_date = None
+
 
     def rebalance(self, *args, **kwargs) -> None:
         timestamp, row = kwargs['timestamp'], kwargs['row']
@@ -68,6 +70,14 @@ class BiCurrencyEqualized(AbstractStrategy):
 
             vault.rebalance(fraction_x, fraction_y, price)
             self.prev_rebalance_tick = current_tick
+
+        if self.prev_gain_date is None:
+            self.prev_gain_date = timestamp.normalize()
+
+        if timestamp.normalize() > self.prev_gain_date:
+            vault = self.portfolio.get_position('Vault')
+            vault.interest_gain(timestamp.normalize())
+            self.prev_gain_date = timestamp.normalize()
 
         return None
 
@@ -100,7 +110,6 @@ class UniV3Passive(AbstractStrategy):
         self.upper_price = upper_price
         self.decimal_diff = -pool.decimals_diff
         self.fee_percent = pool.fee.percent
-
 
     def rebalance(self, *args, **kwargs) -> None:
         timestamp, row = kwargs['timestamp'], kwargs['row']

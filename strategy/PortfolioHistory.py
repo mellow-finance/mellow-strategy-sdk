@@ -47,6 +47,23 @@ class PortfolioHistory:
             df['total_il_to_y'] = 0
         return df
 
+    def calculate_costs(self, df):
+        costs_to_x_cols = [col for col in df.columns if 'rebalance_costs_to_x' in col]
+        costs_to_y_cols = [col for col in df.columns if 'rebalance_costs_to_y' in col]
+        if costs_to_x_cols:
+            df[costs_to_x_cols] = df[costs_to_x_cols].ffill()
+            df[costs_to_y_cols] = df[costs_to_y_cols].ffill()
+
+            df[costs_to_x_cols] = df[costs_to_x_cols].fillna(0)
+            df[costs_to_y_cols] = df[costs_to_y_cols].fillna(0)
+
+            df['total_costs_to_x'] = df[costs_to_x_cols].sum(axis=1)
+            df['total_costs_to_y'] = df[costs_to_y_cols].sum(axis=1)
+        else:
+            df['total_costs_to_x'] = 0
+            df['total_costs_to_y'] = 0
+        return df
+
     # def calculate_rl(self, df):
     #     rl_to_x_cols = [col for col in df.columns if 'realized_loss_to_x' in col]
     #     rl_to_y_cols = [col for col in df.columns if 'realized_loss_to_y' in col]
@@ -127,6 +144,7 @@ class PortfolioHistory:
         # df = self.calculate_rl(df)
         df = self.calculate_actual_fees(df)
         df = self.calculate_earned_fees(df)
+        df = self.calculate_costs(df)
 
         if 'total_current_fees_to_x' in df.columns:
             df['portfolio_value_to_x'] = df['total_value_to_x'] + df['total_current_fees_to_x']

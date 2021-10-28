@@ -28,15 +28,25 @@ class AbstractPosition(ABC):
 class BiCurrencyPosition(AbstractPosition):
     def __init__(self, name: str,
                  swap_fee: float,
+                 rebalance_cost: float,
                  x: float = None,
                  y: float = None,
+                 x_interest: float = None,
+                 y_interest: float = None,
                  ) -> None:
         super().__init__(name)
 
         self.x = x if x is not None else 0
         self.y = y if y is not None else 0
 
+        self.x_interest = x_interest if x_interest is not None else 0
+        self.y_interest = y_interest if y_interest is not None else 0
+
         self.swap_fee = swap_fee
+        self.rebalance_cost = rebalance_cost
+        self.rebalance_costs_to_x = 0
+        self.rebalance_costs_to_y = 0
+        self.previous_gain = None
 
     def deposit(self, x: float, y: float) -> None:
         self.x += x
@@ -44,21 +54,45 @@ class BiCurrencyPosition(AbstractPosition):
         return None
 
     def withdraw(self, x: float, y: float) -> Tuple[float, float]:
+        assert x <= self.x, f'Too much to withdraw X = {x}'
+        assert y <= self.y, f'Too much to withdraw Y = {y}'
         self.x -= x
         self.y -= y
         return x, y
 
     def withdraw_fraction(self, fraction: float) -> Tuple[float, float]:
+        assert fraction <= 1, f'Too much to withdraw Fraction = {fraction}'
         x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
         return x_out, y_out
 
-    def rebalance(self, x_fraction, y_fraction, price):
+    def rebalance(self, x_fraction, y_fraction, price) -> None:
         # Implement add swaps with fee
-        v = price * self.x + self.y
-        new_x = x_fraction * v / price
-        new_y = y_fraction * v
-        self.x = new_x
-        self.y = new_y
+        assert x_fraction <= 1, f'Too much to rebalance Fraction X = {x_fraction}'
+        assert y_fraction <= 1, f'Too much to rebalance Fraction Y = {y_fraction}'
+        assert abs(x_fraction + y_fraction - 1) <= 1e-6, f'Too much to rebalance {x_fraction}, {y_fraction}'
+
+        dV = y_fraction * price * self.x - x_fraction * self.y
+        if dV > 0:
+            dx = dV / price
+            self.swap_x_to_y(dx, price)
+        elif dV < 0:
+            dy = abs(dV)
+            self.swap_y_to_x(dy, price)
+
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+
+        return None
+
+    def interest_gain(self, date) -> None:
+        if self.previous_gain is not None:
+            assert self.previous_gain < date, "Already gained this day"
+        else:
+            self.previous_gain = date
+        multiplier = (date - self.previous_gain).days
+        self.x *= (1 + self.x_interest) ** multiplier
+        self.y *= (1 + self.x_interest) ** multiplier
+        self.previous_gain = date
         return None
 
     def to_x(self, price: float) -> float:
@@ -75,32 +109,27 @@ class BiCurrencyPosition(AbstractPosition):
     def swap_x_to_y(self, dx: float, price: float) -> None:
         self.x -= dx
         self.y += price * (1 - self.swap_fee) * dx
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
         return None
 
     def swap_y_to_x(self, dy: float, price: float) -> None:
         self.y -= dy
         self.x += (1 - self.swap_fee) * dy / price
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
         return None
 
     def snapshot(self, date: datetime, price: float) -> dict:
         value_to_x = self.to_x(price)
         value_to_y = self.to_y(price)
-        snapshot = {f'{self.name}_value_to_x': value_to_x,
-                    f'{self.name}_value_to_y': value_to_y}
+        snapshot = {
+                    f'{self.name}_value_to_x': value_to_x,
+                    f'{self.name}_value_to_y': value_to_y,
+                    f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
+                    f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
+                }
         return snapshot
-
-    # def equalize(self, price: float) -> None:
-    #     dV = price * self.x - self.y
-    #     denom = 2 - self.swap_fee
-    #     if dV > 0:
-    #         dx = dV / (price * denom)
-    #         self.swap_x_to_y(dx, price)
-    #
-    #     elif dV < 0:
-    #         dy = abs(dV) / denom
-    #         self.swap_y_to_x(dy, price)
-    #
-    #     return None
 
 
 class UniV3Position(AbstractPosition):
@@ -108,19 +137,24 @@ class UniV3Position(AbstractPosition):
                  name: str,
                  lower_price: float,
                  upper_price: float,
-                 fee_percent: float) -> None:
+                 fee_percent: float,
+                 rebalance_cost: float,
+                 ) -> None:
 
         super().__init__(name)
 
         self.lower_price = lower_price
         self.upper_price = upper_price
         self.fee_percent = fee_percent
+        self.rebalance_cost = rebalance_cost
 
         self.sqrt_lower = np.sqrt(self.lower_price)
         self.sqrt_upper = np.sqrt(self.upper_price)
 
         self.liquidity = 0
-        self.bi_currency = BiCurrencyPosition('Virtual', self.fee_percent)
+        self.bi_currency = BiCurrencyPosition('Virtual', self.fee_percent, self.rebalance_cost)
+        self.rebalance_costs_to_x = 0
+        self.rebalance_costs_to_y = 0
 
         self.realized_loss_to_x = 0
         self.realized_loss_to_y = 0
@@ -142,9 +176,11 @@ class UniV3Position(AbstractPosition):
         return x_res, y_res
 
     def mint(self, x: float, y: float, price: float) -> None:
-        self.bi_currency.deposit(x, y)
         d_liq = self._xy_to_liq_(x, y, price)
         self.liquidity += d_liq
+        self.bi_currency.deposit(x, y)
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
         return None
 
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
@@ -163,6 +199,8 @@ class UniV3Position(AbstractPosition):
 
         self.realized_loss_to_x += (il_x_0 - il_x_1)
         self.realized_loss_to_y += (il_y_0 - il_y_1)
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
         return x_out, y_out
 
     def charge_fees(self, price_0: float, price_1: float) -> None:
@@ -306,7 +344,9 @@ class UniV3Position(AbstractPosition):
 
                     f'{self.name}_realized_loss_to_x': self.realized_loss_to_x,
                     f'{self.name}_realized_loss_to_y': self.realized_loss_to_y,
-                    }
 
+                    f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
+                    f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
+                    }
         return snapshot
 

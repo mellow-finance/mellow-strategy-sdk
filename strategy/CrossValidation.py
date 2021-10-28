@@ -53,11 +53,11 @@ class CrossValidation:
 
             fold_data = self.folder.get_fold(data.swaps, fold_name)
 
-            backtest_train.backtest(fold_data['train'])
-            backtest_valid.backtest(fold_data['valid'])
+            backtest_train_history = backtest_train.backtest(fold_data['train'])
+            backtest_valid_history = backtest_valid.backtest(fold_data['valid'])
 
-            self.folds_result[fold_name] = {'train': backtest_train.history,
-                                            'valid': backtest_valid.history}
+            self.folds_result[fold_name] = {'train': backtest_train_history,
+                                            'valid': backtest_valid_history}
         return None
 
 

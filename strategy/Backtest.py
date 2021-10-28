@@ -24,9 +24,8 @@ class AbstractStrategy(ABC):
 class Backtest:
     def __init__(self, strategy: AbstractStrategy):
         self.strategy = strategy
-        self.history = None
 
-    def backtest(self, df_swaps) -> None:
+    def backtest(self, df_swaps) -> PortfolioHistory:
         history_tracker = PortfolioHistory()
 
         for idx, row in df_swaps.iterrows():
@@ -35,5 +34,6 @@ class Backtest:
             snapshot = self.strategy.snapshot(idx, row['price'])
             history_tracker.add_snapshot(snapshot)
 
-        self.history = history_tracker
-        return None
+        return history_tracker
+
+
