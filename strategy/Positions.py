@@ -349,4 +349,3 @@ class UniV3Position(AbstractPosition):
                     f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
                     }
         return snapshot
-

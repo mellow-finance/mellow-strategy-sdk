@@ -69,4 +69,3 @@ class Portfolio(AbstractPosition):
             snapshot.update(pos.snapshot(date, price))
         self.portfolio_history[date] = copy.copy(self.positions)
         return snapshot
-

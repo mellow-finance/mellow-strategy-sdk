@@ -3,9 +3,8 @@ from pathlib import Path
 from decimal import Decimal
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import plotly.express as px
 
-from strategy.primitives import Pool
+from .primitives import Pool
 
 
 class PoolDataUniV3:
@@ -24,7 +23,7 @@ class PoolDataUniV3:
         self.spot_prices = None
 
     @classmethod
-    def from_folder(cls, pool: Pool, folder: Path = '../scripts/data/') -> 'RawData':
+    def from_folder(cls, pool: Pool, folder: Path = '../scripts/data/') -> 'PoolDataUniV3':
         mints_converters = {
             "block_time": int,
             "block_number": int,
@@ -132,7 +131,3 @@ class PoolDataUniV3:
         fig.update_yaxes(title_text='Liquidity', secondary_y=True)
         fig.update_layout(title='Price and Liquidity')
         return fig
-
-
-
-

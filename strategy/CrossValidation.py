@@ -1,7 +1,6 @@
-from sklearn.model_selection import KFold, train_test_split, TimeSeriesSplit
-import pandas as pd
-import numpy as np
 import copy
+import numpy as np
+from sklearn.model_selection import TimeSeriesSplit
 
 from .Backtest import Backtest
 
@@ -59,8 +58,3 @@ class CrossValidation:
             self.folds_result[fold_name] = {'train': backtest_train_history,
                                             'valid': backtest_valid_history}
         return None
-
-
-
-
-

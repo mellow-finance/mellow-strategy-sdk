@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
-import pandas as pd
 
 from .Portfolio import Portfolio
-from .Data import PoolDataUniV3
 from .PortfolioHistory import PortfolioHistory
 
 
@@ -35,5 +33,3 @@ class Backtest:
             history_tracker.add_snapshot(snapshot)
 
         return history_tracker
-
-

@@ -1,5 +1,3 @@
-from scipy import stats
-from decimal import Decimal
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pandas as pd
@@ -187,8 +185,7 @@ class PortfolioHistory:
                 x=portfolio_df.index,
                 y=portfolio_df['portfolio_value_to_x'],
                 name="Volume to X",
-            ),
-            secondary_y=False)
+            ), secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
@@ -205,9 +202,7 @@ class PortfolioHistory:
                 y=portfolio_df['total_loss_to_x'],
                 name="Loss to X",
                 yaxis="y2"
-            ),
-             secondary_y=True
-        )
+            ), secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to X", secondary_y=False)
@@ -241,8 +236,7 @@ class PortfolioHistory:
                 y=portfolio_df['total_loss_to_y'],
                 name="Loss to Y",
                 yaxis="y2"
-            ),
-             secondary_y=True
+            ),  secondary_y=True
         )
 
         fig.update_xaxes(title_text="Timeline")
@@ -259,8 +253,7 @@ class PortfolioHistory:
                 x=portfolio_df.index,
                 y=portfolio_df['portfolio_value_to_y'],
                 name="Volume to Y",
-            ),
-            secondary_y=False)
+            ), secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
@@ -268,9 +261,7 @@ class PortfolioHistory:
                 y=portfolio_df['portfolio_performance_to_y_to_year'],
                 name="Performance yearly to Y",
                 yaxis="y2"
-            ),
-            secondary_y=True
-        )
+            ), secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to Y", secondary_y=False)
@@ -315,64 +306,63 @@ class PortfolioHistory:
         fig.update_layout(title='Portfolio Value and Performance X')
         return fig
 
+    # def uniswap_intervals(self):
+    #     result = []
+    #     for date, positions in self.portfolio.portfolio_history.items():
+    #         res_df = pd.DataFrame()
+    #         for name, position in positions.items():
+    #             if 'Uni' in name:
+    #                 pos_inttervals = pd.DataFrame(data=[(position.lower_price, position.upper_price)],
+    #                                              columns=[(position.name, 'min_bound'), (position.name, 'max_bound')],
+    #                                              index=[date])
+    #                 res_df = pd.concat([res_df, pos_inttervals], axis=1)
+    #
+    #         result.append(res_df)
+    #
+    #     final = pd.concat(result)
+    #     final.index.name = 'date'
+    #     return final
 
-    def uniswap_intervals(self):
-        result = []
-        for date, positions in self.portfolio.portfolio_history.items():
-            res_df = pd.DataFrame()
-            for name, position in positions.items():
-                if 'Uni' in name:
-                    pos_inttervals = pd.DataFrame(data=[(position.lower_price, position.upper_price)],
-                                                  columns=[(position.name, 'min_bound'), (position.name, 'max_bound')],
-                                                  index=[date])
-                    res_df = pd.concat([res_df, pos_inttervals], axis=1)
-
-            result.append(res_df)
-
-        final = pd.concat(result)
-        final.index.name = 'date'
-        return final
-
-    def draw_intervals(self, pool_data):
-        intervals = self.uniswap_intervals()
-        fig = go.Figure()
-
-        for col_0 in intervals.columns.get_level_values(level=0).unique():
-            pos = intervals.loc[:, intervals.columns.get_level_values(level=0) == col_0]
-            pos_clear = pos.dropna()
-
-            low = pos_clear[(col_0, 'min_bound')].to_numpy()
-            up = pos_clear[(col_0, 'max_bound')].to_numpy()
-
-            batch = [go.Scatter(
-                name='Upper Bound ' + str(col_0),
-                x=pos_clear.index,
-                y=up,
-                mode='lines',
-                marker=dict(color='blue'),
-                line=dict(width=1),
-                showlegend=False
-            ),
-                go.Scatter(
-                    name='Lower Bound ' + str(col_0),
-                    x=pos_clear.index,
-                    y=low,
-                    marker=dict(color='blue'),
-                    line=dict(width=1),
-                    mode='lines',
-                    fillcolor='rgba(0, 0, 200, 0.1)',
-                    fill='tonexty',
-
-                    showlegend=False
-                )]
-            fig.add_traces(batch)
-
-        fig.add_trace(go.Scatter(
-            name='Price',
-            x=pool_data.spot_prices.index,
-            y=pool_data.spot_prices['price'],
-            mode='lines',
-            line=dict(color='rgb(0, 200, 0)'),
-        ))
-        fig.update_layout(title='Intevals')
-        return fig
+    # def draw_intervals(self, pool_data):
+    #     intervals = self.uniswap_intervals()
+    #     fig = go.Figure()
+    #
+    #     for col_0 in intervals.columns.get_level_values(level=0).unique():
+    #         pos = intervals.loc[:, intervals.columns.get_level_values(level=0) == col_0]
+    #         pos_clear = pos.dropna()
+    #
+    #         low = pos_clear[(col_0, 'min_bound')].to_numpy()
+    #         up = pos_clear[(col_0, 'max_bound')].to_numpy()
+    #
+    #         batch = [go.Scatter(
+    #             name='Upper Bound ' + str(col_0),
+    #             x=pos_clear.index,
+    #             y=up,
+    #             mode='lines',
+    #             marker=dict(color='blue'),
+    #             line=dict(width=1),
+    #             showlegend=False
+    #         ),
+    #             go.Scatter(
+    #                 name='Lower Bound ' + str(col_0),
+    #                 x=pos_clear.index,
+    #                 y=low,
+    #                 marker=dict(color='blue'),
+    #                 line=dict(width=1),
+    #                 mode='lines',
+    #                 fillcolor='rgba(0, 0, 200, 0.1)',
+    #                 fill='tonexty',
+    #
+    #                 showlegend=False
+    #             )]
+    #         fig.add_traces(batch)
+    #
+    #     fig.add_trace(go.Scatter(
+    #         name='Price',
+    #         x=pool_data.spot_prices.index,
+    #         y=pool_data.spot_prices['price'],
+    #         mode='lines',
+    #         line=dict(color='rgb(0, 200, 0)'),
+    #     ))
+    #     fig.update_layout(title='Intevals')
+    #     return fig

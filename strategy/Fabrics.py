@@ -1,21 +1,43 @@
-import numpy as np
-
 from .Portfolio import Portfolio
 from .Positions import UniV3Position
 
+import numpy as np
 
-class UniswapV3Fabric:
+
+class PortfolioFabric:
+    def __init__(self, position):
+        self.position = position
+
+    def create(self, *args, **kwargs):
+        position = self.position(**kwargs)
+        portfolio = Portfolio('main', [position])
+        return portfolio
+
+
+# class StrategyFabric:
+#     def __init__(self, strategy, portfolio):
+#         self.strategy = strategy
+#         self.portfolio = portfolio
+#
+#     def create(self, *args, **kwargs):
+#         position = self.position(**kwargs)
+#         portfolio = Portfolio('main', [position])
+#         return portfolio
+
+
+class UniV3Fabric:
     def __init__(self,
                  portfolio: Portfolio,
                  lower_0: float,
                  upper_0: float,
                  fee_percent: float,
-
+                 rebalance_cost: float,
                  ):
         self.portfolio = portfolio
         self.lower_0 = lower_0
         self.upper_0 = upper_0
         self.fee_percent = fee_percent
+        self.rebalance_cost = rebalance_cost
 
     def create_uni_position(self, name, lower_price, upper_price, price):
         vault = self.portfolio.get_position('Vault')
@@ -26,7 +48,7 @@ class UniswapV3Fabric:
         x_uni_aligned, y_uni_aligned = self._align_to_liq_(x_uni, y_uni, lower_price, upper_price, price)
         vault.withdraw(x_uni_aligned, y_uni_aligned)
 
-        univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent)
+        univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent, self.rebalance_cost)
         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
 
         fraction_x = self._calc_fraction_to_x_(upper_price, price) / (1 - fraction_uni)
@@ -89,4 +111,3 @@ class UniswapV3Fabric:
             x_new = v_y / (price + price_real)
             y_new = price_real * x_new
         return x_new, y_new
-

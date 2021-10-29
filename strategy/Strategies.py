@@ -1,12 +1,11 @@
 from .Backtest import AbstractStrategy
-from strategy.Portfolio import Portfolio
-from .primitives import Pool
-from .Fabrics import UniswapV3Fabric
+from .Fabrics import UniV3Fabric
+from .Portfolio import Portfolio
 from .Positions import UniV3Position
+from .primitives import Pool
 
 import math
 import numpy as np
-import pandas as pd
 
 
 class BiCurrency(AbstractStrategy):
@@ -34,6 +33,7 @@ class BiCurrencyEqualized(AbstractStrategy):
                  lower_0: float,
                  upper_0: float,
                  pool: Pool,
+                 rebalance_cost: float,
                  portfolio: Portfolio = None,
                  ):
 
@@ -45,6 +45,7 @@ class BiCurrencyEqualized(AbstractStrategy):
 
         self.decimal_diff = -pool.decimals_diff
         self.fee_percent = pool.fee.percent
+        self.rebalance_cost = rebalance_cost
 
         self.prev_rebalance_tick = None
         self.prev_gain_date = None
@@ -64,7 +65,7 @@ class BiCurrencyEqualized(AbstractStrategy):
         if abs(self.prev_rebalance_tick - current_tick) >= self.bicur_tolerance:
             vault = self.portfolio.get_position('Vault')
 
-            uni_fabric = UniswapV3Fabric(self.portfolio, self.lower_0, self.upper_0, self.fee_percent)
+            uni_fabric = UniV3Fabric(self.portfolio, self.lower_0, self.upper_0, self.fee_percent, self.rebalance_cost)
             fraction_x = uni_fabric._calc_fraction_to_x_(price, price)
             fraction_y = uni_fabric._calc_fraction_to_y_(price, price)
 
@@ -101,6 +102,7 @@ class UniV3Passive(AbstractStrategy):
                  lower_price: float,
                  upper_price: float,
                  pool: Pool,
+                 rebalance_cost: float,
                  portfolio: Portfolio = None,
                  ):
         super().__init__(portfolio)
@@ -110,6 +112,7 @@ class UniV3Passive(AbstractStrategy):
         self.upper_price = upper_price
         self.decimal_diff = -pool.decimals_diff
         self.fee_percent = pool.fee.percent
+        self.rebalance_cost = rebalance_cost
 
     def rebalance(self, *args, **kwargs) -> None:
         timestamp, row = kwargs['timestamp'], kwargs['row']
@@ -125,9 +128,9 @@ class UniV3Passive(AbstractStrategy):
         return None
 
     def create_uni_pos(self, x, y, price) -> None:
-        uni_fabric = UniswapV3Fabric(self.portfolio, self.lower_price, self.upper_price, self.fee_percent)
+        uni_fabric = UniV3Fabric(self.portfolio, self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
         x_uni_aligned, y_uni_aligned = uni_fabric._align_to_liq_(x, y, self.lower_price, self.upper_price, price)
-        univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent)
+        univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
         self.portfolio.append(univ3_pos)
         return None
@@ -154,6 +157,7 @@ class UniV3Active(AbstractStrategy):
                  lower_0: float,
                  upper_0: float,
                  pool: Pool,
+                 rebalance_cost: float,
                  portfolio: Portfolio = None,
                  ):
         super().__init__(portfolio)
@@ -168,9 +172,9 @@ class UniV3Active(AbstractStrategy):
 
         self.decimal_diff = -pool.decimals_diff
         self.fee_percent = pool.fee.percent
+        self.rebalance_cost = rebalance_cost
 
         self.previous_uni_tick = None
-        self.withdraw = False
 
     def rebalance(self, *args, **kwargs) -> None:
         timestamp, row = kwargs['timestamp'], kwargs['row']
@@ -191,10 +195,8 @@ class UniV3Active(AbstractStrategy):
             self.previous_uni_tick = center_tick
 
         if len(self.portfolio.positions) > 1:
-        # if not self.withdraw:
             if abs(self.previous_uni_tick - current_tick) >= self.burn_tolerance:
                 self.remove_uni_pos(timestamp, price)
-                self.withdraw = True
 
         if len(self.portfolio.positions) < 2:
             if abs(current_tick - center_tick) <= self.mint_tolerance:
@@ -208,7 +210,7 @@ class UniV3Active(AbstractStrategy):
         self.portfolio.remove(last_pos.name)
         self.portfolio.get_position('Vault').deposit(x_out, y_out)
 
-        uni_fabric = UniswapV3Fabric(self.portfolio, self.lower_0, self.upper_0, self.fee_percent)
+        uni_fabric = UniV3Fabric(self.portfolio, self.lower_0, self.upper_0, self.fee_percent, self.rebalance_cost)
         fraction_x = uni_fabric._calc_fraction_to_x_(price, price)
         fraction_y = uni_fabric._calc_fraction_to_y_(price, price)
 
@@ -216,7 +218,7 @@ class UniV3Active(AbstractStrategy):
         return None
 
     def create_uni_pos(self, name, lower_price, upper_price, price) -> None:
-        uni_fabric = UniswapV3Fabric(self.portfolio, self.lower_0, self.upper_0, self.fee_percent)
+        uni_fabric = UniV3Fabric(self.portfolio, self.lower_0, self.upper_0, self.fee_percent, self.rebalance_cost)
         uni_v3_pos = uni_fabric.create_uni_position(name, lower_price, upper_price, price)
         self.portfolio.append(uni_v3_pos)
         return None
