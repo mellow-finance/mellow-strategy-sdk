@@ -14,47 +14,29 @@ class PortfolioFabric:
         return portfolio
 
 
-# class StrategyFabric:
-#     def __init__(self, strategy, portfolio):
-#         self.strategy = strategy
-#         self.portfolio = portfolio
-#
-#     def create(self, *args, **kwargs):
-#         position = self.position(**kwargs)
-#         portfolio = Portfolio('main', [position])
-#         return portfolio
+class StrategyFabric:
+    def __init__(self, strategy, portfolio):
+        self.strategy = strategy
+        self.portfolio = portfolio
+
+    def create(self, *args, **kwargs):
+        strategy = self.strategy(**kwargs)
+        return strategy
 
 
 class UniV3Fabric:
     def __init__(self,
-                 portfolio: Portfolio,
                  lower_0: float,
                  upper_0: float,
-                 fee_percent: float,
-                 rebalance_cost: float,
+                 # fee_percent: float,
+                 # rebalance_cost: float,
                  ):
-        self.portfolio = portfolio
         self.lower_0 = lower_0
         self.upper_0 = upper_0
-        self.fee_percent = fee_percent
-        self.rebalance_cost = rebalance_cost
+        # self.fee_percent = fee_percent
+        # self.rebalance_cost = rebalance_cost
 
-    def create_uni_position(self, name, lower_price, upper_price, price):
-        vault = self.portfolio.get_position('Vault')
-        x_all, y_all = vault.to_xy(price)
 
-        fraction_uni = self._calc_fraction_to_uni_(lower_price, upper_price, price)
-        x_uni, y_uni = x_all * fraction_uni, y_all * fraction_uni
-        x_uni_aligned, y_uni_aligned = self._align_to_liq_(x_uni, y_uni, lower_price, upper_price, price)
-        vault.withdraw(x_uni_aligned, y_uni_aligned)
-
-        univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent, self.rebalance_cost)
-        univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
-
-        fraction_x = self._calc_fraction_to_x_(upper_price, price) / (1 - fraction_uni)
-        fraction_y = self._calc_fraction_to_y_(lower_price, price) / (1 - fraction_uni)
-        vault.rebalance(fraction_x, fraction_y, price)
-        return univ3_pos
 
     def _calc_fraction_to_uni_(self, lower_price, upper_price, price):
         numer = 2 * np.sqrt(price) - np.sqrt(lower_price) - price / np.sqrt(upper_price)

@@ -83,8 +83,9 @@ class PoolDataUniV3:
 
     def preprocess_swaps(self, df: pd.DataFrame) -> pd.DataFrame:
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
-        df = df.set_index('timestamp')
+        df['timestamp'] = df['timestamp'] + pd.to_timedelta(df['log_index'], unit='ns')
         df = df.sort_values(by='timestamp', ascending=True)
+        df = df.set_index('timestamp')
         df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
         df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
         df['liquidity'] = df['liquidity'] / 10**(-self.pool.decimals_diff)

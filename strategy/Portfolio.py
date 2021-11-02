@@ -1,7 +1,7 @@
 from .Positions import AbstractPosition
+
 from typing import List
 from datetime import datetime
-import copy
 
 
 class Portfolio(AbstractPosition):
@@ -12,8 +12,6 @@ class Portfolio(AbstractPosition):
         if positions is None:
             positions = []
         self.positions = {pos.name: pos for pos in positions}
-        self.positions_closed = {}
-        self.portfolio_history = {}
 
     def append(self, position: AbstractPosition) -> None:
         self.positions[position.name] = position
@@ -22,7 +20,6 @@ class Portfolio(AbstractPosition):
     def remove(self, name: str) -> None:
         if name not in self.positions:
             raise Exception(f'Invalid name = {name}')
-        self.positions_closed[name] = copy.copy(self.positions[name])
         del self.positions[name]
         return None
 
@@ -67,5 +64,4 @@ class Portfolio(AbstractPosition):
         snapshot = {'timestamp': date}
         for name, pos in self.positions.items():
             snapshot.update(pos.snapshot(date, price))
-        self.portfolio_history[date] = copy.copy(self.positions)
         return snapshot
