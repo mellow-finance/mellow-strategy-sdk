@@ -20,8 +20,6 @@ class PoolDataUniV3:
         self.burns = burns
         self.swaps = swaps
 
-        self.spot_prices = None
-
     @classmethod
     def from_folder(cls, pool: Pool, folder: Path = '../scripts/data/') -> 'PoolDataUniV3':
         mints_converters = {
@@ -33,7 +31,7 @@ class PoolDataUniV3:
             "amount0": int,
             "amount1": int,
         }
-        df_mint = pd.read_csv(f'{folder}mint-{pool.name}.csv', converters=mints_converters)
+        df_mint = pd.read_csv(f'{folder}mint_{pool.name}.csv', converters=mints_converters)
 
         burns_converts = {
             "block_time": int,
@@ -44,7 +42,7 @@ class PoolDataUniV3:
             "amount0": int,
             "amount1": int,
         }
-        df_burn = pd.read_csv(f'{folder}burn-{pool.name}.csv', converters=burns_converts)
+        df_burn = pd.read_csv(f'{folder}burn_{pool.name}.csv', converters=burns_converts)
 
         swap_converters = {
             "block_time": int,
@@ -54,7 +52,7 @@ class PoolDataUniV3:
             "amount1": int,
             "liquidity": int,
         }
-        df_swap = pd.read_csv(f'{folder}swap-{pool.name}.csv', converters=swap_converters)
+        df_swap = pd.read_csv(f'{folder}swap_{pool.name}.csv', converters=swap_converters)
         return cls(pool, df_mint, df_burn, df_swap)
 
     def preprocess(self) -> None:
@@ -96,12 +94,10 @@ class PoolDataUniV3:
         df["price_before"] = df["price"].shift(1)
         df["price_before"] = df["price_before"].fillna(df["price"])
 
-        spot_prices = df[['price']].resample('D').mean()
-        self.spot_prices = spot_prices
-
         return df
 
     def plot(self):
+        spot_prices = self.swaps[['price']].resample('D').mean()
         daily_mints = self.mints[['amount']].resample('D').sum()
         daily_burns = self.burns[['amount']].resample('D').sum()
         daily_liq = daily_mints - daily_burns
@@ -111,8 +107,8 @@ class PoolDataUniV3:
 
         fig.add_trace(
             go.Scatter(
-                x=self.spot_prices.index,
-                y=self.spot_prices['price'],
+                x=spot_prices.index,
+                y=spot_prices['price'],
                 name="Price",
             ),
             secondary_y=False)

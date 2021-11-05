@@ -1,5 +1,4 @@
-from .Fabrics import UniV3Fabric
-from .Portfolio import Portfolio
+from .UniUtils import UniV3Utils
 from .Positions import UniV3Position, BiCurrencyPosition
 from .primitives import Pool
 
@@ -16,7 +15,7 @@ class AbstractStrategy(ABC):
             self.name = name
 
     @abstractmethod
-    def rebalance(self, *args, **kwargs) -> None:
+    def rebalance(self, *args, **kwargs) -> bool:
         raise Exception(NotImplemented)
 
 
@@ -29,7 +28,7 @@ class BiCurrencyPassive(AbstractStrategy):
         self.decimal_diff = -pool.decimals_diff
         self.fees_percent = pool.fee.percent
 
-    def rebalance(self, *args, **kwargs) -> None:
+    def rebalance(self, *args, **kwargs) -> bool:
         timestamp = kwargs['timestamp']
         row = kwargs['row']
         portfolio = kwargs['portfolio']
@@ -45,7 +44,7 @@ class BiCurrencyPassive(AbstractStrategy):
                                             0.0)
             portfolio.append(bicurrency)
 
-        return None
+        return False
 
 
 class BiCurrencyActive(AbstractStrategy):
@@ -55,8 +54,9 @@ class BiCurrencyActive(AbstractStrategy):
                  upper_0: float,
                  pool: Pool,
                  rebalance_cost: float,
+                 x_interest: float = None,
+                 y_interest: float = None,
                  name: str = None,
-
                  ):
 
         super().__init__(name)
@@ -69,30 +69,34 @@ class BiCurrencyActive(AbstractStrategy):
         self.fee_percent = pool.fee.percent
         self.rebalance_cost = rebalance_cost
 
+        self.x_interest = x_interest
+        self.y_interest = y_interest
+
         self.prev_rebalance_tick = None
         self.prev_gain_date = None
 
-    def rebalance(self, *args, **kwargs) -> None:
+    def rebalance(self, *args, **kwargs) -> bool:
         timestamp = kwargs['timestamp']
         row = kwargs['row']
         portfolio = kwargs['portfolio']
-
         price = row['price']
+
         current_tick = self._price_to_tick_(price)
+        is_rebalanced = False
 
         if len(portfolio.positions) == 0:
             bicurrency = BiCurrencyPosition('Vault',
                                             self.fee_percent,
                                             self.rebalance_cost,
                                             1 / price, 1,
-                                            0.0002,
-                                            0.0001)
+                                            self.x_interest,
+                                            self.y_interest)
             portfolio.append(bicurrency)
             self.prev_rebalance_tick = current_tick
 
-        if self.prev_rebalance_tick is None:
-            vault = portfolio.get_position('Vault')
-            self.prev_rebalance_tick = self._price_to_tick_(vault.y / vault.x)
+        # if self.prev_rebalance_tick is None:
+        #     vault = portfolio.get_position('Vault')
+        #     self.prev_rebalance_tick = self._price_to_tick_(vault.y / vault.x)
 
         if abs(self.prev_rebalance_tick - current_tick) >= self.bicur_tolerance:
             vault = portfolio.get_position('Vault')
@@ -102,6 +106,7 @@ class BiCurrencyActive(AbstractStrategy):
 
             vault.rebalance(fraction_x, fraction_y, price)
             self.prev_rebalance_tick = current_tick
+            is_rebalanced = True
 
         if self.prev_gain_date is None:
             self.prev_gain_date = timestamp.normalize()
@@ -111,7 +116,7 @@ class BiCurrencyActive(AbstractStrategy):
             vault.interest_gain(timestamp.normalize())
             self.prev_gain_date = timestamp.normalize()
 
-        return None
+        return is_rebalanced
 
     def _tick_to_price_(self, tick):
         price = np.power(1.0001, tick) / 10 ** self.decimal_diff
@@ -157,7 +162,7 @@ class UniV3Passive(AbstractStrategy):
         self.fee_percent = pool.fee.percent
         self.rebalance_cost = rebalance_cost
 
-    def rebalance(self, *args, **kwargs) -> None:
+    def rebalance(self, *args, **kwargs) -> bool:
         timestamp = kwargs['timestamp']
         row = kwargs['row']
         portfolio = kwargs['portfolio']
@@ -171,10 +176,10 @@ class UniV3Passive(AbstractStrategy):
             univ3_pos = self.create_uni_pos(price)
             portfolio.append(univ3_pos)
 
-        return None
+        return False
 
     def create_uni_pos(self, price) -> UniV3Position:
-        uni_fabric = UniV3Fabric(self.lower_price, self.upper_price)
+        uni_fabric = UniV3Utils(self.lower_price, self.upper_price)
         x_uni_aligned, y_uni_aligned = uni_fabric._align_to_liq_(1 / price, 1, self.lower_price, self.upper_price, price)
         univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
@@ -221,12 +226,12 @@ class UniV3Active(AbstractStrategy):
         self.y_interest = y_interest
 
         self.previous_uni_tick = None
+        self.prev_gain_date = None
 
-    def rebalance(self, *args, **kwargs) -> None:
+    def rebalance(self, *args, **kwargs) -> bool:
         timestamp = kwargs['timestamp']
         row = kwargs['row']
         portfolio = kwargs['portfolio']
-
         price_before, price = row['price_before'], row['price']
 
         current_tick = self._price_to_tick_(price)
@@ -234,6 +239,8 @@ class UniV3Active(AbstractStrategy):
 
         lower_price = self._tick_to_price_(lower_tick)
         upper_price = self._tick_to_price_(upper_tick)
+
+        is_rebalanced = False
 
         if len(portfolio.positions) == 0:
             bicurrency = BiCurrencyPosition('Vault',
@@ -251,16 +258,27 @@ class UniV3Active(AbstractStrategy):
         if self.previous_uni_tick is None:
             self.create_uni_position(f'UniV3_{timestamp}', portfolio, lower_price, upper_price, price)
             self.previous_uni_tick = center_tick
+            is_rebalanced = True
 
         if len(portfolio.positions) > 1:
             if abs(self.previous_uni_tick - current_tick) >= self.burn_tolerance:
                 self.remove_uni_position(timestamp, portfolio, price)
+                is_rebalanced = True
 
         if len(portfolio.positions) < 2:
             if abs(current_tick - center_tick) <= self.mint_tolerance:
                 self.create_uni_position(f'UniV3_{timestamp}', portfolio, lower_price, upper_price, price)
                 self.previous_uni_tick = center_tick
-        return None
+                is_rebalanced = True
+
+        if self.prev_gain_date is None:
+            self.prev_gain_date = timestamp.normalize()
+
+        if timestamp.normalize() > self.prev_gain_date:
+            vault = portfolio.get_position('Vault')
+            vault.interest_gain(timestamp.normalize())
+            self.prev_gain_date = timestamp.normalize()
+        return is_rebalanced
 
     def remove_uni_position(self, timestamp, portfolio, price) -> None:
         last_pos = portfolio.get_last_position()
@@ -276,7 +294,7 @@ class UniV3Active(AbstractStrategy):
         return None
 
     def create_uni_position(self, name, portfolio, lower_price, upper_price, price):
-        uni_fabric = UniV3Fabric(self.lower_0, self.upper_0)
+        uni_fabric = UniV3Utils(self.lower_0, self.upper_0)
 
         vault = portfolio.get_position('Vault')
         x_all, y_all = vault.to_xy(price)

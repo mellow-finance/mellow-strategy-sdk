@@ -1,7 +1,7 @@
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from .History import PortfolioHistory, UniPositionsHistory
+from .History import PortfolioHistory, UniPositionsHistory, RebalanceHistory
 
 
 class PotrfolioViewer:
@@ -192,4 +192,39 @@ class UniswapViewer:
             line=dict(color='rgb(0, 200, 0)'),
         ))
         fig.update_layout(title='Intevals')
+        return fig
+
+
+class RebalanceViewer:
+    def __init__(self, rebalance_history: RebalanceHistory):
+        self.rebalance_history = rebalance_history
+
+    def draw_rebalances(self, swaps_df):
+        rebalance_df = self.rebalance_history.to_df()
+        swaps_df_slice = swaps_df.loc[swaps_df.index.isin(rebalance_df.index)]
+        rebalance_df_slice = swaps_df_slice.loc[rebalance_df['rebalanced']]
+
+        fig = go.Figure()
+        fig.add_trace(
+                    go.Scatter(
+                        x=swaps_df_slice.index,
+                        y=swaps_df_slice['price'],
+                        name="Price",
+                        )
+                    )
+
+        fig.add_trace(
+                    go.Scatter(
+                        x=rebalance_df_slice.index,
+                        y=rebalance_df_slice['price'],
+                        mode='markers',
+                        marker_color='red',
+                        marker_size=10,
+                        marker_symbol='circle-open',
+                        marker_line_width=2,
+                        name="Rebalances",
+                        )
+                    )
+        fig.update_xaxes(title_text="Timeline")
+        fig.update_layout(title='Rebalances')
         return fig

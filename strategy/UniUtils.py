@@ -1,42 +1,13 @@
-from .Portfolio import Portfolio
-from .Positions import UniV3Position
-
 import numpy as np
 
 
-class PortfolioFabric:
-    def __init__(self, position):
-        self.position = position
-
-    def create(self, *args, **kwargs):
-        position = self.position(**kwargs)
-        portfolio = Portfolio('main', [position])
-        return portfolio
-
-
-class StrategyFabric:
-    def __init__(self, strategy, portfolio):
-        self.strategy = strategy
-        self.portfolio = portfolio
-
-    def create(self, *args, **kwargs):
-        strategy = self.strategy(**kwargs)
-        return strategy
-
-
-class UniV3Fabric:
+class UniV3Utils:
     def __init__(self,
                  lower_0: float,
                  upper_0: float,
-                 # fee_percent: float,
-                 # rebalance_cost: float,
                  ):
         self.lower_0 = lower_0
         self.upper_0 = upper_0
-        # self.fee_percent = fee_percent
-        # self.rebalance_cost = rebalance_cost
-
-
 
     def _calc_fraction_to_uni_(self, lower_price, upper_price, price):
         numer = 2 * np.sqrt(price) - np.sqrt(lower_price) - price / np.sqrt(upper_price)

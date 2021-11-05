@@ -168,11 +168,25 @@ class PortfolioHistory:
         return df
 
 
+class RebalanceHistory:
+    def __init__(self):
+        self.rebalances = {}
+
+    def add_snapshot(self, timestamp, snapshot):
+        self.rebalances[timestamp] = snapshot
+        return None
+
+    def to_df(self):
+        df = pd.DataFrame([self.rebalances], index=['rebalanced']).T
+        df.index.name = 'timestamp'
+        return df
+
+
 class UniPositionsHistory:
     def __init__(self):
         self.positions = {}
 
-    def add_positions_snapshot(self, timestamp, positions):
+    def add_snapshot(self, timestamp, positions):
         self.positions[timestamp] = positions
         return None
 

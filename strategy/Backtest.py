@@ -1,6 +1,8 @@
 from .Strategies import AbstractStrategy
 from .Portfolio import Portfolio
-from .History import PortfolioHistory
+from .History import PortfolioHistory, RebalanceHistory
+
+from typing import Tuple
 
 
 class Backtest:
@@ -14,14 +16,15 @@ class Backtest:
         else:
             self.portfolio = portfolio
 
-
-    def backtest(self, df_swaps) -> PortfolioHistory:
-        history_tracker = PortfolioHistory()
+    def backtest(self, df_swaps) -> Tuple[PortfolioHistory, RebalanceHistory]:
+        portfolio_history = PortfolioHistory()
+        rebalance_history = RebalanceHistory()
 
         for idx, row in df_swaps.iterrows():
-            # df_swaps_prev = df_swaps[:idx]
-            self.strategy.rebalance(timestamp=idx, row=row, portfolio=self.portfolio)
-            snapshot = self.portfolio.snapshot(idx, row['price'])
-            history_tracker.add_snapshot(snapshot)
+            df_swaps_prev = df_swaps[:idx]
+            is_rebalanced = self.strategy.rebalance(timestamp=idx, row=row, prev_data=df_swaps_prev, portfolio=self.portfolio)
+            portfolio_snapshot = self.portfolio.snapshot(idx, row['price'])
+            portfolio_history.add_snapshot(portfolio_snapshot)
+            rebalance_history.add_snapshot(idx, is_rebalanced)
 
-        return history_tracker
+        return portfolio_history, rebalance_history

@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-from sklearn.model_selection import TimeSeriesSplit
+import pandas as pd
 
 from .Backtest import Backtest
 
@@ -20,6 +20,7 @@ class FolderSimple:
         index = np.sort(data.index.to_numpy())
         n = len(index)
         fold_len = n // self.n_folds
+
         idx_split = [i * fold_len for i in range(self.n_folds + 1)]
         if idx_split[-1] != n:
             idx_split[-1] = n
@@ -49,9 +50,18 @@ class CrossValidation:
         for fold_name in self.folder.fold_names:
             backtest = Backtest(self.strategy)
             fold_data = self.folder.get_fold(data.swaps, fold_name)
-            backtest_history = backtest.backtest(fold_data)
-            folds_result[fold_name] = backtest_history
+            portfolio_history, rebalance_history = backtest.backtest(fold_data)
+            folds_result[fold_name] = {'portfolio': portfolio_history, 'rebalance': rebalance_history}
         return folds_result
+
+    def aggregate(self, folds_result):
+        res = {}
+        for k, v in folds_result.items():
+            df = v['portfolio'].portfolio_stats()
+            res[k] = df.iloc[-1]['portfolio_performance_to_y_to_year']
+
+        res_df = pd.DataFrame([res], index=['y_apy']).T
+        return res_df
 
 
 # class FolderByTime:
