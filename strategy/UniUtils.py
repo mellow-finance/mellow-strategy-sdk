@@ -1,7 +1,12 @@
 import numpy as np
 
 
-class UniV3Utils:
+class UniswapV3Utils:
+    """
+       ``UniV3Utils`` is a class for creating UniswapV3 position in correct proportions.
+       :param lower_0: Base lower bound of the emulated interval
+       :param upper_0: Base upper bound of the emulated interval
+    """
     def __init__(self,
                  lower_0: float,
                  upper_0: float,

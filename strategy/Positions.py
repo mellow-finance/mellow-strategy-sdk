@@ -5,6 +5,10 @@ from datetime import datetime
 
 
 class AbstractPosition(ABC):
+    """
+    ``AbstractPosition`` is a abstract class for Position and Portfolio classes
+    :param name: Unique name for the instance
+    """
     def __init__(self, name: str) -> None:
         self.name = name
 
@@ -26,6 +30,17 @@ class AbstractPosition(ABC):
 
 
 class BiCurrencyPosition(AbstractPosition):
+    """
+        ``BiCurrencyPosition`` is a class corresponding to currency pair.
+        :param name: Unique name for the position
+        :param swap_fee: Exchange fee expressed as a percentage
+        :param rebalance_cost: Rebalancing cost, expressed in currency
+        :param x: Amount of asset X
+        :param y: Amount of asset Y
+        :param x_interest: Interest on  currency X deposit expressed as a daily percentage yield
+        :param y_interest: Interest on  currency Y deposit expressed as a daily percentage yield
+   """
+
     def __init__(self, name: str,
                  swap_fee: float,
                  rebalance_cost: float,
@@ -133,6 +148,15 @@ class BiCurrencyPosition(AbstractPosition):
 
 
 class UniV3Position(AbstractPosition):
+    """
+        ``UniV3Position`` is a class corresponding to one investment into UniswapV3 interval.
+        It's defined by lower and upper bounds ``lower_price``, ``upper_price`` and  pool fee percent ``fee_percent``
+        :param name: Unique name for the position
+        :param lower_price: Lower bound of the interval (price)
+        :param upper_price:  Upper bound of the interval (price)
+        :param fee_percent: Amount of fee expressed as a percentage
+        :param rebalance_cost: Rebalancing cost, expressed in currency
+   """
     def __init__(self,
                  name: str,
                  lower_price: float,

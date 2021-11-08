@@ -5,6 +5,10 @@ from .History import PortfolioHistory, UniPositionsHistory, RebalanceHistory
 
 
 class PotrfolioViewer:
+    """
+       ``PotrfolioViewer`` is class for potrfolio visualisation.
+       :param portfolio_history: portfolio history instance
+    """
     def __init__(self, portfolio_history: PortfolioHistory):
         self.portfolio_history = portfolio_history
 
@@ -147,11 +151,15 @@ class PotrfolioViewer:
 
 
 class UniswapViewer:
+    """
+       ``UniswapViewer`` is class for visualizing UniswapV3 intervals in time.
+       :param uni_postition_history: Uniswap positions history instance
+    """
     def __init__(self, uni_postition_history: UniPositionsHistory):
         self.uni_postition_history = uni_postition_history
 
     def draw_intervals(self, swaps_df):
-        intervals = self.uni_postition_history()
+        intervals = self.uni_postition_history.to_df()
         fig = go.Figure()
 
         for col_0 in intervals.columns.get_level_values(level=0).unique():
@@ -196,6 +204,10 @@ class UniswapViewer:
 
 
 class RebalanceViewer:
+    """
+       ``RebalanceViewer`` is class for rebalance visualisation.
+       :param rebalance_history: rebalance history instance
+    """
     def __init__(self, rebalance_history: RebalanceHistory):
         self.rebalance_history = rebalance_history
 

@@ -4,6 +4,6 @@
 
 ```
 python3 -m venv .venv
-cp .env.example .env
+source venv/bin/activate
 pip install -r requirements.txt
 ```

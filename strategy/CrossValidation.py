@@ -6,13 +6,15 @@ from .Backtest import Backtest
 
 
 class FolderSimple:
+    """
+       ``FolderSimple`` makes the splitting into equal folds.
+       :param n_folds: Number of folds.
+   """
     def __init__(self,
                  n_folds: int = 5,
-                 seed: int = 4242,
                  ):
 
         self.n_folds = n_folds
-        self.seed = seed
         self.folds = None
         self.fold_names = None
 
@@ -40,6 +42,11 @@ class FolderSimple:
 
 
 class CrossValidation:
+    """
+       ``CrossValidation`` backtests strategy on folds.
+       :param folder: Folder class that splits data on folds
+       :param strategy: Strategy to backtest
+   """
     def __init__(self, folder, strategy):
         self.folder = folder
         self.strategy = strategy

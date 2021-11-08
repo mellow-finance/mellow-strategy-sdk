@@ -1,7 +1,7 @@
 from .Backtest import Backtest
 from .CrossValidation import CrossValidation, FolderSimple
 from .Data import PoolDataUniV3
-from .UniUtils import UniV3Utils
+from .UniUtils import UniswapV3Utils
 from .Portfolio import Portfolio
 from .History import PortfolioHistory
 from .Positions import BiCurrencyPosition, UniV3Position

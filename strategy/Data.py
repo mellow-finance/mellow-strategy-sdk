@@ -8,6 +8,16 @@ from .primitives import Pool
 
 
 class PoolDataUniV3:
+    """
+       ``PoolDataUniV3`` prepares data for backtesting.
+       The data represented as a ``pandas`` DataFrame with datetime index.
+       All data is denominated in eth rather then wei (or btc rather that sat, etc.)
+       :param pool: UniswapV3 pool meta data
+       :param mints: UniswapV3 mints data
+       :param burns: UniswapV3 burns data
+       :param swaps: UniswapV3 swaps data
+   """
+
     def __init__(self,
                  pool: Pool,
                  mints: pd.DataFrame = None,
@@ -21,7 +31,7 @@ class PoolDataUniV3:
         self.swaps = swaps
 
     @classmethod
-    def from_folder(cls, pool: Pool, folder: Path = '../scripts/data/') -> 'PoolDataUniV3':
+    def from_folder(cls, pool: Pool, folder: Path = '../data/') -> 'PoolDataUniV3':
         mints_converters = {
             "block_time": int,
             "block_number": int,

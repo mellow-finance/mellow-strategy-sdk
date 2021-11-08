@@ -5,6 +5,14 @@ from datetime import datetime
 
 
 class Portfolio(AbstractPosition):
+    """
+        ``Portfolio`` is a container for several open positions.
+        It also conforms to ``AbstractPosition`` interface, aggregating all positions values.
+        Note that children positions of ``Portfolio`` can also be other ``Portfolio`` objects.
+        :param name: Unique name for the position
+        :param positions: List of initial positions
+    """
+
     def __init__(self,
                  name: str,
                  positions: List[AbstractPosition] = None):

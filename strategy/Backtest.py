@@ -6,6 +6,12 @@ from typing import Tuple
 
 
 class Backtest:
+    """
+        ``Backtest`` is used for backtesting strategy on pool data.
+        It contains the logic of running strategy thrhough the data and tracks results.
+        :param strategy: Strategy to backtest
+        :param portfolio: Portfolio to manage
+    """
     def __init__(self,
                  strategy: AbstractStrategy,
                  portfolio: Portfolio = None):

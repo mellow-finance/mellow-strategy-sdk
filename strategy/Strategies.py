@@ -1,4 +1,4 @@
-from .UniUtils import UniV3Utils
+from .UniUtils import UniswapV3Utils
 from .Positions import UniV3Position, BiCurrencyPosition
 from .primitives import Pool
 
@@ -8,6 +8,10 @@ import numpy as np
 
 
 class AbstractStrategy(ABC):
+    """
+    ``AbstractStrategy`` is a abstract class for Strategies
+    :param name: Unique name for the instance
+    """
     def __init__(self, name: str = None):
         if name is None:
             self.name = self.__class__.__name__
@@ -20,6 +24,12 @@ class AbstractStrategy(ABC):
 
 
 class BiCurrencyPassive(AbstractStrategy):
+    """
+    ``BiCurrencyPassive`` is the simplest strategy for asset pair.
+    This strategy only tracks own statistic in time
+    :param pool: UniswapV3 Pool instance
+    :param name: Unique name for the instance
+    """
     def __init__(self,
                  pool: Pool,
                  name: str = None,
@@ -48,6 +58,18 @@ class BiCurrencyPassive(AbstractStrategy):
 
 
 class BiCurrencyActive(AbstractStrategy):
+    """
+    ``BiCurrencyActive`` is the strategy for asset pair, that rebalances asset weights over time.
+    Weights are calculated by the formula. Rebalancing occurs by a trigger.
+    :param bicur_tolerance: UniswapV3 Pool instance
+    :param lower_0: Base lower bound of the emulated interval
+    :param upper_0: Base upper bound of the emulated interval
+    :param rebalance_cost: Rebalancing cost, expressed in currency
+    :param x_interest: Interest on  currency X deposit expressed as a daily percentage yield
+    :param y_interest: Interest on  currency Y deposit expressed as a daily percentage yield
+    :param pool: UniswapV3 Pool instance
+    :param name: Unique name for the instance
+    """
     def __init__(self,
                  bicur_tolerance: int,
                  lower_0: float,
@@ -148,6 +170,14 @@ class BiCurrencyActive(AbstractStrategy):
 
 
 class UniV3Passive(AbstractStrategy):
+    """
+    ``UniV3Passive`` is the passive strategy on UniswapV3 without rebalances.
+    :param lower_price: Lower bound of the interval
+    :param upper_price: Upper bound of the interval
+    :param rebalance_cost: Rebalancing cost, expressed in currency
+    :param pool: UniswapV3 Pool instance
+    :param name: Unique name for the instance
+    """
     def __init__(self,
                  lower_price: float,
                  upper_price: float,
@@ -179,7 +209,7 @@ class UniV3Passive(AbstractStrategy):
         return False
 
     def create_uni_pos(self, price) -> UniV3Position:
-        uni_fabric = UniV3Utils(self.lower_price, self.upper_price)
+        uni_fabric = UniswapV3Utils(self.lower_price, self.upper_price)
         x_uni_aligned, y_uni_aligned = uni_fabric._align_to_liq_(1 / price, 1, self.lower_price, self.upper_price, price)
         univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
@@ -195,6 +225,21 @@ class UniV3Passive(AbstractStrategy):
 
 
 class UniV3Active(AbstractStrategy):
+    """
+    ``UniV3Active`` is the strategy for asset pair and UniswapV3 position. Strategy rebalances asset weights over time, and
+    Weights are calculated by the formula. Rebalancing occurs by a trigger.
+    :param mint_tolerance: The width of the interval of the small neighborhood of the tickspacing
+    :param burn_tolerance: Amount of ticks which it is necessary deviate from previous position to trigger rebalancing
+    :param grid_width: The width of tickspacing grid
+    :param width_num: The width of position interval
+    :param lower_0: Base lower bound of the emulated interval
+    :param upper_0: Base upper bound of the emulated interval
+    :param rebalance_cost: Rebalancing cost, expressed in currency
+    :param x_interest: Interest on  currency X deposit expressed as a daily percentage yield
+    :param y_interest: Interest on  currency Y deposit expressed as a daily percentage yield
+    :param pool: UniswapV3 Pool instance
+    :param name: Unique name for the instance
+    """
     def __init__(self,
                  mint_tolerance: int,
                  burn_tolerance: int,
@@ -294,7 +339,7 @@ class UniV3Active(AbstractStrategy):
         return None
 
     def create_uni_position(self, name, portfolio, lower_price, upper_price, price):
-        uni_fabric = UniV3Utils(self.lower_0, self.upper_0)
+        uni_fabric = UniswapV3Utils(self.lower_0, self.upper_0)
 
         vault = portfolio.get_position('Vault')
         x_all, y_all = vault.to_xy(price)

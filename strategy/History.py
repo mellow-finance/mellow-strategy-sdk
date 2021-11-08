@@ -2,6 +2,11 @@ import pandas as pd
 
 
 class PortfolioHistory:
+    """
+       ``PortfolioHistory`` tracks position stats over time.
+       Each time ``add_snapshot`` method is called it remembers current state in time.
+       All tracked values then can be accessed via ``to_df`` method that will return a ``pandas`` Dataframe.
+    """
     def __init__(self):
         self.snapshots = []
 
@@ -169,6 +174,11 @@ class PortfolioHistory:
 
 
 class RebalanceHistory:
+    """
+       ``RebalanceHistory`` tracks rebalances over time.
+       Each time ``add_snapshot`` method is called it remembers rebalance.
+       All tracked values then can be accessed via ``to_df`` method that will return a ``pandas`` Dataframe.
+    """
     def __init__(self):
         self.rebalances = {}
 
@@ -183,11 +193,19 @@ class RebalanceHistory:
 
 
 class UniPositionsHistory:
+    """
+       ``UniPositionsHistory`` tracks Uniswap positions over time.
+       Each time ``add_snapshot`` method is called it remembers all uniswap positions at current time.
+       All tracked values then can be accessed via ``to_df`` method that will return a ``pandas`` Dataframe.
+    """
     def __init__(self):
         self.positions = {}
 
     def add_snapshot(self, timestamp, positions):
-        self.positions[timestamp] = positions
+        uni_positions = {}
+        for name, position in positions.items():
+            uni_positions[name] = position
+        self.positions[timestamp] = uni_positions
         return None
 
     def to_df(self):
@@ -195,11 +213,11 @@ class UniPositionsHistory:
         for date, positions in self.positions.items():
             res_df = pd.DataFrame()
             for name, position in positions.items():
-                if 'Uni' in name:
-                    pos_inttervals = pd.DataFrame(data=[(position.lower_price, position.upper_price)],
-                                                 columns=[(position.name, 'min_bound'), (position.name, 'max_bound')],
-                                                 index=[date])
-                    res_df = pd.concat([res_df, pos_inttervals], axis=1)
+
+                pos_inttervals = pd.DataFrame(data=[(position.lower_price, position.upper_price)],
+                                             columns=[(position.name, 'min_bound'), (position.name, 'max_bound')],
+                                             index=[date])
+                res_df = pd.concat([res_df, pos_inttervals], axis=1)
 
             result.append(res_df)
 
