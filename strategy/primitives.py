@@ -162,7 +162,7 @@ class Pool:
         """
         Unique name for the pool
         """
-        return f"{self._token0.value}-{self._token1.value}-{self._fee.value}"
+        return f"{self._token0.value}_{self._token1.value}_{self._fee.value}"
 
     @property
     def address(self) -> str:
