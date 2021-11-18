@@ -2,6 +2,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from .History import PortfolioHistory, UniPositionsHistory, RebalanceHistory
+from .Data import PoolDataUniV3
 
 
 class PotrfolioViewer:
@@ -194,8 +195,8 @@ class UniswapViewer:
 
         fig.add_trace(go.Scatter(
             name='Price',
-            x=swaps_df.spot_prices.index,
-            y=swaps_df.spot_prices['price'],
+            x=swaps_df.index,
+            y=swaps_df['price'],
             mode='lines',
             line=dict(color='rgb(0, 200, 0)'),
         ))
@@ -239,4 +240,42 @@ class RebalanceViewer:
                     )
         fig.update_xaxes(title_text="Timeline")
         fig.update_layout(title='Rebalances')
+        return fig
+
+
+class LiqudityViewer:
+    def __init__(self, pool_data: PoolDataUniV3):
+        pass
+
+    def draw_plot(self):
+        spot_prices = self.swaps[['price']].resample('D').mean()
+        daily_mints = self.mints[['amount']].resample('D').sum()
+        daily_burns = self.burns[['amount']].resample('D').sum()
+        daily_liq = daily_mints - daily_burns
+        total_liq = daily_liq.cumsum()
+
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        fig.add_trace(
+            go.Scatter(
+                x=spot_prices.index,
+                y=spot_prices['price'],
+                name="Price",
+            ),
+            secondary_y=False)
+
+        fig.add_trace(
+            go.Scatter(
+                x=total_liq.index,
+                y=total_liq['amount'],
+                name='Liquidity',
+                yaxis='y2',
+
+            ), secondary_y=True)
+        # Set x-axis title
+        fig.update_xaxes(title_text="Timeline")
+        # Set y-axes titles
+        fig.update_yaxes(title_text="Price", secondary_y=False)
+        fig.update_yaxes(title_text='Liquidity', secondary_y=True)
+        fig.update_layout(title='Price and Liquidity')
         return fig

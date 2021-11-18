@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 class PortfolioHistory:
@@ -204,7 +205,8 @@ class UniPositionsHistory:
     def add_snapshot(self, timestamp, positions):
         uni_positions = {}
         for name, position in positions.items():
-            uni_positions[name] = position
+            if 'Uni' in name:
+                uni_positions[name] = position
         self.positions[timestamp] = uni_positions
         return None
 
@@ -222,5 +224,27 @@ class UniPositionsHistory:
             result.append(res_df)
 
         intervals_df = pd.concat(result)
+        intervals_df.columns = pd.MultiIndex.from_tuples(intervals_df.columns, names=["pos_name", "bound_type"])
         intervals_df.index.name = 'date'
         return intervals_df
+
+    def get_coverage(self, swaps_df):
+        prices = swaps_df[['price']]
+        prices['covered'] = np.nan
+
+        intervals = self.to_df()
+        for col_0 in intervals.columns.get_level_values(level=0).unique():
+            pos = intervals.loc[:, intervals.columns.get_level_values(level=0) == col_0]
+            pos_clear = pos.dropna()
+
+            idx = pos_clear.index
+            low = pos_clear[(col_0, 'min_bound')]
+            up = pos_clear[(col_0, 'max_bound')]
+
+            prices_slice = prices.loc[idx]
+            mask = (low <= prices_slice['price']) & (prices_slice['price'] <= up)
+            prices.loc[idx, 'covered'] = mask
+
+        prices['covered'] = prices['covered'].fillna(False)
+        coverage = prices['covered'] / prices.shape[0]
+        return coverage
