@@ -84,7 +84,7 @@ class BiCurrencyPosition(AbstractPosition):
         # Implement add swaps with fee
         assert x_fraction <= 1, f'Too much to rebalance Fraction X = {x_fraction}'
         assert y_fraction <= 1, f'Too much to rebalance Fraction Y = {y_fraction}'
-        assert abs(x_fraction + y_fraction - 1) <= 1e-6, f'Too much to rebalance {x_fraction}, {y_fraction}'
+        assert abs(x_fraction + y_fraction - 1) <= 1e-6, f'Incorrect fractions {x_fraction}, {y_fraction}'
 
         dV = y_fraction * price * self.x - x_fraction * self.y
         if dV > 0:
