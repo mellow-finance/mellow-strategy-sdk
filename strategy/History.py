@@ -206,24 +206,14 @@ class UniPositionsHistory:
         uni_positions = {}
         for name, position in positions.items():
             if 'Uni' in name:
-                uni_positions[name] = position
-        self.positions[timestamp] = uni_positions
+                uni_positions[(name, 'lower_bound')] = position.lower_price
+                uni_positions[(name, 'upper_bound')] = position.upper_price
+        if uni_positions:
+            self.positions[timestamp] = uni_positions
         return None
 
     def to_df(self):
-        result = []
-        for date, positions in self.positions.items():
-            res_df = pd.DataFrame()
-            for name, position in positions.items():
-
-                pos_inttervals = pd.DataFrame(data=[(position.lower_price, position.upper_price)],
-                                             columns=[(position.name, 'min_bound'), (position.name, 'max_bound')],
-                                             index=[date])
-                res_df = pd.concat([res_df, pos_inttervals], axis=1)
-
-            result.append(res_df)
-
-        intervals_df = pd.concat(result)
+        intervals_df = pd.DataFrame(self.positions).T
         intervals_df.columns = pd.MultiIndex.from_tuples(intervals_df.columns, names=["pos_name", "bound_type"])
         intervals_df.index.name = 'date'
         return intervals_df
@@ -233,18 +223,21 @@ class UniPositionsHistory:
         prices['covered'] = np.nan
 
         intervals = self.to_df()
-        for col_0 in intervals.columns.get_level_values(level=0).unique():
-            pos = intervals.loc[:, intervals.columns.get_level_values(level=0) == col_0]
-            pos_clear = pos.dropna()
+        prices_sliced = prices.loc[intervals.index]['price']
 
-            idx = pos_clear.index
-            low = pos_clear[(col_0, 'min_bound')]
-            up = pos_clear[(col_0, 'max_bound')]
+        min_bound = intervals.loc[:, intervals.columns.get_level_values(level=1) == 'lower_bound']
+        max_bound = intervals.loc[:, intervals.columns.get_level_values(level=1) == 'upper_bound']
 
-            prices_slice = prices.loc[idx]
-            mask = (low <= prices_slice['price']) & (prices_slice['price'] <= up)
-            prices.loc[idx, 'covered'] = mask
+        min_bound.columns = list(min_bound.columns.droplevel(1))
+        max_bound.columns = list(max_bound.columns.droplevel(1))
 
-        prices['covered'] = prices['covered'].fillna(False)
-        coverage = prices['covered'] / prices.shape[0]
+        min_mask = min_bound.lt(prices_sliced, axis=0).any(axis=1)
+        max_mask = max_bound.gt(prices_sliced, axis=0).any(axis=1)
+
+        final_mask = min_mask & max_mask
+
+        prices.loc[intervals.index, 'covered'] = final_mask
+        prices.loc[:, 'covered'] = prices['covered'].fillna(False)
+        coverage = prices['covered'].sum() / prices.shape[0]
+
         return coverage

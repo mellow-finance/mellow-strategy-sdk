@@ -167,8 +167,8 @@ class UniswapViewer:
             pos = intervals.loc[:, intervals.columns.get_level_values(level=0) == col_0]
             pos_clear = pos.dropna()
 
-            low = pos_clear[(col_0, 'min_bound')].to_numpy()
-            up = pos_clear[(col_0, 'max_bound')].to_numpy()
+            low = pos_clear[(col_0, 'lower_bound')].to_numpy()
+            up = pos_clear[(col_0, 'upper_bound')].to_numpy()
 
             batch = [go.Scatter(
                 name='Upper Bound ' + str(col_0),
