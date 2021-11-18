@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from pathlib import Path
 from decimal import Decimal
@@ -9,7 +10,7 @@ from .primitives import Pool
 
 class PoolDataUniV3:
     """
-       ``PoolDataUniV3`` prepares data for backtesting.
+       ``PoolDataUniV3`` contains data for backtesting.
        The data represented as a ``pandas`` DataFrame with datetime index.
        All data is denominated in eth rather then wei (or btc rather that sat, etc.)
        :param pool: UniswapV3 pool meta data
@@ -30,8 +31,18 @@ class PoolDataUniV3:
         self.burns = burns
         self.swaps = swaps
 
-    @classmethod
-    def from_folder(cls, pool: Pool, folder: Path = '../data/') -> 'PoolDataUniV3':
+
+class RawDataUniV3:
+    """
+       ``RawDataUniV3`` preprocess UniswapV3 data.
+       :param pool: UniswapV3 pool meta data
+       :param folder: path to data
+   """
+    def __init__(self, pool: Pool, folder: Path = '../data/'):
+        self.pool = pool
+        self.folder = folder
+
+    def load_from_folder(self) -> PoolDataUniV3:
         mints_converters = {
             "block_time": int,
             "block_number": int,
@@ -41,7 +52,7 @@ class PoolDataUniV3:
             "amount0": int,
             "amount1": int,
         }
-        df_mint = pd.read_csv(f'{folder}mint_{pool.name}.csv', converters=mints_converters)
+        df_mint = pd.read_csv(f'{self.folder}mint_{self.pool.name}.csv', converters=mints_converters)
 
         burns_converts = {
             "block_time": int,
@@ -52,7 +63,7 @@ class PoolDataUniV3:
             "amount0": int,
             "amount1": int,
         }
-        df_burn = pd.read_csv(f'{folder}burn_{pool.name}.csv', converters=burns_converts)
+        df_burn = pd.read_csv(f'{self.folder}burn_{self.pool.name}.csv', converters=burns_converts)
 
         swap_converters = {
             "block_time": int,
@@ -62,14 +73,12 @@ class PoolDataUniV3:
             "amount1": int,
             "liquidity": int,
         }
-        df_swap = pd.read_csv(f'{folder}swap_{pool.name}.csv', converters=swap_converters)
-        return cls(pool, df_mint, df_burn, df_swap)
+        df_swap = pd.read_csv(f'{self.folder}swap_{self.pool.name}.csv', converters=swap_converters)
 
-    def preprocess(self) -> None:
-        self.mints = self.preprocess_mints(self.mints)
-        self.burns = self.preprocess_burns(self.burns)
-        self.swaps = self.preprocess_swaps(self.swaps)
-        return None
+        mints = self.preprocess_mints(df_mint)
+        burns = self.preprocess_burns(df_burn)
+        swaps = self.preprocess_swaps(df_swap)
+        return PoolDataUniV3(self.pool, mints, burns, swaps)
 
     def preprocess_mints(self, df: pd.DataFrame) -> pd.DataFrame:
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
@@ -106,35 +115,41 @@ class PoolDataUniV3:
 
         return df
 
-    def plot(self):
-        spot_prices = self.swaps[['price']].resample('D').mean()
-        daily_mints = self.mints[['amount']].resample('D').sum()
-        daily_burns = self.burns[['amount']].resample('D').sum()
-        daily_liq = daily_mints - daily_burns
-        total_liq = daily_liq.cumsum()
 
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+class SyntheticData:
+    """
+       ``SyntheticData`` generates synthetic UniswapV3 swaps data.
+       :param pool: UniswapV3 pool meta data
+       :param start_date: starting date for generating
+       :param n_points: how many samples to generate
+       :param init_price: initial price
+       :param mu: expectation of random walk
+       :param sigma: variance of random walk
+       :param seed: seed for random generator
+   """
+    def __init__(self, pool, start_date='1-1-2022', n_points=100, init_price=1, mu=0, sigma=0.1, seed=42):
+        self.pool = pool
+        self.start_date = start_date
+        self.n_points = n_points
 
-        fig.add_trace(
-            go.Scatter(
-                x=spot_prices.index,
-                y=spot_prices['price'],
-                name="Price",
-            ),
-            secondary_y=False)
+        self.init_price = init_price
+        self.mu = mu
+        self.sigma = sigma
 
-        fig.add_trace(
-            go.Scatter(
-                x=total_liq.index,
-                y=total_liq['amount'],
-                name='Liquidity',
-                yaxis='y2',
+        self.seed = seed
 
-            ), secondary_y=True)
-        # Set x-axis title
-        fig.update_xaxes(title_text="Timeline")
-        # Set y-axes titles
-        fig.update_yaxes(title_text="Price", secondary_y=False)
-        fig.update_yaxes(title_text='Liquidity', secondary_y=True)
-        fig.update_layout(title='Price and Liquidity')
-        return fig
+    def generate_data(self):
+        timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq='D', normalize=True)
+        # np.random.seed(self.seed)
+        price_log_returns = np.random.normal(loc=self.mu, scale=self.sigma, size=self.n_points)
+        price_returns = np.exp(price_log_returns)
+        price_returns[0] = self.init_price
+
+        prices = np.cumprod(price_returns)
+
+        df = pd.DataFrame(zip(timestamps, prices), columns=['timestamp', 'price']).set_index('timestamp')
+
+        df["price_before"] = df["price"].shift(1)
+        df["price_before"] = df["price_before"].fillna(df["price"])
+
+        return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df)
