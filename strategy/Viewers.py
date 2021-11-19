@@ -245,12 +245,12 @@ class RebalanceViewer:
 
 class LiqudityViewer:
     def __init__(self, pool_data: PoolDataUniV3):
-        pass
+        self.pool = pool_data
 
     def draw_plot(self):
-        spot_prices = self.swaps[['price']].resample('D').mean()
-        daily_mints = self.mints[['amount']].resample('D').sum()
-        daily_burns = self.burns[['amount']].resample('D').sum()
+        spot_prices = self.pool.swaps[['price']].resample('D').mean()
+        daily_mints = self.pool.mints[['amount']].resample('D').sum()
+        daily_burns = self.pool.burns[['amount']].resample('D').sum()
         daily_liq = daily_mints - daily_burns
         total_liq = daily_liq.cumsum()
 
