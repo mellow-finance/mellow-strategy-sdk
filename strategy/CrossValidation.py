@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 import pandas as pd
+from multiprocessing import Pool
 
 from .Backtest import Backtest
 
@@ -51,14 +52,27 @@ class CrossValidation:
         self.folder = folder
         self.strategy = strategy
 
+    def _backtest_(self, *args):
+        # print(args)
+        data, fold_name = args[0][0], args[0][1]
+        backtest = Backtest(self.strategy)
+        fold_data = self.folder.get_fold(data.swaps, fold_name)
+        portfolio_history, rebalance_history, uni_history = backtest.backtest(fold_data)
+        res = {'portfolio': portfolio_history,
+                'rebalance': rebalance_history,
+                'uniswap': uni_history}
+        return res
+
     def backtest(self, data):
-        folds_result = {}
+        # folds_result = {}
         self.folder.generate_folds_by_index(data.swaps)
-        for fold_name in self.folder.fold_names:
-            backtest = Backtest(self.strategy)
-            fold_data = self.folder.get_fold(data.swaps, fold_name)
-            portfolio_history, rebalance_history = backtest.backtest(fold_data)
-            folds_result[fold_name] = {'portfolio': portfolio_history, 'rebalance': rebalance_history}
+        args = [(data, fold_name) for fold_name in self.folder.fold_names]
+        with Pool(processes=len(self.folder.fold_names)) as pool:
+            folds_result = pool.map(self. _backtest_, args)
+
+        # for fold_name in self.folder.fold_names:
+        #    res = self. _backtest_(data, fold_name)
+        #    folds_result[fold_name] = res
         return folds_result
 
     def aggregate(self, folds_result):
