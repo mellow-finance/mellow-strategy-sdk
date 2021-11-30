@@ -20,13 +20,17 @@ class FolderSimple:
         self.fold_names = None
 
     def generate_folds_by_index(self, data):
+        """
+        Split data into folds
+        :param data: Uniswap exchancge data
+        """
         index = np.sort(data.index.to_numpy())
         n = len(index)
         fold_len = n // self.n_folds
 
         idx_split = [i * fold_len for i in range(self.n_folds + 1)]
         if idx_split[-1] != n:
-            idx_split[-1] = n
+            idx_split[-1] = nRun backtest on data
 
         folds = {}
         for i, j in enumerate(range(len(idx_split)-1)):
@@ -37,6 +41,12 @@ class FolderSimple:
         return None
 
     def get_fold(self, data, fold_name):
+        """
+        Get fold by name
+        :param data: Uniswap exchancge data
+        :param fold_name: Folds name
+        :return: Folds data as PoolDataUniV3
+        """
         fold_idx = self.folds[fold_name]
         fold_data = data.loc[data.index.isin(fold_idx)]
         return fold_data
@@ -53,7 +63,12 @@ class CrossValidation:
         self.strategy = strategy
 
     def _backtest_(self, *args):
-        # print(args)
+        """
+        Run backtest on single fold
+        :param args[0]: Uniswap exchancge data
+        :param args[1]: Folds name
+        :return: Dict of history results
+        """
         data, fold_name = args[0][0], args[0][1]
         backtest = Backtest(self.strategy)
         fold_data = self.folder.get_fold(data.swaps, fold_name)
@@ -64,7 +79,11 @@ class CrossValidation:
         return res
 
     def backtest(self, data):
-        # folds_result = {}
+        """
+        Parallel backtesting on folded data
+        :param data: Uniswap exchancge data
+        :return: List of history dicts by folds
+        """
         self.folder.generate_folds_by_index(data.swaps)
         args = [(data, fold_name) for fold_name in self.folder.fold_names]
         with Pool(processes=len(self.folder.fold_names)) as pool:
@@ -76,6 +95,11 @@ class CrossValidation:
         return folds_result
 
     def aggregate(self, folds_result):
+        """
+        Aggregate backtesting results from folds
+        :param folds_result: History from folds
+        :return: Dict of APY's by folds
+        """
         res = {}
         for k, v in folds_result.items():
             df = v['portfolio'].portfolio_stats()

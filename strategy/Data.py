@@ -43,6 +43,9 @@ class RawDataUniV3:
         self.folder = folder
 
     def load_from_folder(self) -> PoolDataUniV3:
+        """
+        Loads data - swaps, mint, burns from predefined folder
+        """
         mints_converters = {
             "block_time": int,
             "block_number": int,
@@ -81,6 +84,10 @@ class RawDataUniV3:
         return PoolDataUniV3(self.pool, mints, burns, swaps)
 
     def preprocess_mints(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Preprocess Uniswap mints data
+        :param df: Mints data frame
+        """
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df = df.set_index('timestamp')
         df = df.sort_values(by=['timestamp', 'amount'], ascending=[True, False])
@@ -90,6 +97,10 @@ class RawDataUniV3:
         return df
 
     def preprocess_burns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Preprocess Uniswap burns data
+        :param df: Burns data frame
+        """
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df = df.set_index('timestamp')
         df = df.sort_values(by=['timestamp', 'amount'], ascending=[True, False])
@@ -99,6 +110,10 @@ class RawDataUniV3:
         return df
 
     def preprocess_swaps(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Preprocess Uniswap swap data
+        :param df: Swap data frame
+        """
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df['timestamp'] = df['timestamp'] + pd.to_timedelta(df['log_index'], unit='ns')
         df = df.sort_values(by='timestamp', ascending=True)
@@ -118,7 +133,7 @@ class RawDataUniV3:
 
 class SyntheticData:
     """
-       ``SyntheticData`` generates synthetic UniswapV3 swaps data.
+       ``SyntheticData`` generates synthetic UniswapV3 exchange data.
        :param pool: UniswapV3 pool meta data
        :param start_date: starting date for generating
        :param n_points: how many samples to generate
@@ -139,6 +154,10 @@ class SyntheticData:
         self.seed = seed
 
     def generate_data(self):
+        """
+        Generate synthetic UniswapV3 exchange data
+        :return: PoolDataUniV3
+        """
         timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq='D', normalize=True)
         # np.random.seed(self.seed)
         price_log_returns = np.random.normal(loc=self.mu, scale=self.sigma, size=self.n_points)

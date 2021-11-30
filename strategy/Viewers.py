@@ -14,6 +14,10 @@ class PotrfolioViewer:
         self.portfolio_history = portfolio_history
 
     def draw_portfolio(self):
+        """
+        Plot in pool in time
+        :return: Figures
+        """
         portfolio_df = self.portfolio_history.portfolio_stats()
         fig1 = self.draw_portfolio_to_x(portfolio_df)
         fig2 = self.draw_portfolio_to_y(portfolio_df)
@@ -22,6 +26,11 @@ class PotrfolioViewer:
         return fig1, fig2, fig3, fig4
 
     def draw_portfolio_to_x(self, portfolio_df):
+        """
+        Plot portfolio value and fees in X
+        :param portfolio_df: portfolio history data frame
+        :return: Figure
+        """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
@@ -55,6 +64,11 @@ class PotrfolioViewer:
         return fig
 
     def draw_portfolio_to_y(self, portfolio_df):
+        """
+        Plot portfolio value and fees in Y
+        :param portfolio_df: portfolio history data frame
+        :return: Figure
+        """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
@@ -90,6 +104,11 @@ class PotrfolioViewer:
         return fig
 
     def draw_performance_y(self, portfolio_df):
+        """
+        Plot portfolio performance in Y
+        :param portfolio_df: portfolio history data frame
+        :return: Figure
+        """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
@@ -119,6 +138,11 @@ class PotrfolioViewer:
         return fig
 
     def draw_performance_x(self, portfolio_df):
+        """
+        Plot portfolio performance in X
+        :param portfolio_df: portfolio history data frame
+        :return: Figure
+        """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
@@ -160,6 +184,11 @@ class UniswapViewer:
         self.uni_postition_history = uni_postition_history
 
     def draw_intervals(self, swaps_df):
+        """
+        Plot uniswap positions intervals in time
+        :param swaps_df: UniswapV3 exchange data
+        :return: Figure
+        """
         intervals = self.uni_postition_history.to_df()
         fig = go.Figure()
 
@@ -213,6 +242,11 @@ class RebalanceViewer:
         self.rebalance_history = rebalance_history
 
     def draw_rebalances(self, swaps_df):
+        """
+        Plot portfolio rabalances in time
+        :param swaps_df: UniswapV3 exchange data
+        :return: Figure
+        """
         rebalance_df = self.rebalance_history.to_df()
         swaps_df_slice = swaps_df.loc[swaps_df.index.isin(rebalance_df.index)]
         rebalance_df_slice = swaps_df_slice.loc[rebalance_df['rebalanced']]
@@ -248,6 +282,10 @@ class LiqudityViewer:
         self.pool = pool_data
 
     def draw_plot(self):
+        """
+        Plot liquidity in pool in time
+        :return: Figure
+        """
         spot_prices = self.pool.swaps[['price']].resample('D').mean()
         daily_mints = self.pool.mints[['amount']].resample('D').sum()
         daily_burns = self.pool.burns[['amount']].resample('D').sum()

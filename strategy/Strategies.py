@@ -21,6 +21,12 @@ class AbstractStrategy(ABC):
 
     @abstractmethod
     def rebalance(self, *args, **kwargs) -> bool:
+        '''
+        Rebalance implementation
+        :param args:
+        :param kwargs:
+        :return: True if strategy rebalances portfolio or False otherwise
+        '''
         raise Exception(NotImplemented)
 
 
@@ -389,8 +395,14 @@ class UniV3Active(AbstractStrategy):
         fraction_uni = uni_fabric._calc_fraction_to_uni_(lower_price, upper_price, price)
         print('fraction_uni', fraction_uni)
         x_uni, y_uni = x_all * fraction_uni, y_all * fraction_uni
+
+        # x_uni_aligned, y_uni_aligned = uni_fabric._align_to_liq_(x_uni, y_uni, lower_price, upper_price, price)
+        # vault.withdraw(x_uni_aligned, y_uni_aligned)
+
+        vault.withdraw(x_uni, y_uni)
         x_uni_aligned, y_uni_aligned = uni_fabric._align_to_liq_(x_uni, y_uni, lower_price, upper_price, price)
-        vault.withdraw(x_uni_aligned, y_uni_aligned)
+        # vault.withdraw(x_uni_aligned, y_uni_aligned)
+
 
         univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent, self.rebalance_cost)
         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)

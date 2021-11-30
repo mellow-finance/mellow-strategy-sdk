@@ -24,12 +24,17 @@ class Backtest:
             self.portfolio = portfolio
 
     def backtest(self, df_swaps) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
+        """
+        Run backtest on data
+        :param df_swaps: Uniswap exchancge data
+        :return: History results
+        """
         portfolio_history = PortfolioHistory()
         rebalance_history = RebalanceHistory()
         uni_history = UniPositionsHistory()
 
         for idx, row in df_swaps.iterrows():
-            df_swaps_prev = df_swaps[['price']][:idx]
+            df_swaps_prev = None #df_swaps[['price']][:idx]
             is_rebalanced = self.strategy.rebalance(timestamp=idx, row=row, prev_data=df_swaps_prev, portfolio=self.portfolio)
             portfolio_snapshot = self.portfolio.snapshot(idx, row['price'])
             portfolio_history.add_snapshot(portfolio_snapshot)

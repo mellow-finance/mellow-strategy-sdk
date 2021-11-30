@@ -25,7 +25,7 @@ class AbstractPosition(ABC):
         raise Exception(NotImplemented)
 
     @abstractmethod
-    def snapshot(self, date: datetime, price: float) -> dict:
+    def snapshot(self, timestamp: datetime, price: float) -> dict:
         raise Exception(NotImplemented)
 
 
@@ -64,11 +64,22 @@ class BiCurrencyPosition(AbstractPosition):
         self.previous_gain = None
 
     def deposit(self, x: float, y: float) -> None:
+        """
+        Deposit X currency and Y currency to position
+        :param x: value of X currency
+        :param y: value of Y currency
+        """
         self.x += x
         self.y += y
         return None
 
     def withdraw(self, x: float, y: float) -> Tuple[float, float]:
+        """
+        Withdraw X currency and Y currency from position
+        :param x: value of X currency
+        :param y: value of Y currency
+        :return: value of X, value of Y
+        """
         assert x <= self.x, f'Too much to withdraw X = {x}'
         assert y <= self.y, f'Too much to withdraw Y = {y}'
         self.x -= x
@@ -76,11 +87,22 @@ class BiCurrencyPosition(AbstractPosition):
         return x, y
 
     def withdraw_fraction(self, fraction: float) -> Tuple[float, float]:
+        """
+        Withdraw percent of X currency and percent of Y currency from position 
+        :param fraction: fraction from 0 to 1
+        :return: value of fraction*X, value of fraction*Y
+        """
         assert fraction <= 1, f'Too much to withdraw Fraction = {fraction}'
         x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
         return x_out, y_out
 
     def rebalance(self, x_fraction, y_fraction, price) -> None:
+        """
+        Rebalance bicurrency pair with respect to their proportion
+        :param x_fraction: fraction of X after rebalance from 0 to 1
+        :param y_fraction: fraction of Y after rebalance from 0 to 1
+        :param price: current price of X in Y currency
+        """
         # Implement add swaps with fee
         assert x_fraction <= 1, f'Too much to rebalance Fraction X = {x_fraction}'
         assert y_fraction <= 1, f'Too much to rebalance Fraction Y = {y_fraction}'
@@ -100,6 +122,10 @@ class BiCurrencyPosition(AbstractPosition):
         return None
 
     def interest_gain(self, date) -> None:
+        """
+        Gain deposit interest
+        :param date: gaining date
+        """
         if self.previous_gain is not None:
             assert self.previous_gain < date, "Already gained this day"
         else:
@@ -111,14 +137,29 @@ class BiCurrencyPosition(AbstractPosition):
         return None
 
     def to_x(self, price: float) -> float:
+        '''
+        Get total value of position expessed in X
+        :param price: current price of X in Y currency
+        :return: Total value of position expessed in X
+        '''
         res = self.x + self.y / price
         return res
 
     def to_y(self, price: float) -> float:
+        '''
+        Get total value of position expessed in Y
+        :param price: current price of X in Y currency
+        :return: Total value of position expessed in Y
+        '''
         res = self.x * price + self.y
         return res
 
     def to_xy(self, price: float) -> Tuple[float, float]:
+        '''
+        Get values of bicurrency pair
+        :param price: current price of X in Y currency
+        :return: Position value to X and Y
+        '''
         return self.x, self.y
 
     def swap_x_to_y(self, dx: float, price: float) -> None:
@@ -135,7 +176,13 @@ class BiCurrencyPosition(AbstractPosition):
         self.rebalance_costs_to_y += self.rebalance_cost
         return None
 
-    def snapshot(self, date: datetime, price: float) -> dict:
+    def snapshot(self, timestamp: datetime, price: float) -> dict:
+        '''
+        Get position snapshot
+        :param timestamp: timestamp of snapshot
+        :param price: current price of X in Y currency
+        :return: position snapshot
+        '''
         value_to_x = self.to_x(price)
         value_to_y = self.to_y(price)
         snapshot = {
@@ -190,16 +237,33 @@ class UniV3Position(AbstractPosition):
         self._fees_y_earned_ = 0
 
     def deposit(self, x: float, y: float, price: float) -> None:
+        """
+        Deposit X and Y to position
+        :param x: value of X currency
+        :param y: value of Y currency
+        :param price: current price of X in Y currency
+        """
         self.mint(x, y, price)
         return None
 
     def withdraw(self, price: float) -> Tuple[float, float]:
+        """
+        Withdraw all liquidity from uniswapV3 position
+        :param price: current price of X in Y currency
+        :return: value of X, value of Y
+        """
         x_out, y_out = self.burn(self.liquidity, price)
         x_fees, y_fees = self.collect_fees()
         x_res, y_res = x_out + x_fees, y_out + y_fees
         return x_res, y_res
 
     def mint(self, x: float, y: float, price: float) -> None:
+        """
+        Mint X and Y to uniswapV3 interval
+        :param x: value of X currency
+        :param y: value of Y currency
+        :param price: current price of X in Y currency
+        """
         d_liq = self._xy_to_liq_(x, y, price)
         self.liquidity += d_liq
         self.bi_currency.deposit(x, y)
@@ -208,6 +272,12 @@ class UniV3Position(AbstractPosition):
         return None
 
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
+        """
+        Burn liquidity from uniswapV3 interval
+        :param liq: value of liquidity
+        :param price: current price of X in Y currency
+        :return: value of X, value of Y
+        """
         assert liq <= self.liquidity, f'Too much liquidity too withdraw = {liq}'
         assert liq > 1e-6, f'Too small liquidity too withdraw = {liq}'
         il_x_0 = self.impermanent_loss_to_x(price)
@@ -228,6 +298,11 @@ class UniV3Position(AbstractPosition):
         return x_out, y_out
 
     def charge_fees(self, price_0: float, price_1: float) -> None:
+        """
+        Charge exchange fees
+        :param price_0: price before exchange
+        :param price_1: price after exchange
+        """
         price_0_adj = self._adj_price_(price_0)
         price_1_adj = self._adj_price_(price_1)
 
@@ -252,6 +327,10 @@ class UniV3Position(AbstractPosition):
         return None
 
     def collect_fees(self) -> Tuple[float, float]:
+        """
+        Collect all gained fees
+        :return: value of X fees, value of Y fees
+        """
         fees_x = self.fees_x
         fees_y = self.fees_y
         self.fees_x = 0
@@ -259,6 +338,10 @@ class UniV3Position(AbstractPosition):
         return fees_x, fees_y
 
     def reinvest_fees(self, price) -> None:
+        """
+        Collect all gained fees and reinvest to current position
+        :param price: current price of X in Y currency
+        """
         fees_x, fees_y = self.collect_fees()
         self.mint(fees_x, fees_y, price)
         return None
@@ -283,16 +366,31 @@ class UniV3Position(AbstractPosition):
         return il_y
 
     def to_x(self, price: float) -> float:
+        '''
+        Get total value of uniswapV3 position expessed in X
+        :param price: current price of X in Y currency
+        :return: Total value of uniswapV3 position expessed in X
+        '''
         x, y = self.to_xy(price)
         vol_x = x + y / price
         return vol_x
 
     def to_y(self, price: float) -> float:
+        '''
+        Get total value of uniswapV3 position expessed in Y
+        :param price: current price of X in Y currency
+        :return: Total value of uniswapV3 position expessed in Y
+        '''
         x, y = self.to_xy(price)
         vol_y = x * price + y
         return vol_y
 
     def to_xy(self, price) -> Tuple[float, float]:
+        '''
+        Get value of position in X and Y
+        :param price: current price of X in Y currency
+        :return: Position value to X and Y
+        '''
         x, y = self._liq_to_xy_(self.liquidity, price)
         return x, y
 
@@ -301,6 +399,12 @@ class UniV3Position(AbstractPosition):
         return adj_price
 
     def _x_to_liq_(self, x: float, price: float) -> float:
+        '''
+        Transform X to liquidity
+        :param x: Value of X 
+        :param price: current price of X in Y currency
+        :return: Resulting liquidity
+        '''
         if self.upper_price <= price:
             return np.inf
         sqrt_price = np.sqrt(price)
@@ -308,6 +412,12 @@ class UniV3Position(AbstractPosition):
         return l_x
 
     def _y_to_liq_(self, y: float, price: float) -> float:
+        '''
+        Transform Y to liquidity
+        :param y: Value of Y
+        :param price: current price of X in Y currency
+        :return: Resulting liquidity
+        '''
         if self.lower_price >= price:
             return np.inf
         sqrt_price = np.sqrt(price)
@@ -315,6 +425,13 @@ class UniV3Position(AbstractPosition):
         return l_y
 
     def _xy_to_liq_(self, x: float, y: float, price: float) -> float:
+        '''
+        Transform X and Y to liquidity
+        :param x: Value of X
+        :param y: Value of Y
+        :param price: current price of X in Y currency
+        :return: Resulting liquidity
+        '''
         adj_price = self._adj_price_(price)
         x_liq = self._x_to_liq_(x, adj_price)
         y_liq = self._y_to_liq_(y, adj_price)
@@ -323,6 +440,12 @@ class UniV3Position(AbstractPosition):
         return liq
 
     def _liq_to_x_(self, liq: float, price: float) -> float:
+        '''
+        Transform liquidity to X
+        :param liq: Value of liq
+        :param price: current price of X in Y currency
+        :return: Value of X
+        '''
         adj_price = self._adj_price_(price)
         sqrt_price = np.sqrt(adj_price)
         numer = self.sqrt_upper - sqrt_price
@@ -331,17 +454,35 @@ class UniV3Position(AbstractPosition):
         return x
 
     def _liq_to_y_(self, liq: float, price: float) -> float:
+        '''
+        Transform liquidity to Y
+        :param liq: Value of liq
+        :param price: current price of X in Y currency
+        :return: Value of Y
+        '''
         adj_price = self._adj_price_(price)
         sqrt_price = np.sqrt(adj_price)
         y = liq * (sqrt_price - self.sqrt_lower)
         return y
 
     def _liq_to_xy_(self, liq: float, price: float) -> Tuple[float, float]:
+        '''
+        Transform liquidity to X, Y pair 
+        :param liq: Value of liq
+        :param price: current price of X in Y currency
+        :return: Value of X and Y 
+        '''
         x = self._liq_to_x_(liq, price)
         y = self._liq_to_y_(liq, price)
         return x, y
 
-    def snapshot(self, date: datetime, price: float) -> dict:
+    def snapshot(self, timestamp: datetime, price: float) -> dict:
+        '''
+        Get uniswapV3 position snapshot
+        :param timestamp: timestamp of snapshot
+        :param price: current price of X in Y currency
+        :return: UniswapV3 position snapshot
+        '''
         volume_to_x = self.to_x(price)
         volume_to_y = self.to_y(price)
 
