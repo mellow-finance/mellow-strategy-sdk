@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 class PortfolioHistory:
@@ -11,16 +12,28 @@ class PortfolioHistory:
         self.snapshots = []
 
     def add_snapshot(self, snapshot: dict):
+        """
+        Add portfolio snapshot to history
+        :param snapshot: dict of portfolio params
+        """
         if snapshot:
             self.snapshots.append(snapshot)
         return None
 
     def to_df(self):
+        """
+        Transform list of portfolio snapshots to data frame
+        :return: Portfolio history data frame
+        """
         df = pd.DataFrame(self.snapshots)
         df = df.set_index('timestamp')
         return df
 
     def calculate_value(self, df):
+        """
+        Calculate total value of portfolio denomitated in X and Y. Add new columns to historical df
+        :return: Portfolio history data frame
+        """
         value_to_x_cols = [col for col in df.columns if 'value_to_x' in col]
         value_to_y_cols = [col for col in df.columns if 'value_to_y' in col]
 
@@ -32,6 +45,10 @@ class PortfolioHistory:
         return df
 
     def calculate_il(self, df):
+        """
+        Calculate IL of portfolio denomitated in X and Y. Add new columns to historical df
+        :return: Portfolio history data frame
+        """
         il_to_x_cols = [col for col in df.columns if 'il_to_x' in col]
         il_to_y_cols = [col for col in df.columns if 'il_to_y' in col]
         if il_to_x_cols:
@@ -49,6 +66,10 @@ class PortfolioHistory:
         return df
 
     def calculate_costs(self, df):
+        """
+        Costs of portfolio management denomitated in X and Y. Add new columns to historical df
+        :return: Portfolio history data frame
+        """
         costs_to_x_cols = [col for col in df.columns if 'rebalance_costs_to_x' in col]
         costs_to_y_cols = [col for col in df.columns if 'rebalance_costs_to_y' in col]
         if costs_to_x_cols:
@@ -84,6 +105,10 @@ class PortfolioHistory:
     #     return df
 
     def calculate_actual_fees(self, df):
+        """
+        Calculate actual fees of Uniswap positions denomitated in X and Y. Add new columns to historical df
+        :return: Portfolio history data frame
+        """
         fees_to_x_cols = [col for col in df.columns if 'current_fees_to_x' in col]
         fees_to_y_cols = [col for col in df.columns if 'current_fees_to_y' in col]
 
@@ -99,6 +124,10 @@ class PortfolioHistory:
         return df
 
     def calculate_earned_fees(self, df):
+        """
+        Calculate total erned fees of Uniswap positions denomitated in X and Y. Add new columns to historical df
+        :return: Portfolio history data frame
+        """
         fees_to_x_cols = [col for col in df.columns if 'earned_fees_to_x' in col]
         fees_to_y_cols = [col for col in df.columns if 'earned_fees_to_y' in col]
 
@@ -117,6 +146,10 @@ class PortfolioHistory:
         return df
 
     def calculate_performance(self, stats_df):
+        """
+        Calculate porfolio performance. Add new columns to historical df
+        :return: Portfolio history data frame
+        """
         def yearly_adj(df):
             days_gone = (df.index[-1] - df.index[0]).days + 1
             out = df.iloc[-1] ** (365 / days_gone)
@@ -139,6 +172,10 @@ class PortfolioHistory:
         return stats_df
 
     def portfolio_stats(self):
+        """
+        Evalute statistics calculation for portfolio.
+        :return: Portfolio history data frame
+        """
         df = self.to_df()
         df = self.calculate_value(df)
         df = self.calculate_il(df)
@@ -183,10 +220,19 @@ class RebalanceHistory:
         self.rebalances = {}
 
     def add_snapshot(self, timestamp, snapshot):
+        """
+        Add portfolio rebalance snapshot to history
+        :param timestamp: timestamp of snapshot
+        :param snapshot: dict of portfolio rebalances
+        """
         self.rebalances[timestamp] = snapshot
         return None
 
     def to_df(self):
+        """
+        Transform list of portfolio rebalance snapshots to data frame
+        :return: Portfolio rebalance history data frame
+        """
         df = pd.DataFrame([self.rebalances], index=['rebalanced']).T
         df.index.name = 'timestamp'
         return df
@@ -202,25 +248,55 @@ class UniPositionsHistory:
         self.positions = {}
 
     def add_snapshot(self, timestamp, positions):
+        """
+        Add uniswap position snapshot to history
+        :param timestamp: timestamp of snapshot
+        :param positions: list of Uniswap positions
+        """       
         uni_positions = {}
         for name, position in positions.items():
-            uni_positions[name] = position
-        self.positions[timestamp] = uni_positions
+            if 'Uni' in name:
+                uni_positions[(name, 'lower_bound')] = position.lower_price
+                uni_positions[(name, 'upper_bound')] = position.upper_price
+        if uni_positions:
+            self.positions[timestamp] = uni_positions
         return None
 
     def to_df(self):
-        result = []
-        for date, positions in self.positions.items():
-            res_df = pd.DataFrame()
-            for name, position in positions.items():
-
-                pos_inttervals = pd.DataFrame(data=[(position.lower_price, position.upper_price)],
-                                             columns=[(position.name, 'min_bound'), (position.name, 'max_bound')],
-                                             index=[date])
-                res_df = pd.concat([res_df, pos_inttervals], axis=1)
-
-            result.append(res_df)
-
-        intervals_df = pd.concat(result)
+        """
+        Transform list of uniswap positions snapshots to data frame
+        :return: Uniswap positions history data frame
+        """
+        intervals_df = pd.DataFrame(self.positions).T
+        intervals_df.columns = pd.MultiIndex.from_tuples(intervals_df.columns, names=["pos_name", "bound_type"])
         intervals_df.index.name = 'date'
         return intervals_df
+
+    def get_coverage(self, swaps_df):
+        """
+        Get coverage metric for all uniswap positions in historic portfolio
+        :param swaps_df: UniswapV3 exchange data
+        :return: Uniswap positions history data frame
+        """
+        prices = swaps_df[['price']]
+        prices['covered'] = np.nan
+
+        intervals = self.to_df()
+        prices_sliced = prices.loc[intervals.index]['price']
+
+        min_bound = intervals.loc[:, intervals.columns.get_level_values(level=1) == 'lower_bound']
+        max_bound = intervals.loc[:, intervals.columns.get_level_values(level=1) == 'upper_bound']
+
+        min_bound.columns = list(min_bound.columns.droplevel(1))
+        max_bound.columns = list(max_bound.columns.droplevel(1))
+
+        min_mask = min_bound.lt(prices_sliced, axis=0).any(axis=1)
+        max_mask = max_bound.gt(prices_sliced, axis=0).any(axis=1)
+
+        final_mask = min_mask & max_mask
+
+        prices.loc[intervals.index, 'covered'] = final_mask
+        prices.loc[:, 'covered'] = prices['covered'].fillna(False)
+        coverage = prices['covered'].sum() / prices.shape[0]
+
+        return coverage
