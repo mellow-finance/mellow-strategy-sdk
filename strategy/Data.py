@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from decimal import Decimal
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 from .primitives import Pool
 
@@ -126,7 +124,10 @@ class RawDataUniV3:
                 lambda x: float(Decimal(x) * Decimal(x) / (Decimal(2 ** 192) * Decimal(10 ** (-self.pool.decimals_diff))))
                         )
         df["price_before"] = df["price"].shift(1)
-        df["price_before"] = df["price_before"].fillna(df["price"])
+        df["price_before"] = df["price_before"].bfill()
+
+        df["price_next"] = df["price"].shift(-1)
+        df["price_next"] = df["price_next"].ffill()
 
         return df
 
@@ -142,7 +143,7 @@ class SyntheticData:
        :param sigma: variance of random walk
        :param seed: seed for random generator
    """
-    def __init__(self, pool, start_date='1-1-2022', n_points=100, init_price=1, mu=0, sigma=0.1, seed=42):
+    def __init__(self, pool, start_date='1-1-2022', n_points=365, init_price=1, mu=0, sigma=0.1, seed=42):
         self.pool = pool
         self.start_date = start_date
         self.n_points = n_points
@@ -169,6 +170,9 @@ class SyntheticData:
         df = pd.DataFrame(zip(timestamps, prices), columns=['timestamp', 'price']).set_index('timestamp')
 
         df["price_before"] = df["price"].shift(1)
-        df["price_before"] = df["price_before"].fillna(df["price"])
+        df["price_before"] = df["price_before"].bfill()
 
+        df["price_next"] = df["price"].shift(-1)
+        df["price_next"] = df["price_next"].ffill()
+        
         return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df)

@@ -32,15 +32,15 @@ class MultiStrategy(AbstractStrategy):
         del self.strategies[name]
         return None
 
-    def rebalance(self, *args, **kwargs) -> bool:
+    def rebalance(self, *args, **kwargs):
         """
         Rebalance implementation for strategy composition
         :param args:
         :param kwargs:
         :return: True if strategy rebalances portfolio or False otherwise
         """
-        is_rebalanced = [False, ]
+        is_rebalanced = []
         for name, strategy in self.strategies.items():
             status = strategy.rebalance(*args, **kwargs)
             is_rebalanced.append(status)
-        return any(is_rebalanced)
+        return is_rebalanced

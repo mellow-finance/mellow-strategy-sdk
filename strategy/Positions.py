@@ -6,7 +6,7 @@ from datetime import datetime
 
 class AbstractPosition(ABC):
     """
-    ``AbstractPosition`` is a abstract class for Position and Portfolio classes
+    ``AbstractPosition`` is an abstract class for Position and Portfolio classes
     :param name: Unique name for the instance
     """
     def __init__(self, name: str) -> None:
@@ -108,12 +108,12 @@ class BiCurrencyPosition(AbstractPosition):
         assert y_fraction <= 1, f'Too much to rebalance Fraction Y = {y_fraction}'
         assert abs(x_fraction + y_fraction - 1) <= 1e-6, f'Incorrect fractions {x_fraction}, {y_fraction}'
 
-        dV = y_fraction * price * self.x - x_fraction * self.y
-        if dV > 0:
-            dx = dV / price
+        d_v = y_fraction * price * self.x - x_fraction * self.y
+        if d_v > 0:
+            dx = d_v / price
             self.swap_x_to_y(dx, price)
-        elif dV < 0:
-            dy = abs(dV)
+        elif d_v < 0:
+            dy = abs(d_v)
             self.swap_y_to_x(dy, price)
 
         self.rebalance_costs_to_x += self.rebalance_cost / price
@@ -137,29 +137,29 @@ class BiCurrencyPosition(AbstractPosition):
         return None
 
     def to_x(self, price: float) -> float:
-        '''
+        """
         Get total value of position expessed in X
         :param price: current price of X in Y currency
         :return: Total value of position expessed in X
-        '''
+        """
         res = self.x + self.y / price
         return res
 
     def to_y(self, price: float) -> float:
-        '''
+        """
         Get total value of position expessed in Y
         :param price: current price of X in Y currency
         :return: Total value of position expessed in Y
-        '''
+        """
         res = self.x * price + self.y
         return res
 
     def to_xy(self, price: float) -> Tuple[float, float]:
-        '''
+        """
         Get values of bicurrency pair
         :param price: current price of X in Y currency
         :return: Position value to X and Y
-        '''
+        """
         return self.x, self.y
 
     def swap_x_to_y(self, dx: float, price: float) -> None:
@@ -177,12 +177,12 @@ class BiCurrencyPosition(AbstractPosition):
         return None
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
-        '''
+        """
         Get position snapshot
         :param timestamp: timestamp of snapshot
         :param price: current price of X in Y currency
         :return: position snapshot
-        '''
+        """
         value_to_x = self.to_x(price)
         value_to_y = self.to_y(price)
         snapshot = {
@@ -366,31 +366,31 @@ class UniV3Position(AbstractPosition):
         return il_y
 
     def to_x(self, price: float) -> float:
-        '''
+        """
         Get total value of uniswapV3 position expessed in X
         :param price: current price of X in Y currency
         :return: Total value of uniswapV3 position expessed in X
-        '''
+        """
         x, y = self.to_xy(price)
         vol_x = x + y / price
         return vol_x
 
     def to_y(self, price: float) -> float:
-        '''
+        """
         Get total value of uniswapV3 position expessed in Y
         :param price: current price of X in Y currency
         :return: Total value of uniswapV3 position expessed in Y
-        '''
+        """
         x, y = self.to_xy(price)
         vol_y = x * price + y
         return vol_y
 
     def to_xy(self, price) -> Tuple[float, float]:
-        '''
+        """
         Get value of position in X and Y
         :param price: current price of X in Y currency
         :return: Position value to X and Y
-        '''
+        """
         x, y = self._liq_to_xy_(self.liquidity, price)
         return x, y
 
@@ -399,12 +399,12 @@ class UniV3Position(AbstractPosition):
         return adj_price
 
     def _x_to_liq_(self, x: float, price: float) -> float:
-        '''
+        """
         Transform X to liquidity
         :param x: Value of X 
         :param price: current price of X in Y currency
         :return: Resulting liquidity
-        '''
+        """
         if self.upper_price <= price:
             return np.inf
         sqrt_price = np.sqrt(price)
@@ -412,12 +412,12 @@ class UniV3Position(AbstractPosition):
         return l_x
 
     def _y_to_liq_(self, y: float, price: float) -> float:
-        '''
+        """
         Transform Y to liquidity
         :param y: Value of Y
         :param price: current price of X in Y currency
         :return: Resulting liquidity
-        '''
+        """
         if self.lower_price >= price:
             return np.inf
         sqrt_price = np.sqrt(price)
@@ -425,27 +425,32 @@ class UniV3Position(AbstractPosition):
         return l_y
 
     def _xy_to_liq_(self, x: float, y: float, price: float) -> float:
-        '''
+        """
         Transform X and Y to liquidity
         :param x: Value of X
         :param y: Value of Y
         :param price: current price of X in Y currency
         :return: Resulting liquidity
-        '''
+        """
         adj_price = self._adj_price_(price)
         x_liq = self._x_to_liq_(x, adj_price)
         y_liq = self._y_to_liq_(y, adj_price)
+        assert (x_liq >= 0) & (y_liq >= 0), f'Lx or Ly less then 0: Lx={x_liq}, Ly={y_liq}'
+        if np.isinf(x_liq):
+            return y_liq
+        elif np.isinf(y_liq):
+            return x_liq
         assert abs(x_liq - y_liq) < 1e-6, f'Lx != Ly: Lx={x_liq}, Ly={y_liq}'
         liq = min(x_liq, y_liq)
         return liq
 
     def _liq_to_x_(self, liq: float, price: float) -> float:
-        '''
+        """
         Transform liquidity to X
         :param liq: Value of liq
         :param price: current price of X in Y currency
         :return: Value of X
-        '''
+        """
         adj_price = self._adj_price_(price)
         sqrt_price = np.sqrt(adj_price)
         numer = self.sqrt_upper - sqrt_price
@@ -454,35 +459,35 @@ class UniV3Position(AbstractPosition):
         return x
 
     def _liq_to_y_(self, liq: float, price: float) -> float:
-        '''
+        """
         Transform liquidity to Y
         :param liq: Value of liq
         :param price: current price of X in Y currency
         :return: Value of Y
-        '''
+        """
         adj_price = self._adj_price_(price)
         sqrt_price = np.sqrt(adj_price)
         y = liq * (sqrt_price - self.sqrt_lower)
         return y
 
     def _liq_to_xy_(self, liq: float, price: float) -> Tuple[float, float]:
-        '''
+        """
         Transform liquidity to X, Y pair 
         :param liq: Value of liq
         :param price: current price of X in Y currency
         :return: Value of X and Y 
-        '''
+        """
         x = self._liq_to_x_(liq, price)
         y = self._liq_to_y_(liq, price)
         return x, y
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
-        '''
+        """
         Get uniswapV3 position snapshot
         :param timestamp: timestamp of snapshot
         :param price: current price of X in Y currency
         :return: UniswapV3 position snapshot
-        '''
+        """
         volume_to_x = self.to_x(price)
         volume_to_y = self.to_y(price)
 

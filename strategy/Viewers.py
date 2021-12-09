@@ -249,8 +249,7 @@ class RebalanceViewer:
         """
         rebalance_df = self.rebalance_history.to_df()
         swaps_df_slice = swaps_df.loc[swaps_df.index.isin(rebalance_df.index)]
-        rebalance_df_slice = swaps_df_slice.loc[rebalance_df['rebalanced']]
-
+        rebalance_df_slice = swaps_df_slice.loc[~rebalance_df['rebalanced'].isna()]
         fig = go.Figure()
         fig.add_trace(
                     go.Scatter(
@@ -317,3 +316,4 @@ class LiqudityViewer:
         fig.update_yaxes(title_text='Liquidity', secondary_y=True)
         fig.update_layout(title='Price and Liquidity')
         return fig
+

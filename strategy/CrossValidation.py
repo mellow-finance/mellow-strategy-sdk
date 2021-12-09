@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 import pandas as pd
 from multiprocessing import Pool
@@ -30,7 +29,7 @@ class FolderSimple:
 
         idx_split = [i * fold_len for i in range(self.n_folds + 1)]
         if idx_split[-1] != n:
-            idx_split[-1] = nRun backtest on data
+            idx_split[-1] = n
 
         folds = {}
         for i, j in enumerate(range(len(idx_split)-1)):
@@ -74,8 +73,8 @@ class CrossValidation:
         fold_data = self.folder.get_fold(data.swaps, fold_name)
         portfolio_history, rebalance_history, uni_history = backtest.backtest(fold_data)
         res = {'portfolio': portfolio_history,
-                'rebalance': rebalance_history,
-                'uniswap': uni_history}
+               'rebalance': rebalance_history,
+               'uniswap': uni_history}
         return res
 
     def backtest(self, data):
