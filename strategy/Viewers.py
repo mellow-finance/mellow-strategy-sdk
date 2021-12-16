@@ -295,9 +295,10 @@ class RebalanceViewer:
         :return: Figure
         """
         rebalance_df = self.rebalance_history.to_df()
-        swaps_df_slice = swaps_df.loc[swaps_df.index.isin(rebalance_df.index)]
-        rebalance_df_slice = swaps_df_slice.loc[rebalance_df['rebalanced'].notna()]
-        
+        swaps_df_slice = swaps_df.loc[rebalance_df.index]
+
+        rebalance_df = rebalance_df.dropna()
+
         fig = go.Figure()
         fig.add_trace(
                     go.Scatter(
@@ -307,18 +308,22 @@ class RebalanceViewer:
                         )
                     )
 
-        fig.add_trace(
-                    go.Scatter(
-                        x=rebalance_df_slice.index,
-                        y=rebalance_df_slice['price'],
-                        mode='markers',
-                        # marker_color='red',
-                        marker_size=7,
-                        marker_symbol='circle-open',
-                        marker_line_width=1,
-                        name="Rebalances",
+        events = rebalance_df['rebalanced'].unique()
+        for event in events:
+            rebalance_df_slice = swaps_df_slice.loc[rebalance_df.loc[rebalance_df['rebalanced'] == event].index]
+
+            fig.add_trace(
+                        go.Scatter(
+                            x=rebalance_df_slice.index,
+                            y=rebalance_df_slice['price'],
+                            mode='markers',
+                            # marker_color='red',
+                            marker_size=7,
+                            marker_symbol='circle-open',
+                            marker_line_width=2,
+                            name=f"Rebalances {event}",
+                            )
                         )
-                    )
         fig.update_xaxes(title_text="Timeline")
         fig.update_layout(title='Rebalances')
         return fig
