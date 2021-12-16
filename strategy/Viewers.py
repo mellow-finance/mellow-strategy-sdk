@@ -103,6 +103,53 @@ class PotrfolioViewer:
         fig.update_layout(title='Portfolio Value and Fees Y')
         return fig
 
+    def draw_performance_x(self, portfolio_df):
+        """
+        Plot portfolio performance in X
+        :param portfolio_df: portfolio history data frame
+        :return: Figure
+        """
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_value_to_x'],
+                name="Volume to X",
+            ),
+            secondary_y=False)
+        
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_performance_to_x_apy'],
+                name="APY to X",
+                yaxis="y2"
+            ),
+            secondary_y=True
+        )
+        
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_performance_rel_to_x_apy'],
+                name="APY relative to bicurrency pair to X",
+                yaxis="y2"
+            ),
+            secondary_y=True
+        )
+
+        fig.update_xaxes(title_text="Timeline")
+        fig.update_yaxes(title_text="Value to X", secondary_y=False)
+        fig.update_yaxes(title_text='Performance to X', secondary_y=True)
+
+        # lower = portfolio_df['portfolio_performance_to_x_apy'].quantile(0.03)
+        # upper = portfolio_df['portfolio_performance_to_x_apy'].quantile(0.97)
+        # fig.update_yaxes(range=[lower, upper], secondary_y=True)
+
+        fig.update_layout(title='Portfolio Value and Performance X')
+        return fig
+    
     def draw_performance_y(self, portfolio_df):
         """
         Plot portfolio performance in Y
@@ -121,8 +168,16 @@ class PotrfolioViewer:
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df.index,
-                y=portfolio_df['portfolio_performance_to_y_to_year'],
+                y=portfolio_df['portfolio_performance_to_y_apy'],
                 name="Performance yearly to Y",
+                yaxis="y2"
+            ), secondary_y=True)
+        
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_performance_rel_to_y_apy'],
+                name="APY relative to bicurrency pair to Y",
                 yaxis="y2"
             ), secondary_y=True)
 
@@ -130,49 +185,41 @@ class PotrfolioViewer:
         fig.update_yaxes(title_text="Value to Y", secondary_y=False)
         fig.update_yaxes(title_text='Performance to Y', secondary_y=True)
 
-        lower = portfolio_df['portfolio_performance_to_y_to_year'].quantile(0.03)
-        upper = portfolio_df['portfolio_performance_to_y_to_year'].quantile(0.97)
-        fig.update_yaxes(range=[lower, upper], secondary_y=True)
+        # lower = portfolio_df['portfolio_performance_to_y_apy'].quantile(0.03)
+        # upper = portfolio_df['portfolio_performance_to_y_apy'].quantile(0.97)
+        # fig.update_yaxes(range=[lower, upper], secondary_y=True)
 
         fig.update_layout(title='Portfolio Value and Performance Y')
         return fig
-
-    def draw_performance_x(self, portfolio_df):
-        """
-        Plot portfolio performance in X
-        :param portfolio_df: portfolio history data frame
-        :return: Figure
-        """
+    
+    def draw_liquidity(self, portfolio_df):
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df.index,
-                y=portfolio_df['portfolio_value_to_x'],
-                name="Volume to X",
+                y=portfolio_df['price'],
+                name="Price",
             ),
             secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df.index,
-                y=portfolio_df['portfolio_performance_to_x_to_year'],
-                name="Performance yearly to X",
+                y=portfolio_df['total_current_liquidity'],
+                name="Current liquidity",
                 yaxis="y2"
             ),
             secondary_y=True
         )
-
+        
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Value to X", secondary_y=False)
-        fig.update_yaxes(title_text='Performance to X', secondary_y=True)
-
-        lower = portfolio_df['portfolio_performance_to_x_to_year'].quantile(0.03)
-        upper = portfolio_df['portfolio_performance_to_x_to_year'].quantile(0.97)
-        fig.update_yaxes(range=[lower, upper], secondary_y=True)
-
-        fig.update_layout(title='Portfolio Value and Performance X')
+        fig.update_yaxes(title_text="Price", secondary_y=False)
+        fig.update_yaxes(title_text='Liquidity', secondary_y=True)
+        fig.update_layout(title='Portfolio Liquidity')
+        
         return fig
+        
 
 
 class UniswapViewer:
@@ -249,7 +296,8 @@ class RebalanceViewer:
         """
         rebalance_df = self.rebalance_history.to_df()
         swaps_df_slice = swaps_df.loc[swaps_df.index.isin(rebalance_df.index)]
-        rebalance_df_slice = swaps_df_slice.loc[~rebalance_df['rebalanced'].isna()]
+        rebalance_df_slice = swaps_df_slice.loc[rebalance_df['rebalanced'].notna()]
+        
         fig = go.Figure()
         fig.add_trace(
                     go.Scatter(
@@ -264,10 +312,10 @@ class RebalanceViewer:
                         x=rebalance_df_slice.index,
                         y=rebalance_df_slice['price'],
                         mode='markers',
-                        marker_color='red',
-                        marker_size=10,
+                        # marker_color='red',
+                        marker_size=7,
                         marker_symbol='circle-open',
-                        marker_line_width=2,
+                        marker_line_width=1,
                         name="Rebalances",
                         )
                     )

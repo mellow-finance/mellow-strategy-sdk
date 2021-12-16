@@ -275,6 +275,18 @@ POOLS = [
         "token1": Token.USDT,
         "fee": Fee.HIGH,
     },
+    {
+        "address": "lidov1",
+        "token0": Token.WETH,
+        "token1": Token.WETH,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "lidov2",
+        "token0": Token.WETH,
+        "token1": Token.WETH,
+        "fee": Fee.LOW,
+    },
 ]
 
 SPACING = {Fee.LOW: 10, Fee.MIDDLE: 60, Fee.HIGH: 200}

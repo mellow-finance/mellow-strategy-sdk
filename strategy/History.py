@@ -32,6 +32,7 @@ class PortfolioHistory:
     def calculate_value(self, df):
         """
         Calculate total value of portfolio denomitated in X and Y. Add new columns to historical df
+        :param df: Portfolio stats DataFrame 
         :return: Portfolio history data frame
         """
         value_to_x_cols = [col for col in df.columns if 'value_to_x' in col]
@@ -47,6 +48,7 @@ class PortfolioHistory:
     def calculate_il(self, df):
         """
         Calculate IL of portfolio denomitated in X and Y. Add new columns to historical df
+        :param df: Portfolio stats DataFrame 
         :return: Portfolio history data frame
         """
         il_to_x_cols = [col for col in df.columns if 'il_to_x' in col]
@@ -68,6 +70,7 @@ class PortfolioHistory:
     def calculate_costs(self, df):
         """
         Costs of portfolio management denomitated in X and Y. Add new columns to historical df
+        :param df: Portfolio stats DataFrame 
         :return: Portfolio history data frame
         """
         costs_to_x_cols = [col for col in df.columns if 'rebalance_costs_to_x' in col]
@@ -103,10 +106,23 @@ class PortfolioHistory:
     #         df['total_rl_to_x'] = 0
     #         df['total_rl_to_y'] = 0
     #     return df
+    
+    def calculate_liquidity(self, df):
+        liq_cols = [col for col in df.columns if 'current_liquidity' in col]
+    
+        if liq_cols:
+            df[liq_cols] = df[liq_cols].fillna(0)
+            df['total_current_liquidity'] = df[liq_cols].sum(axis=1)
+        else:
+            df['total_current_liquidity'] = 0
+            df['total_current_liquidity'] = 0
+            
+        return df
 
     def calculate_actual_fees(self, df):
         """
         Calculate actual fees of Uniswap positions denomitated in X and Y. Add new columns to historical df
+        :param stats_df: Portfolio stats DataFrame 
         :return: Portfolio history data frame
         """
         fees_to_x_cols = [col for col in df.columns if 'current_fees_to_x' in col]
@@ -126,6 +142,7 @@ class PortfolioHistory:
     def calculate_earned_fees(self, df):
         """
         Calculate total erned fees of Uniswap positions denomitated in X and Y. Add new columns to historical df
+        :param stats_df: Portfolio stats DataFrame 
         :return: Portfolio history data frame
         """
         fees_to_x_cols = [col for col in df.columns if 'earned_fees_to_x' in col]
@@ -144,31 +161,61 @@ class PortfolioHistory:
             df['total_earned_fees_to_x'] = 0
             df['total_earned_fees_to_y'] = 0
         return df
-
-    def calculate_performance(self, stats_df):
+    
+    
+    def calculate_returns(self, stats_df):
         """
-        Calculate porfolio performance. Add new columns to historical df
+        Calculate porfolio returns.
+        Add new columns to historical df.
+        :param stats_df: Portfolio stats DataFrame 
+        :return: Portfolio history data frame
+        """
+        stats_df['portfolio_returns_to_x'] = stats_df['portfolio_value_to_x'] / stats_df['portfolio_value_to_x'].shift()
+        stats_df['portfolio_returns_to_y'] = stats_df['portfolio_value_to_y'] / stats_df['portfolio_value_to_y'].shift()
+        return stats_df
+        
+    def calculate_performance_adj(self, stats_df):
+        """
+        Calculate porfolio performance relative to bicurrency pair.
+        Add new columns to historical df.
+        :param stats_df: Portfolio stats DataFrame 
         :return: Portfolio history data frame
         """
         def yearly_adj(df):
             days_gone = (df.index[-1] - df.index[0]).days + 1
             out = df.iloc[-1] ** (365 / days_gone)
             return out
+        
+        stats_df['price_returns_y'] = stats_df['price'] / stats_df['price'].shift()
+        stats_df['price_returns_x'] = stats_df['price'].shift() / stats_df['price'] 
+        
+        stats_df['portfolio_returns_rel_to_x'] = stats_df['portfolio_returns_to_x'] / stats_df['price_returns_x']
+        stats_df['portfolio_returns_rel_to_y'] = stats_df['portfolio_returns_to_y'] / stats_df['price_returns_y']
 
-        stats_df['profit_bicurrency_to_x'] = (stats_df['total_value_to_x'] - stats_df['total_value_to_x'].shift()).cumsum()
-        stats_df['profit_bicurrency_to_y'] = (stats_df['total_value_to_y'] - stats_df['total_value_to_y'].shift()).cumsum()
+        stats_df['portfolio_performance_rel_to_x_apy'] = stats_df['portfolio_returns_rel_to_x'].cumprod().expanding().apply(yearly_adj)
+        stats_df['portfolio_performance_rel_to_y_apy'] = stats_df['portfolio_returns_rel_to_y'].cumprod().expanding().apply(yearly_adj)
 
-        stats_df['portfolio_performance_to_x'] = (stats_df['portfolio_value_to_x'] / stats_df['portfolio_value_to_x'].shift()).cumprod()
-        stats_df['portfolio_performance_to_y'] = (stats_df['portfolio_value_to_y'] / stats_df['portfolio_value_to_y'].shift()).cumprod()
+        stats_df['portfolio_performance_rel_to_x_apy'] -= 1
+        stats_df['portfolio_performance_rel_to_y_apy'] -= 1
+        return stats_df
+        
 
-        stats_df['portfolio_performance_to_x_to_year'] = stats_df['portfolio_performance_to_x'].expanding().apply(yearly_adj)
-        stats_df['portfolio_performance_to_y_to_year'] = stats_df['portfolio_performance_to_y'].expanding().apply(yearly_adj)
+    def calculate_performance(self, stats_df):
+        """
+        Calculate porfolio performance. Add new columns to historical df
+        :param stats_df: Portfolio stats DataFrame 
+        :return: Portfolio history data frame
+        """
+        def yearly_adj(df):
+            days_gone = (df.index[-1] - df.index[0]).days + 1
+            out = df.iloc[-1] ** (365 / days_gone)
+            return out
+                        
+        stats_df['portfolio_performance_to_x_apy'] = stats_df['portfolio_returns_to_x'].cumprod().expanding().apply(yearly_adj)
+        stats_df['portfolio_performance_to_y_apy'] = stats_df['portfolio_returns_to_y'].cumprod().expanding().apply(yearly_adj)
 
-        stats_df['portfolio_performance_to_x'] -= 1
-        stats_df['portfolio_performance_to_x_to_year'] -= 1
-
-        stats_df['portfolio_performance_to_y'] -= 1
-        stats_df['portfolio_performance_to_y_to_year'] -= 1
+        stats_df['portfolio_performance_to_x_apy'] -= 1
+        stats_df['portfolio_performance_to_y_apy'] -= 1
         return stats_df
 
     def portfolio_stats(self):
@@ -180,6 +227,7 @@ class PortfolioHistory:
         df = self.calculate_value(df)
         df = self.calculate_il(df)
         # df = self.calculate_rl(df)
+        df = self.calculate_liquidity(df)
         df = self.calculate_actual_fees(df)
         df = self.calculate_earned_fees(df)
         df = self.calculate_costs(df)
@@ -206,7 +254,9 @@ class PortfolioHistory:
             df['total_earned_fees_to_x'] = 0
             df['total_earned_fees_to_y'] = 0
 
+        df = self.calculate_returns(df)
         df = self.calculate_performance(df)
+        df = self.calculate_performance_adj(df)
         return df
 
 

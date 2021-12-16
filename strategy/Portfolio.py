@@ -20,6 +20,11 @@ class Portfolio(AbstractPosition):
         if positions is None:
             positions = []
         self.positions = {pos.name: pos for pos in positions}
+    
+    def rename_position(self, old_name: str, new_name: str) -> None:
+        self.positions[old_name].rename(new_name)
+        self.positions[new_name] = self.positions.pop(old_name)
+        return None
 
     def append(self, position: AbstractPosition) -> None:
         """
@@ -67,6 +72,13 @@ class Portfolio(AbstractPosition):
         :return: List[AbstractPosition]
         """
         return list(self.positions.values())
+    
+    def position_names(self) -> List:
+        """
+        Get list of position names from portfolio
+        :return: List[str]
+        """
+        return list(self.positions.keys())
 
     def to_x(self, price: float):
         """
@@ -111,7 +123,7 @@ class Portfolio(AbstractPosition):
         :param price: current price of X in Y currency
         :return: portfolio snapshot
         """
-        snapshot = {'timestamp': timestamp}
+        snapshot = {'timestamp': timestamp, 'price': price}
         for name, pos in self.positions.items():
             snapshot.update(pos.snapshot(timestamp, price))
         return snapshot

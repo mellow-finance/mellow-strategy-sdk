@@ -11,6 +11,9 @@ class AbstractPosition(ABC):
     """
     def __init__(self, name: str) -> None:
         self.name = name
+    
+    def rename(self, new_name: str) -> None:
+        self.name = new_name
 
     @abstractmethod
     def to_x(self, price: float) -> float:
@@ -499,6 +502,8 @@ class UniV3Position(AbstractPosition):
 
         il_to_x = self.impermanent_loss_to_x(price)
         il_to_y = self.impermanent_loss_to_y(price)
+        
+        current_liquidity = self.liquidity
 
         snapshot = {f'{self.name}_value_to_x': volume_to_x,
                     f'{self.name}_value_to_y': volume_to_y,
@@ -517,5 +522,7 @@ class UniV3Position(AbstractPosition):
 
                     f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
                     f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
+                    
+                    f'{self.name}_current_liquidity': current_liquidity
                     }
         return snapshot
