@@ -1,6 +1,6 @@
-from .Strategies import AbstractStrategy
-from .Portfolio import Portfolio
-from .History import PortfolioHistory, RebalanceHistory, UniPositionsHistory
+from strategy.Strategies import AbstractStrategy
+from strategy.Portfolio import Portfolio
+from strategy.History import PortfolioHistory, RebalanceHistory, UniPositionsHistory
 
 from typing import Tuple
 import pandas as pd

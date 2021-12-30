@@ -3,7 +3,7 @@ import pandas as pd
 from pathlib import Path
 from decimal import Decimal
 
-from .primitives import Pool
+from strategy.primitives import Pool
 
 
 class PoolDataUniV3:

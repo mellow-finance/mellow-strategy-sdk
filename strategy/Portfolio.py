@@ -1,4 +1,4 @@
-from .Positions import AbstractPosition
+from strategy.Positions import AbstractPosition
 
 from typing import List, Tuple
 from datetime import datetime

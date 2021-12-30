@@ -37,7 +37,30 @@ class LinearData:
         return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df)
 
 
+
+def init_strat(pool, interval_width):
+    """
+    Initilize strategy.
+    Args:
+        data: UniswapV3 data.
+        pool: UniswapV3 pool.
+    Returns:
+        Initialized strategy.
+    """
+    burn_gap = int(pool.fee.spacing * interval_width / 2) - 1
+    lido = LidoStrategy(grid_width=pool.fee.spacing, interval_width_num=interval_width, burn_gap=burn_gap, pool=pool)
+    return lido
+
+
 def calc_perf(portfolio_history):
+    """
+    Calculate strategy performance metrics.
+    Args:
+        data: UniswapV3 data.
+        pool: UniswapV3 pool.
+    Returns:
+        Performance metrics.
+    """
     df_stats = portfolio_history.portfolio_stats()
 
     snaphot_first = df_stats.iloc[0]
@@ -74,13 +97,14 @@ def calc_perf(portfolio_history):
     return res
 
 
-def init_strat(pool, interval_width):
-    burn_gap = int(pool.fee.spacing * interval_width / 2) - 1
-    lido = LidoStrategy(grid_width=pool.fee.spacing, interval_width_num=interval_width, burn_gap=burn_gap, pool=pool)
-    return lido
-
-
 def evaluate(interval_width):
+    """
+    Evaluate backtesting.
+    Args:
+        path: Path to data.
+    Returns:
+        Performance metrics.
+    """
     pool = Pool(Token.WETH, Token.stETH, Fee.LOW)
     data = LinearData(pool).generate_data()
     strat = init_strat(pool, interval_width)
@@ -92,5 +116,5 @@ def evaluate(interval_width):
 
 if __name__ == '__main__':
     out = evaluate(1)
-    print(out)
+    pprint.pprint(out)
 

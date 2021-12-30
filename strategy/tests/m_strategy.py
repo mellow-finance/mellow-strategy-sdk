@@ -12,6 +12,14 @@ from strategy.primitives import Pool, Token, Fee
 
 
 def init_strat(pool, data):
+    """
+    Initilize strategy.
+    Args:
+        pool: UniswapV3 pool.
+        data: UniswapV3 data.
+    Returns:
+        Initialized strategy.
+    """
     lower_0 = data.swaps['price'].min()
     upper_0 = data.swaps['price'].max()
     mb_strat = MBStrategy(600, 30, lower_0, upper_0, pool, 0.01,  0.0002, 0.0002)
@@ -21,6 +29,14 @@ def init_strat(pool, data):
 
 
 def calc_perf(portfolio_history, data):
+    """
+    Calculate strategy performance metrics.
+    Args:
+        data: UniswapV3 data.
+        pool: UniswapV3 pool.
+    Returns:
+        Performance metrics.
+    """
     snaphot_last = portfolio_history.snapshots[-1]
     snaphot_first = portfolio_history.snapshots[0]
     
@@ -48,6 +64,13 @@ def calc_perf(portfolio_history, data):
 
 
 def evaluate(path):
+    """
+    Evaluate backtesting.
+    Args:
+        path: Path to data.
+    Returns:
+        Performance metrics.
+    """
     pool = Pool(Token.WBTC, Token.WETH, Fee.MIDDLE)
     data = RawDataUniV3(pool, folder=f'{path}/data/').load_from_folder()
     strat = init_strat(pool, data)

@@ -311,7 +311,7 @@ class UniPositionsHistory:
     def __init__(self):
         self.positions = {}
 
-    def add_snapshot(self, timestamp: datetime.datetime, positions: list):
+    def add_snapshot(self, timestamp: datetime.datetime, positions: dict):
         """
         Add uniswap position snapshot to history
         Args:

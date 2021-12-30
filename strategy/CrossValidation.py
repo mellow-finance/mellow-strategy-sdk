@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from multiprocessing import Pool
 
-from .Backtest import Backtest
+from strategy.Backtest import Backtest
 
 
 class FolderSimple:

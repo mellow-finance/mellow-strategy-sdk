@@ -84,7 +84,6 @@ class UniswapV3Utils:
         return res
 
 
-
 class UniswapV2Utils:
     def calc_fraction_to_uni(self, price, lower_price, upper_price):
         res = 1 - self.calc_fraction_to_y(price, lower_price) - self.calc_fraction_to_x(price, upper_price)

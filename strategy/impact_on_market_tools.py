@@ -98,4 +98,3 @@ def tokens_x_for_swap_p_0_to_p_1(liq: float, p_0: float, p_1: float) -> float:
     dsqrt_p = np.sqrt(Decimal(1 / p_1)) - np.sqrt(Decimal(1 / p_0))
     dx = dsqrt_p * liq
     return dx
-

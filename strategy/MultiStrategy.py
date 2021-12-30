@@ -1,4 +1,4 @@
-from .Strategies import AbstractStrategy
+from strategy.Strategies import AbstractStrategy
 from typing import List
 
 

@@ -2,9 +2,9 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from .History import PortfolioHistory, UniPositionsHistory, RebalanceHistory
-from .Data import PoolDataUniV3
-from .primitives import Pool
+from strategy.History import PortfolioHistory, UniPositionsHistory, RebalanceHistory
+from strategy.Data import PoolDataUniV3
+from strategy.primitives import Pool
 
 
 class PotrfolioViewer:

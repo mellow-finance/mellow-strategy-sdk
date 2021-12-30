@@ -98,6 +98,19 @@ class Token(Enum):
             return NotImplemented
         return self.value == other.value
 
+    def __lt__(self, other: 'Token') -> bool:
+        """
+        Args:
+            other: Other Token
+        """
+        if not self._is_valid_operand(other):
+            return NotImplemented
+
+        return (
+            TOKEN_DETAILS[self.value]["address"].lower()
+            < TOKEN_DETAILS[other.value]["address"].lower()
+        )
+
 
 class Pool:
     """
@@ -108,7 +121,7 @@ class Pool:
         fee: Pool fee.
     """
 
-    def __init__(self, tokenA: Token, tokenB: Token, fee: Fee):
+    def __init__(self, tokenA: "Token", tokenB: "Token", fee: "Fee"):
         self._token0, self._token1 = tokenA, tokenB
         self._fee = fee
         self._address = None
@@ -160,7 +173,7 @@ class Pool:
         return self._address
 
     @property
-    def token0(self) -> Token:
+    def token0(self) -> "Token":
         """
         First token of the pool.
         Returns:
@@ -169,7 +182,7 @@ class Pool:
         return self._token0
 
     @property
-    def token1(self) -> Token:
+    def token1(self) -> "Token":
         """
         Second token of the pool.
         Returns:
@@ -178,7 +191,7 @@ class Pool:
         return self._token1
 
     @property
-    def fee(self) -> Fee:
+    def fee(self) -> "Fee":
         """
         Fee of the pool.
         Returns:

@@ -1,6 +1,6 @@
-from .UniUtils import UniswapV3Utils, UniswapV2Utils, UniswapLiquidityAligner
-from .Positions import UniV3Position, BiCurrencyPosition
-from .primitives import Pool
+from strategy.UniUtils import UniswapV3Utils, UniswapV2Utils, UniswapLiquidityAligner
+from strategy.Positions import UniV3Position, BiCurrencyPosition
+from strategy.primitives import Pool
 
 from abc import ABC, abstractmethod
 import math
@@ -411,8 +411,6 @@ class MUStrategy(AbstractStrategy):
         lower_0: Base lower bound of the emulated interval.
         upper_0: Base upper bound of the emulated interval.
         rebalance_cost: Rebalancing cost, expressed in currency.
-        x_interest: Interest on  currency X deposit expressed as a daily percentage yield.
-        y_interest: Interest on  currency Y deposit expressed as a daily percentage yield.
         pool: UniswapV3 Pool instance.
         name: Unique name for the instance.
     """

@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>strategy.Data API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>strategy.Data</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import numpy as np
+import pandas as pd
+from pathlib import Path
+from decimal import Decimal
+
+from strategy.primitives import Pool
+
+
+class PoolDataUniV3:
+    &#34;&#34;&#34;
+    ``PoolDataUniV3`` contains data for backtesting.
+    Attributes:
+        pool: UniswapV3 ``Pool`` data
+        mints: UniswapV3 mints data.
+        burns: UniswapV3 burns data.
+        swaps: UniswapV3 swaps data.
+    &#34;&#34;&#34;
+    def __init__(self,
+                 pool: Pool,
+                 mints: pd.DataFrame = None,
+                 burns: pd.DataFrame = None,
+                 swaps: pd.DataFrame = None
+                 ):
+
+        self.pool = pool
+        self.mints = mints
+        self.burns = burns
+        self.swaps = swaps
+
+
+class RawDataUniV3:
+    &#34;&#34;&#34;
+      ``RawDataUniV3`` preprocess UniswapV3 data.
+      Attributes:
+         pool: UniswapV3 pool meta data.
+         folder: path to data.
+   &#34;&#34;&#34;
+    def __init__(self, pool: Pool, folder: Path = &#39;../data/&#39;):
+        self.pool = pool
+        self.folder = folder
+
+    def load_from_folder(self) -&gt; PoolDataUniV3:
+        &#34;&#34;&#34;
+        Loads data: swaps, mint, burns from predefined folder.
+        Returns:
+            PoolDataUniV3 instance with loaded data.
+        &#34;&#34;&#34;
+
+        mints_converters = {
+            &#34;block_time&#34;: int,
+            &#34;block_number&#34;: int,
+            &#34;tick_lower&#34;: int,
+            &#34;tick_upper&#34;: int,
+            &#34;amount&#34;: int,
+            &#34;amount0&#34;: int,
+            &#34;amount1&#34;: int,
+        }
+        df_mint = pd.read_csv(f&#39;{self.folder}mint_{self.pool.name}.csv&#39;, converters=mints_converters)
+
+        burns_converts = {
+            &#34;block_time&#34;: int,
+            &#34;block_number&#34;: int,
+            &#34;tick_lower&#34;: int,
+            &#34;tick_upper&#34;: int,
+            &#34;amount&#34;: int,
+            &#34;amount0&#34;: int,
+            &#34;amount1&#34;: int,
+        }
+        df_burn = pd.read_csv(f&#39;{self.folder}burn_{self.pool.name}.csv&#39;, converters=burns_converts)
+
+        swap_converters = {
+            &#34;block_time&#34;: int,
+            &#34;block_number&#34;: int,
+            &#34;sqrt_price_x96&#34;: int,
+            &#34;amount0&#34;: int,
+            &#34;amount1&#34;: int,
+            &#34;liquidity&#34;: int,
+        }
+        df_swap = pd.read_csv(f&#39;{self.folder}swap_{self.pool.name}.csv&#39;, converters=swap_converters)
+
+        mints = self.preprocess_mints(df_mint)
+        burns = self.preprocess_burns(df_burn)
+        swaps = self.preprocess_swaps(df_swap)
+        return PoolDataUniV3(self.pool, mints, burns, swaps)
+
+    def preprocess_mints(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;
+        Preprocess UniswapV3 mints data.
+        Args:
+            df: Mints data frame.
+        Returns:
+            Preprocessed mints data frame.
+        &#34;&#34;&#34;
+        df[&#39;timestamp&#39;] = pd.to_datetime(df[&#34;block_time&#34;], unit=&#34;s&#34;)
+        df = df.set_index(&#39;timestamp&#39;)
+        df = df.sort_values(by=[&#39;timestamp&#39;, &#39;amount&#39;], ascending=[True, False])
+        df[&#39;amount0&#39;] = df[&#39;amount0&#39;] / 10**self.pool.token0.decimals
+        df[&#39;amount1&#39;] = df[&#39;amount1&#39;] / 10**self.pool.token1.decimals
+        df[&#39;amount&#39;] = df[&#39;amount&#39;] / 10**(-self.pool.decimals_diff)
+        return df
+
+    def preprocess_burns(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;
+        Preprocess UniswapV3 burns data.
+        Args:
+            df: Burns data frame.
+        Returns:
+            Preprocessed burns data frame.
+        &#34;&#34;&#34;
+        df[&#39;timestamp&#39;] = pd.to_datetime(df[&#34;block_time&#34;], unit=&#34;s&#34;)
+        df = df.set_index(&#39;timestamp&#39;)
+        df = df.sort_values(by=[&#39;timestamp&#39;, &#39;amount&#39;], ascending=[True, False])
+        df[&#39;amount0&#39;] = df[&#39;amount0&#39;] / 10**self.pool.token0.decimals
+        df[&#39;amount1&#39;] = df[&#39;amount1&#39;] / 10**self.pool.token1.decimals
+        df[&#39;amount&#39;] = df[&#39;amount&#39;] / 10**(-self.pool.decimals_diff)
+        return df
+
+    def preprocess_swaps(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;
+        Preprocess UniswapV3 swap data.
+        Args:
+            df: Swaps data frame.
+        Returns:
+            Preprocessed swap data frame.
+        &#34;&#34;&#34;
+
+        df[&#39;timestamp&#39;] = pd.to_datetime(df[&#34;block_time&#34;], unit=&#34;s&#34;)
+        df[&#39;timestamp&#39;] = df[&#39;timestamp&#39;] + pd.to_timedelta(df[&#39;log_index&#39;], unit=&#39;ns&#39;)
+        df = df.sort_values(by=&#39;timestamp&#39;, ascending=True)
+        df = df.set_index(&#39;timestamp&#39;)
+        df[&#39;amount0&#39;] = df[&#39;amount0&#39;] / 10**self.pool.token0.decimals
+        df[&#39;amount1&#39;] = df[&#39;amount1&#39;] / 10**self.pool.token1.decimals
+        df[&#39;liquidity&#39;] = df[&#39;liquidity&#39;] / 10**(-self.pool.decimals_diff)
+
+        df[&#34;price&#34;] = df[&#34;sqrt_price_x96&#34;].transform(
+                lambda x: float(Decimal(x) * Decimal(x) / (Decimal(2 ** 192) * Decimal(10 ** (-self.pool.decimals_diff))))
+                        )
+        df[&#34;price_before&#34;] = df[&#34;price&#34;].shift(1)
+        df[&#34;price_before&#34;] = df[&#34;price_before&#34;].bfill()
+
+        df[&#34;price_next&#34;] = df[&#34;price&#34;].shift(-1)
+        df[&#34;price_next&#34;] = df[&#34;price_next&#34;].ffill()
+
+        return df
+
+
+class SyntheticData:
+    &#34;&#34;&#34;
+       ``SyntheticData`` generates UniswapV3 synthetic exchange data.
+       Attributes:
+            pool: UniswapV3 ``Pool`` instance.
+            start_date: Generating starting date.
+            n_points: Amount samples to generate.
+            init_price: Initial price.
+            mu: Expectation of normal distribution.
+            sigma: Variance of normal distributio.
+            seed: Seed for random generator.
+   &#34;&#34;&#34;
+    def __init__(self, pool, start_date=&#39;1-1-2022&#39;, n_points=365, init_price=1, mu=0, sigma=0.1, seed=42):
+        self.pool = pool
+        self.start_date = start_date
+        self.n_points = n_points
+
+        self.init_price = init_price
+        self.mu = mu
+        self.sigma = sigma
+
+        self.seed = seed
+
+    def generate_data(self):
+        &#34;&#34;&#34;
+        Generate synthetic UniswapV3 exchange data.
+        Returns:
+            PoolDataUniV3 instance with synthetic data.
+        &#34;&#34;&#34;
+        timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq=&#39;D&#39;, normalize=True)
+        # np.random.seed(self.seed)
+        price_log_returns = np.random.normal(loc=self.mu, scale=self.sigma, size=self.n_points)
+        price_returns = np.exp(price_log_returns)
+        price_returns[0] = self.init_price
+
+        prices = np.cumprod(price_returns)
+
+        df = pd.DataFrame(zip(timestamps, prices), columns=[&#39;timestamp&#39;, &#39;price&#39;]).set_index(&#39;timestamp&#39;)
+
+        df[&#34;price_before&#34;] = df[&#34;price&#34;].shift(1)
+        df[&#34;price_before&#34;] = df[&#34;price_before&#34;].bfill()
+
+        df[&#34;price_next&#34;] = df[&#34;price&#34;].shift(-1)
+        df[&#34;price_next&#34;] = df[&#34;price_next&#34;].ffill()
+        
+        return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="strategy.Data.PoolDataUniV3"><code class="flex name class">
+<span>class <span class="ident">PoolDataUniV3</span></span>
+<span>(</span><span>pool: <a title="strategy.primitives.Pool" href="primitives.html#strategy.primitives.Pool">Pool</a>, mints: pandas.core.frame.DataFrame = None, burns: pandas.core.frame.DataFrame = None, swaps: pandas.core.frame.DataFrame = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p><code><a title="strategy.Data.PoolDataUniV3" href="#strategy.Data.PoolDataUniV3">PoolDataUniV3</a></code> contains data for backtesting.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>pool</code></strong></dt>
+<dd>UniswapV3 <code>Pool</code> data</dd>
+<dt><strong><code>mints</code></strong></dt>
+<dd>UniswapV3 mints data.</dd>
+<dt><strong><code>burns</code></strong></dt>
+<dd>UniswapV3 burns data.</dd>
+<dt><strong><code>swaps</code></strong></dt>
+<dd>UniswapV3 swaps data.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class PoolDataUniV3:
+    &#34;&#34;&#34;
+    ``PoolDataUniV3`` contains data for backtesting.
+    Attributes:
+        pool: UniswapV3 ``Pool`` data
+        mints: UniswapV3 mints data.
+        burns: UniswapV3 burns data.
+        swaps: UniswapV3 swaps data.
+    &#34;&#34;&#34;
+    def __init__(self,
+                 pool: Pool,
+                 mints: pd.DataFrame = None,
+                 burns: pd.DataFrame = None,
+                 swaps: pd.DataFrame = None
+                 ):
+
+        self.pool = pool
+        self.mints = mints
+        self.burns = burns
+        self.swaps = swaps</code></pre>
+</details>
+</dd>
+<dt id="strategy.Data.RawDataUniV3"><code class="flex name class">
+<span>class <span class="ident">RawDataUniV3</span></span>
+<span>(</span><span>pool: <a title="strategy.primitives.Pool" href="primitives.html#strategy.primitives.Pool">Pool</a>, folder: pathlib.Path = '../data/')</span>
+</code></dt>
+<dd>
+<div class="desc"><p><code><a title="strategy.Data.RawDataUniV3" href="#strategy.Data.RawDataUniV3">RawDataUniV3</a></code> preprocess UniswapV3 data.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>pool</code></strong></dt>
+<dd>UniswapV3 pool meta data.</dd>
+<dt><strong><code>folder</code></strong></dt>
+<dd>path to data.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RawDataUniV3:
+    &#34;&#34;&#34;
+      ``RawDataUniV3`` preprocess UniswapV3 data.
+      Attributes:
+         pool: UniswapV3 pool meta data.
+         folder: path to data.
+   &#34;&#34;&#34;
+    def __init__(self, pool: Pool, folder: Path = &#39;../data/&#39;):
+        self.pool = pool
+        self.folder = folder
+
+    def load_from_folder(self) -&gt; PoolDataUniV3:
+        &#34;&#34;&#34;
+        Loads data: swaps, mint, burns from predefined folder.
+        Returns:
+            PoolDataUniV3 instance with loaded data.
+        &#34;&#34;&#34;
+
+        mints_converters = {
+            &#34;block_time&#34;: int,
+            &#34;block_number&#34;: int,
+            &#34;tick_lower&#34;: int,
+            &#34;tick_upper&#34;: int,
+            &#34;amount&#34;: int,
+            &#34;amount0&#34;: int,
+            &#34;amount1&#34;: int,
+        }
+        df_mint = pd.read_csv(f&#39;{self.folder}mint_{self.pool.name}.csv&#39;, converters=mints_converters)
+
+        burns_converts = {
+            &#34;block_time&#34;: int,
+            &#34;block_number&#34;: int,
+            &#34;tick_lower&#34;: int,
+            &#34;tick_upper&#34;: int,
+            &#34;amount&#34;: int,
+            &#34;amount0&#34;: int,
+            &#34;amount1&#34;: int,
+        }
+        df_burn = pd.read_csv(f&#39;{self.folder}burn_{self.pool.name}.csv&#39;, converters=burns_converts)
+
+        swap_converters = {
+            &#34;block_time&#34;: int,
+            &#34;block_number&#34;: int,
+            &#34;sqrt_price_x96&#34;: int,
+            &#34;amount0&#34;: int,
+            &#34;amount1&#34;: int,
+            &#34;liquidity&#34;: int,
+        }
+        df_swap = pd.read_csv(f&#39;{self.folder}swap_{self.pool.name}.csv&#39;, converters=swap_converters)
+
+        mints = self.preprocess_mints(df_mint)
+        burns = self.preprocess_burns(df_burn)
+        swaps = self.preprocess_swaps(df_swap)
+        return PoolDataUniV3(self.pool, mints, burns, swaps)
+
+    def preprocess_mints(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;
+        Preprocess UniswapV3 mints data.
+        Args:
+            df: Mints data frame.
+        Returns:
+            Preprocessed mints data frame.
+        &#34;&#34;&#34;
+        df[&#39;timestamp&#39;] = pd.to_datetime(df[&#34;block_time&#34;], unit=&#34;s&#34;)
+        df = df.set_index(&#39;timestamp&#39;)
+        df = df.sort_values(by=[&#39;timestamp&#39;, &#39;amount&#39;], ascending=[True, False])
+        df[&#39;amount0&#39;] = df[&#39;amount0&#39;] / 10**self.pool.token0.decimals
+        df[&#39;amount1&#39;] = df[&#39;amount1&#39;] / 10**self.pool.token1.decimals
+        df[&#39;amount&#39;] = df[&#39;amount&#39;] / 10**(-self.pool.decimals_diff)
+        return df
+
+    def preprocess_burns(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;
+        Preprocess UniswapV3 burns data.
+        Args:
+            df: Burns data frame.
+        Returns:
+            Preprocessed burns data frame.
+        &#34;&#34;&#34;
+        df[&#39;timestamp&#39;] = pd.to_datetime(df[&#34;block_time&#34;], unit=&#34;s&#34;)
+        df = df.set_index(&#39;timestamp&#39;)
+        df = df.sort_values(by=[&#39;timestamp&#39;, &#39;amount&#39;], ascending=[True, False])
+        df[&#39;amount0&#39;] = df[&#39;amount0&#39;] / 10**self.pool.token0.decimals
+        df[&#39;amount1&#39;] = df[&#39;amount1&#39;] / 10**self.pool.token1.decimals
+        df[&#39;amount&#39;] = df[&#39;amount&#39;] / 10**(-self.pool.decimals_diff)
+        return df
+
+    def preprocess_swaps(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;
+        Preprocess UniswapV3 swap data.
+        Args:
+            df: Swaps data frame.
+        Returns:
+            Preprocessed swap data frame.
+        &#34;&#34;&#34;
+
+        df[&#39;timestamp&#39;] = pd.to_datetime(df[&#34;block_time&#34;], unit=&#34;s&#34;)
+        df[&#39;timestamp&#39;] = df[&#39;timestamp&#39;] + pd.to_timedelta(df[&#39;log_index&#39;], unit=&#39;ns&#39;)
+        df = df.sort_values(by=&#39;timestamp&#39;, ascending=True)
+        df = df.set_index(&#39;timestamp&#39;)
+        df[&#39;amount0&#39;] = df[&#39;amount0&#39;] / 10**self.pool.token0.decimals
+        df[&#39;amount1&#39;] = df[&#39;amount1&#39;] / 10**self.pool.token1.decimals
+        df[&#39;liquidity&#39;] = df[&#39;liquidity&#39;] / 10**(-self.pool.decimals_diff)
+
+        df[&#34;price&#34;] = df[&#34;sqrt_price_x96&#34;].transform(
+                lambda x: float(Decimal(x) * Decimal(x) / (Decimal(2 ** 192) * Decimal(10 ** (-self.pool.decimals_diff))))
+                        )
+        df[&#34;price_before&#34;] = df[&#34;price&#34;].shift(1)
+        df[&#34;price_before&#34;] = df[&#34;price_before&#34;].bfill()
+
+        df[&#34;price_next&#34;] = df[&#34;price&#34;].shift(-1)
+        df[&#34;price_next&#34;] = df[&#34;price_next&#34;].ffill()
+
+        return df</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="strategy.Data.RawDataUniV3.load_from_folder"><code class="name flex">
+<span>def <span class="ident">load_from_folder</span></span>(<span>self) ‑> <a title="strategy.Data.PoolDataUniV3" href="#strategy.Data.PoolDataUniV3">PoolDataUniV3</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Loads data: swaps, mint, burns from predefined folder.</p>
+<h2 id="returns">Returns</h2>
+<p>PoolDataUniV3 instance with loaded data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def load_from_folder(self) -&gt; PoolDataUniV3:
+    &#34;&#34;&#34;
+    Loads data: swaps, mint, burns from predefined folder.
+    Returns:
+        PoolDataUniV3 instance with loaded data.
+    &#34;&#34;&#34;
+
+    mints_converters = {
+        &#34;block_time&#34;: int,
+        &#34;block_number&#34;: int,
+        &#34;tick_lower&#34;: int,
+        &#34;tick_upper&#34;: int,
+        &#34;amount&#34;: int,
+        &#34;amount0&#34;: int,
+        &#34;amount1&#34;: int,
+    }
+    df_mint = pd.read_csv(f&#39;{self.folder}mint_{self.pool.name}.csv&#39;, converters=mints_converters)
+
+    burns_converts = {
+        &#34;block_time&#34;: int,
+        &#34;block_number&#34;: int,
+        &#34;tick_lower&#34;: int,
+        &#34;tick_upper&#34;: int,
+        &#34;amount&#34;: int,
+        &#34;amount0&#34;: int,
+        &#34;amount1&#34;: int,
+    }
+    df_burn = pd.read_csv(f&#39;{self.folder}burn_{self.pool.name}.csv&#39;, converters=burns_converts)
+
+    swap_converters = {
+        &#34;block_time&#34;: int,
+        &#34;block_number&#34;: int,
+        &#34;sqrt_price_x96&#34;: int,
+        &#34;amount0&#34;: int,
+        &#34;amount1&#34;: int,
+        &#34;liquidity&#34;: int,
+    }
+    df_swap = pd.read_csv(f&#39;{self.folder}swap_{self.pool.name}.csv&#39;, converters=swap_converters)
+
+    mints = self.preprocess_mints(df_mint)
+    burns = self.preprocess_burns(df_burn)
+    swaps = self.preprocess_swaps(df_swap)
+    return PoolDataUniV3(self.pool, mints, burns, swaps)</code></pre>
+</details>
+</dd>
+<dt id="strategy.Data.RawDataUniV3.preprocess_burns"><code class="name flex">
+<span>def <span class="ident">preprocess_burns</span></span>(<span>self, df: pandas.core.frame.DataFrame) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Preprocess UniswapV3 burns data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong></dt>
+<dd>Burns data frame.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Preprocessed burns data frame.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def preprocess_burns(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;
+    Preprocess UniswapV3 burns data.
+    Args:
+        df: Burns data frame.
+    Returns:
+        Preprocessed burns data frame.
+    &#34;&#34;&#34;
+    df[&#39;timestamp&#39;] = pd.to_datetime(df[&#34;block_time&#34;], unit=&#34;s&#34;)
+    df = df.set_index(&#39;timestamp&#39;)
+    df = df.sort_values(by=[&#39;timestamp&#39;, &#39;amount&#39;], ascending=[True, False])
+    df[&#39;amount0&#39;] = df[&#39;amount0&#39;] / 10**self.pool.token0.decimals
+    df[&#39;amount1&#39;] = df[&#39;amount1&#39;] / 10**self.pool.token1.decimals
+    df[&#39;amount&#39;] = df[&#39;amount&#39;] / 10**(-self.pool.decimals_diff)
+    return df</code></pre>
+</details>
+</dd>
+<dt id="strategy.Data.RawDataUniV3.preprocess_mints"><code class="name flex">
+<span>def <span class="ident">preprocess_mints</span></span>(<span>self, df: pandas.core.frame.DataFrame) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Preprocess UniswapV3 mints data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong></dt>
+<dd>Mints data frame.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Preprocessed mints data frame.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def preprocess_mints(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;
+    Preprocess UniswapV3 mints data.
+    Args:
+        df: Mints data frame.
+    Returns:
+        Preprocessed mints data frame.
+    &#34;&#34;&#34;
+    df[&#39;timestamp&#39;] = pd.to_datetime(df[&#34;block_time&#34;], unit=&#34;s&#34;)
+    df = df.set_index(&#39;timestamp&#39;)
+    df = df.sort_values(by=[&#39;timestamp&#39;, &#39;amount&#39;], ascending=[True, False])
+    df[&#39;amount0&#39;] = df[&#39;amount0&#39;] / 10**self.pool.token0.decimals
+    df[&#39;amount1&#39;] = df[&#39;amount1&#39;] / 10**self.pool.token1.decimals
+    df[&#39;amount&#39;] = df[&#39;amount&#39;] / 10**(-self.pool.decimals_diff)
+    return df</code></pre>
+</details>
+</dd>
+<dt id="strategy.Data.RawDataUniV3.preprocess_swaps"><code class="name flex">
+<span>def <span class="ident">preprocess_swaps</span></span>(<span>self, df: pandas.core.frame.DataFrame) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Preprocess UniswapV3 swap data.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>df</code></strong></dt>
+<dd>Swaps data frame.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Preprocessed swap data frame.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def preprocess_swaps(self, df: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;
+    Preprocess UniswapV3 swap data.
+    Args:
+        df: Swaps data frame.
+    Returns:
+        Preprocessed swap data frame.
+    &#34;&#34;&#34;
+
+    df[&#39;timestamp&#39;] = pd.to_datetime(df[&#34;block_time&#34;], unit=&#34;s&#34;)
+    df[&#39;timestamp&#39;] = df[&#39;timestamp&#39;] + pd.to_timedelta(df[&#39;log_index&#39;], unit=&#39;ns&#39;)
+    df = df.sort_values(by=&#39;timestamp&#39;, ascending=True)
+    df = df.set_index(&#39;timestamp&#39;)
+    df[&#39;amount0&#39;] = df[&#39;amount0&#39;] / 10**self.pool.token0.decimals
+    df[&#39;amount1&#39;] = df[&#39;amount1&#39;] / 10**self.pool.token1.decimals
+    df[&#39;liquidity&#39;] = df[&#39;liquidity&#39;] / 10**(-self.pool.decimals_diff)
+
+    df[&#34;price&#34;] = df[&#34;sqrt_price_x96&#34;].transform(
+            lambda x: float(Decimal(x) * Decimal(x) / (Decimal(2 ** 192) * Decimal(10 ** (-self.pool.decimals_diff))))
+                    )
+    df[&#34;price_before&#34;] = df[&#34;price&#34;].shift(1)
+    df[&#34;price_before&#34;] = df[&#34;price_before&#34;].bfill()
+
+    df[&#34;price_next&#34;] = df[&#34;price&#34;].shift(-1)
+    df[&#34;price_next&#34;] = df[&#34;price_next&#34;].ffill()
+
+    return df</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="strategy.Data.SyntheticData"><code class="flex name class">
+<span>class <span class="ident">SyntheticData</span></span>
+<span>(</span><span>pool, start_date='1-1-2022', n_points=365, init_price=1, mu=0, sigma=0.1, seed=42)</span>
+</code></dt>
+<dd>
+<div class="desc"><p><code><a title="strategy.Data.SyntheticData" href="#strategy.Data.SyntheticData">SyntheticData</a></code> generates UniswapV3 synthetic exchange data.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>pool</code></strong></dt>
+<dd>UniswapV3 <code>Pool</code> instance.</dd>
+<dt><strong><code>start_date</code></strong></dt>
+<dd>Generating starting date.</dd>
+<dt><strong><code>n_points</code></strong></dt>
+<dd>Amount samples to generate.</dd>
+<dt><strong><code>init_price</code></strong></dt>
+<dd>Initial price.</dd>
+<dt><strong><code>mu</code></strong></dt>
+<dd>Expectation of normal distribution.</dd>
+<dt><strong><code>sigma</code></strong></dt>
+<dd>Variance of normal distributio.</dd>
+<dt><strong><code>seed</code></strong></dt>
+<dd>Seed for random generator.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SyntheticData:
+    &#34;&#34;&#34;
+       ``SyntheticData`` generates UniswapV3 synthetic exchange data.
+       Attributes:
+            pool: UniswapV3 ``Pool`` instance.
+            start_date: Generating starting date.
+            n_points: Amount samples to generate.
+            init_price: Initial price.
+            mu: Expectation of normal distribution.
+            sigma: Variance of normal distributio.
+            seed: Seed for random generator.
+   &#34;&#34;&#34;
+    def __init__(self, pool, start_date=&#39;1-1-2022&#39;, n_points=365, init_price=1, mu=0, sigma=0.1, seed=42):
+        self.pool = pool
+        self.start_date = start_date
+        self.n_points = n_points
+
+        self.init_price = init_price
+        self.mu = mu
+        self.sigma = sigma
+
+        self.seed = seed
+
+    def generate_data(self):
+        &#34;&#34;&#34;
+        Generate synthetic UniswapV3 exchange data.
+        Returns:
+            PoolDataUniV3 instance with synthetic data.
+        &#34;&#34;&#34;
+        timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq=&#39;D&#39;, normalize=True)
+        # np.random.seed(self.seed)
+        price_log_returns = np.random.normal(loc=self.mu, scale=self.sigma, size=self.n_points)
+        price_returns = np.exp(price_log_returns)
+        price_returns[0] = self.init_price
+
+        prices = np.cumprod(price_returns)
+
+        df = pd.DataFrame(zip(timestamps, prices), columns=[&#39;timestamp&#39;, &#39;price&#39;]).set_index(&#39;timestamp&#39;)
+
+        df[&#34;price_before&#34;] = df[&#34;price&#34;].shift(1)
+        df[&#34;price_before&#34;] = df[&#34;price_before&#34;].bfill()
+
+        df[&#34;price_next&#34;] = df[&#34;price&#34;].shift(-1)
+        df[&#34;price_next&#34;] = df[&#34;price_next&#34;].ffill()
+        
+        return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df)</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="strategy.Data.SyntheticData.generate_data"><code class="name flex">
+<span>def <span class="ident">generate_data</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate synthetic UniswapV3 exchange data.</p>
+<h2 id="returns">Returns</h2>
+<p>PoolDataUniV3 instance with synthetic data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def generate_data(self):
+    &#34;&#34;&#34;
+    Generate synthetic UniswapV3 exchange data.
+    Returns:
+        PoolDataUniV3 instance with synthetic data.
+    &#34;&#34;&#34;
+    timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq=&#39;D&#39;, normalize=True)
+    # np.random.seed(self.seed)
+    price_log_returns = np.random.normal(loc=self.mu, scale=self.sigma, size=self.n_points)
+    price_returns = np.exp(price_log_returns)
+    price_returns[0] = self.init_price
+
+    prices = np.cumprod(price_returns)
+
+    df = pd.DataFrame(zip(timestamps, prices), columns=[&#39;timestamp&#39;, &#39;price&#39;]).set_index(&#39;timestamp&#39;)
+
+    df[&#34;price_before&#34;] = df[&#34;price&#34;].shift(1)
+    df[&#34;price_before&#34;] = df[&#34;price_before&#34;].bfill()
+
+    df[&#34;price_next&#34;] = df[&#34;price&#34;].shift(-1)
+    df[&#34;price_next&#34;] = df[&#34;price_next&#34;].ffill()
+    
+    return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="strategy" href="index.html">strategy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="strategy.Data.PoolDataUniV3" href="#strategy.Data.PoolDataUniV3">PoolDataUniV3</a></code></h4>
+</li>
+<li>
+<h4><code><a title="strategy.Data.RawDataUniV3" href="#strategy.Data.RawDataUniV3">RawDataUniV3</a></code></h4>
+<ul class="">
+<li><code><a title="strategy.Data.RawDataUniV3.load_from_folder" href="#strategy.Data.RawDataUniV3.load_from_folder">load_from_folder</a></code></li>
+<li><code><a title="strategy.Data.RawDataUniV3.preprocess_burns" href="#strategy.Data.RawDataUniV3.preprocess_burns">preprocess_burns</a></code></li>
+<li><code><a title="strategy.Data.RawDataUniV3.preprocess_mints" href="#strategy.Data.RawDataUniV3.preprocess_mints">preprocess_mints</a></code></li>
+<li><code><a title="strategy.Data.RawDataUniV3.preprocess_swaps" href="#strategy.Data.RawDataUniV3.preprocess_swaps">preprocess_swaps</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="strategy.Data.SyntheticData" href="#strategy.Data.SyntheticData">SyntheticData</a></code></h4>
+<ul class="">
+<li><code><a title="strategy.Data.SyntheticData.generate_data" href="#strategy.Data.SyntheticData.generate_data">generate_data</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
