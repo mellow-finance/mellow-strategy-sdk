@@ -2,6 +2,12 @@ import numpy as np
 
 
 class UniswapLiquidityAligner:
+    """
+    ``UniswapLiquidityAligner`` is a class with UniswapV3 utils.
+    Attributes:
+        lower_price: Left bound for the UniswapV3 interval.
+        upper_price: Right bound for the UniswapV3 interval.
+    """
     def __init__(self, lower_price, upper_price):
         self.lower_price = lower_price
         self.upper_price = upper_price
@@ -36,8 +42,9 @@ class UniswapLiquidityAligner:
 class UniswapV3Utils:
     """
        ``UniV3Utils`` is a class for creating UniswapV3 position in correct proportions.
-       :param lower_0: Base lower bound of the emulated interval
-       :param upper_0: Base upper bound of the emulated interval
+       Attributes:
+            lower_0: Base lower bound of the emulated interval.
+            upper_0: Base upper bound of the emulated interval.
     """
     def __init__(self,
                  lower_0: float,

@@ -7,10 +7,9 @@ from datetime import datetime
 class Portfolio(AbstractPosition):
     """
         ``Portfolio`` is a container for several open positions.
-        It also conforms to ``AbstractPosition`` interface, aggregating all positions values.
-        Note that children positions of ``Portfolio`` can also be other ``Portfolio`` objects.
-        :param name: Unique name for the position
-        :param positions: List of initial positions
+        Attributes:
+            name: Unique name for the position.
+            positions: List of initial positions.
     """
 
     def __init__(self,
@@ -21,23 +20,31 @@ class Portfolio(AbstractPosition):
             positions = []
         self.positions = {pos.name: pos for pos in positions}
     
-    def rename_position(self, old_name: str, new_name: str) -> None:
-        self.positions[old_name].rename(new_name)
-        self.positions[new_name] = self.positions.pop(old_name)
+    def rename_position(self, current_name: str, new_name: str) -> None:
+        """
+        Rename position in portfolio by its name.
+        Args:
+            current_name: Current name of position.
+            new_name: New name for position.
+        """
+        self.positions[current_name].rename(new_name)
+        self.positions[new_name] = self.positions.pop(current_name)
         return None
 
     def append(self, position: AbstractPosition) -> None:
         """
-        Add position to portfolio
-        :param position: AbstractPosition
+        Add position to portfolio.
+        Args:
+            position: Any ``AbstractPosition`` instance.
         """
         self.positions[position.name] = position
         return None
 
     def remove(self, name: str) -> None:
         """
-        Remove position from portfolio by name
-        :param name: position name
+        Remove position from portfolio by its name.
+        Args:
+            name: Position name.
         """
         if name not in self.positions:
             raise Exception(f'Invalid name = {name}')
@@ -46,9 +53,11 @@ class Portfolio(AbstractPosition):
 
     def get_position(self, name: str) -> AbstractPosition:
         """
-        Get position from portfolio by name
-        :param name: position name
-        :return: AbstractPosition
+        Get position from portfolio by name.
+        Args:
+            name: Position name.
+        Returns:
+            ``AbstractPosition`` instance.
         """
         if name not in self.positions:
             raise Exception(f'Invalid name = {name}')
@@ -56,8 +65,9 @@ class Portfolio(AbstractPosition):
 
     def get_last_position(self) -> AbstractPosition:
         """
-        Get last position from portfolio
-        :return: AbstractPosition
+        Get last position from portfolio.
+        Returns:
+             Last position in portfolio.
         """
         if self.positions:
             last_key = list(self.positions.keys())[-1]
@@ -66,25 +76,29 @@ class Portfolio(AbstractPosition):
         else:
             raise Exception(f'Position not found')
 
-    def positions_list(self) -> List:
+    def positions_list(self) -> List[AbstractPosition]:
         """
-        Get list of positions from portfolio
-        :return: List[AbstractPosition]
+        Get list of all positions in portfolio.
+        Returns:
+            List of all positions in portfolio.
         """
         return list(self.positions.values())
     
-    def position_names(self) -> List:
+    def position_names(self) -> List[str]:
         """
-        Get list of position names from portfolio
-        :return: List[str]
+        Get list of position names in portfolio.
+        Returns:
+            List of all position names in portfolio.
         """
         return list(self.positions.keys())
 
-    def to_x(self, price: float):
+    def to_x(self, price: float) -> float:
         """
-        Get total value of portfolio expressed in X
-        :param price: current price of X in Y currency
-        :return: Total value of portfolio denominated in X
+        Get total value of portfolio denominated to X.
+        Args:
+            price: Current price of X in Y currency
+        Returns:
+            Total value of portfolio denominated in X
         """
         total_x = 0
         for name, pos in self.positions.items():
@@ -94,8 +108,10 @@ class Portfolio(AbstractPosition):
     def to_y(self, price: float) -> float:
         """
         Get total value of portfolio expressed in Y
-        :param price: current price of X in Y currency
-        :return: Total value of portfolio denominated in Y
+        Args:
+            price: Current price of X in Y currency
+        Returns:
+            Total value of portfolio denominated in Y
         """
         total_y = 0
         for name, pos in self.positions.items():
@@ -104,9 +120,11 @@ class Portfolio(AbstractPosition):
 
     def to_xy(self, price: float) -> Tuple[float, float]:
         """
-        Get bicurrency equivalence of portfolio
-        :param price: current price of X in Y currency
-        :return: Portfolio value to X and Y
+        Get bicurrency equivalence of portfolio.
+        Args:
+            price: Сurrent price of X in Y currency.
+        Returns:
+            Portfolio value to X and Y.
         """
         total_x = 0
         total_y = 0
@@ -118,10 +136,11 @@ class Portfolio(AbstractPosition):
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
         """
-        Get portfolio snapshot
-        :param timestamp: timestamp of snapshot
-        :param price: current price of X in Y currency
-        :return: portfolio snapshot
+        Get portfolio snapshot.
+        Args:
+            timestamp: Timestamp of snapshot.
+            price: Current price of X in Y currency.
+        Returns: Portfolio snapshot.
         """
         snapshot = {'timestamp': timestamp, 'price': price}
         for name, pos in self.positions.items():

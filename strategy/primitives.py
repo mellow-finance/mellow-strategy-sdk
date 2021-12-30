@@ -2,31 +2,6 @@ from enum import Enum
 from functools import total_ordering
 
 
-class Frequency(Enum):
-    """
-    ``Frequency`` defines the sampling frequency for the data.
-    It is helpful if you want your time series to be split into equal intervals and you want to define interval width.
-
-    Values:
-
-    - `MINUTE` - One minute
-    - `MINUTE5` - 5 minutes
-    - `MINUTE15` - 15 minutes
-    - `HOUR` - 1 hour
-    - `DAY` - 1 day
-    - `WEEK` - 1 week
-    - `MONTH` - 1 month
-    """
-
-    MINUTE = "min"
-    MINUTE5 = "5min"
-    MINUTE15 = "15min"
-    HOUR = "H"
-    DAY = "D"
-    WEEK = "W"
-    MONTH = "M"
-
-
 class Fee(Enum):
     """
     ``Fee`` defines available fees for UniV3 pools. Currently 3 values are available: 0.05%, 0.3%, 1%.
@@ -47,13 +22,17 @@ class Fee(Enum):
     def percent(self) -> float:
         """
         The actual uniswap percentage fee, i.e. 0.05%, 0.3% or 1%.
+        Returns:
+            UniswapV3 percentage fee.
         """
         return self.value / 1000000
 
     @property
     def spacing(self) -> int:
         """
-        Tick spacing for this fee
+        Tick spacing for this fee.
+        Returns:
+            Tick spacing for this fee.
         """
         return SPACING[self]
 
@@ -75,61 +54,62 @@ class Token(Enum):
 
     WBTC = "WBTC"
     WETH = "WETH"
+    stETH = "stETH"
     USDC = "USDC"
     USDT = "USDT"
 
     @property
     def address(self) -> str:
         """
-        Mainnet address of the token
+        Mainnet address of the token.
+        Returns:
+            Mainnet address of the token.
         """
         return TOKEN_DETAILS[self.value]["address"]
 
     @property
     def decimals(self) -> int:
         """
-        Decimals of the token
+        Decimals of the token.
+        Returns:
+            Decimals of the token.
         """
         return TOKEN_DETAILS[self.value]["decimals"]
 
     def _is_valid_operand(self, other: 'Token') -> bool:
         """
-        :param other: other Token
+        Checks if Token is valid.
+        Args:
+            other: Other Token
+        Returns:
+            Valid or not.
         """
         return isinstance(other, Token)
 
     def __eq__(self, other: 'Token') -> bool:
         """
-        :param other: other Token
+        Checks if Tokens are equal.
+        Args:
+            other: Other Token
+        Returns:
+            Equal or not.
         """
         if not self._is_valid_operand(other):
             return NotImplemented
         return self.value == other.value
 
-    def __lt__(self, other: 'Token') -> bool:
-        """
-        :param other: other Token
-        """
-        if not self._is_valid_operand(other):
-            return NotImplemented
-
-        return (
-            TOKEN_DETAILS[self.value]["address"].lower()
-            < TOKEN_DETAILS[other.value]["address"].lower()
-        )
-
 
 class Pool:
     """
     ``Pool`` represents a mainnet UniV3 pool.
-
-    :param tokenA: First token of the pool
-    :param tokenB: Second token of the pool
-    :param fee: Pool fee
+    Attributes:
+        tokenA: First token of the pool.
+        tokenB: Second token of the pool.
+        fee: Pool fee.
     """
 
     def __init__(self, tokenA: Token, tokenB: Token, fee: Fee):
-        [self._token0, self._token1] = sorted([tokenA, tokenB])
+        self._token0, self._token1 = tokenA, tokenB
         self._fee = fee
         self._address = None
         for pool in POOLS:
@@ -147,6 +127,8 @@ class Pool:
     def decimals_diff(self) -> int:
         """
         Difference between ``token0`` and ``token1`` decimals. Used for conversion of price from `wei` to `eth`.
+        Returns:
+            Decimal difference between Tokens.
         """
         return self._token0.decimals - self._token1.decimals
 
@@ -154,41 +136,53 @@ class Pool:
     def l_decimals_diff(self) -> float:
         """
         Used for conversion of liquidity from `wei` to `eth`.
+        Returns:
+            Decimal difference between Tokens in Eth.
         """
         return float(self._token0.decimals + self._token1.decimals) / 2
 
     @property
     def name(self) -> str:
         """
-        Unique name for the pool
+        Unique name for the pool.
+        Returns:
+            Pool name.
         """
         return f"{self._token0.value}_{self._token1.value}_{self._fee.value}"
 
     @property
     def address(self) -> str:
         """
-        Address of the pool on the mainnet
+        Address of the pool on the mainnet.
+        Returns:
+            Pool mainnet address.
         """
         return self._address
 
     @property
     def token0(self) -> Token:
         """
-        First token of the pool
+        First token of the pool.
+        Returns:
+            First token name.
         """
         return self._token0
 
     @property
     def token1(self) -> Token:
         """
-        Second token of the pool
+        Second token of the pool.
+        Returns:
+            Second token name.
         """
         return self._token1
 
     @property
     def fee(self) -> Fee:
         """
-        Fee of the pool
+        Fee of the pool.
+        Returns:
+            Fee of the pool.
         """
         return self._fee
 
@@ -210,6 +204,12 @@ TOKEN_DETAILS = {
         "name": "WETH",
         "description": "Wrapped Ether",
         "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "decimals": 18,
+    },
+    Token.stETH.value: {
+        "name": "stETH",
+        "description": "Staked Ether",
+        "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
         "decimals": 18,
     },
     Token.USDT.value: {
@@ -278,13 +278,13 @@ POOLS = [
     {
         "address": "lidov1",
         "token0": Token.WETH,
-        "token1": Token.WETH,
+        "token1": Token.stETH,
         "fee": Fee.MIDDLE,
     },
     {
         "address": "lidov2",
         "token0": Token.WETH,
-        "token1": Token.WETH,
+        "token1": Token.stETH,
         "fee": Fee.LOW,
     },
 ]

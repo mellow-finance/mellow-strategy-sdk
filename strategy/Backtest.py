@@ -3,15 +3,17 @@ from .Portfolio import Portfolio
 from .History import PortfolioHistory, RebalanceHistory, UniPositionsHistory
 
 from typing import Tuple
+import pandas as pd
 import copy
 
 
 class Backtest:
     """
         ``Backtest`` is used for backtesting strategy on pool data.
-        It contains the logic of running strategy thrhough the data and tracks results.
-        :param strategy: Strategy to backtest
-        :param portfolio: Portfolio to manage
+        It contains the logic of running strategy on the market data and tracks results.
+        Attributes:
+            strategy: Strategy to backtest
+            portfolio: Portfolio to manage
     """
     def __init__(self,
                  strategy: AbstractStrategy,
@@ -23,11 +25,13 @@ class Backtest:
         else:
             self.portfolio = portfolio
 
-    def backtest(self, df_swaps) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
+    def backtest(self, df_swaps: pd.DataFrame) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
         """
         Run backtest on data
-        :param df_swaps: Uniswap exchancge data
-        :return: History results
+        Args:
+            df_swaps: Uniswap exchancge data
+        Returns:
+            History results
         """
         portfolio_history = PortfolioHistory()
         rebalance_history = RebalanceHistory()
