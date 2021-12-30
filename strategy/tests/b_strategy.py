@@ -11,12 +11,29 @@ from strategy.primitives import Pool, Token, Fee
 
 
 def init_strat(data, pool):
+    """
+    Initilize strategy.
+    Args:
+        data: UniswapV3 data.
+        pool: UniswapV3 pool.
+    Returns:
+        Initialized strategy.
+    """
     lower_0 = data.swaps['price'].min()
     upper_0 = data.swaps['price'].max()
     bi_strat = MBStrategy(600, 30, lower_0, upper_0, pool, 0.03,  0.0002, 0.0002)
     return bi_strat
 
-def calc_perf(portfolio_history, data):
+
+def calc_perf(portfolio_history, data) -> dict:
+    """
+    Calculate strategy performance metrics.
+    Args:
+        data: UniswapV3 data.
+        pool: UniswapV3 pool.
+    Returns:
+        Performance metrics.
+    """
     snaphot_last = portfolio_history.snapshots[-1]
     snaphot_first = portfolio_history.snapshots[0]
     
@@ -42,10 +59,18 @@ def calc_perf(portfolio_history, data):
     
     return res
 
-def evaluate(path):
+
+def evaluate(path) -> dict:
+    """
+    Evaluate backtesting.
+    Args:
+        path: Path to data.
+    Returns:
+        Performance metrics.
+    """
     pool = Pool(Token.WBTC, Token.WETH, Fee.MIDDLE)
-    # data = SyntheticData(pool, init_price=10, mu=0.005).generate_data()
-    data = RawDataUniV3(pool, folder=f'{path}/data/').load_from_folder()
+    data = SyntheticData(pool, init_price=10, mu=0.005).generate_data()
+    # data = RawDataUniV3(pool, folder=f'{path}/data/').load_from_folder()
     bi_strat = init_strat(data, pool)
     portfolio_history, rebalance_history, uni_history = Backtest(bi_strat).backtest(data.swaps)
     metrics = calc_perf(portfolio_history, data)

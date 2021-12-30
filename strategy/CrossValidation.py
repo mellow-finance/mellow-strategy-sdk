@@ -2,13 +2,14 @@ import numpy as np
 import pandas as pd
 from multiprocessing import Pool
 
-from .Backtest import Backtest
+from strategy.Backtest import Backtest
 
 
 class FolderSimple:
     """
        ``FolderSimple`` makes the splitting into equal folds.
-       :param n_folds: Number of folds.
+        Attributes:
+            n_folds: Number of folds.
    """
     def __init__(self,
                  n_folds: int = 5,
@@ -21,7 +22,8 @@ class FolderSimple:
     def generate_folds_by_index(self, data):
         """
         Split data into folds
-        :param data: Uniswap exchancge data
+        Args:
+             data: Uniswap exchancge data
         """
         index = np.sort(data.index.to_numpy())
         n = len(index)
@@ -41,10 +43,12 @@ class FolderSimple:
 
     def get_fold(self, data, fold_name):
         """
-        Get fold by name
-        :param data: Uniswap exchancge data
-        :param fold_name: Folds name
-        :return: Folds data as PoolDataUniV3
+        Get fold by name.
+        Args:
+            data: Uniswap exchancge data
+            fold_name: Folds name
+        Returns:
+            Fold data as PoolDataUniV3
         """
         fold_idx = self.folds[fold_name]
         fold_data = data.loc[data.index.isin(fold_idx)]
@@ -54,8 +58,9 @@ class FolderSimple:
 class CrossValidation:
     """
        ``CrossValidation`` backtests strategy on folds.
-       :param folder: Folder class that splits data on folds
-       :param strategy: Strategy to backtest
+        Attributes:
+            folder: Folder class that splits data on folds
+            strategy: Strategy to backtest
    """
     def __init__(self, folder, strategy):
         self.folder = folder
@@ -64,9 +69,11 @@ class CrossValidation:
     def _backtest_(self, *args):
         """
         Run backtest on single fold
-        :param args[0]: Uniswap exchancge data
-        :param args[1]: Folds name
-        :return: Dict of history results
+        Args:
+            args[0]: Uniswap exchancge data
+            args[1]: Folds name
+        Returns:
+            Dict of history results
         """
         data, fold_name = args[0][0], args[0][1]
         backtest = Backtest(self.strategy)
@@ -80,8 +87,10 @@ class CrossValidation:
     def backtest(self, data):
         """
         Parallel backtesting on folded data
-        :param data: Uniswap exchancge data
-        :return: List of history dicts by folds
+        Args:
+            data: Uniswap exchancge data
+        Returns:
+            List of history dicts by folds
         """
         self.folder.generate_folds_by_index(data.swaps)
         args = [(data, fold_name) for fold_name in self.folder.fold_names]
@@ -96,8 +105,10 @@ class CrossValidation:
     def aggregate(self, folds_result):
         """
         Aggregate backtesting results from folds
-        :param folds_result: History from folds
-        :return: Dict of APY's by folds
+        Args:
+            folds_result: History from folds
+        Returns:
+            Dict of APY's by folds
         """
         res = {}
         for k, v in folds_result.items():

@@ -1,0 +1,2338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>strategy.Positions API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>strategy.Positions</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from typing import Tuple
+from abc import ABC, abstractmethod
+import numpy as np
+from datetime import datetime
+
+
+class AbstractPosition(ABC):
+    &#34;&#34;&#34;
+    ``AbstractPosition`` is an abstract class for Position and Portfolio classes.
+    Attributes:
+        name: Unique name for the position.
+    &#34;&#34;&#34;
+    def __init__(self, name: str) -&gt; None:
+        self.name = name
+    
+    def rename(self, new_name: str) -&gt; None:
+        &#34;&#34;&#34;
+        Rename position.
+        Args:
+            new_name: New name for position.
+        &#34;&#34;&#34;
+        self.name = new_name
+
+    @abstractmethod
+    def to_x(self, price: float) -&gt; float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def to_y(self, price: float) -&gt; float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def to_xy(self, price: float) -&gt; Tuple[float, float]:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def snapshot(self, timestamp: datetime, price: float) -&gt; dict:
+        raise Exception(NotImplemented)
+
+
+class BiCurrencyPosition(AbstractPosition):
+    &#34;&#34;&#34;
+        ``BiCurrencyPosition`` is a class corresponding to currency pair.
+        Attributes:
+            name: Unique name for the position.
+            swap_fee: Exchange fee expressed as a percentage.
+            rebalance_cost: Rebalancing cost, expressed in Y currency.
+            x: Amount of asset X.
+            y: Amount of asset Y.
+            x_interest: Interest on currency X deposit expressed as a daily percentage yield.
+            y_interest: Interest on currency Y deposit expressed as a daily percentage yield.
+   &#34;&#34;&#34;
+
+    def __init__(self, name: str,
+                 swap_fee: float,
+                 rebalance_cost: float,
+                 x: float = None,
+                 y: float = None,
+                 x_interest: float = None,
+                 y_interest: float = None,
+                 ) -&gt; None:
+        super().__init__(name)
+
+        self.x = x if x is not None else 0
+        self.y = y if y is not None else 0
+
+        self.x_interest = x_interest if x_interest is not None else 0
+        self.y_interest = y_interest if y_interest is not None else 0
+
+        self.swap_fee = swap_fee
+        self.rebalance_cost = rebalance_cost
+        self.rebalance_costs_to_x = 0
+        self.rebalance_costs_to_y = 0
+        self.previous_gain = None
+
+    def deposit(self, x: float, y: float) -&gt; None:
+        &#34;&#34;&#34;
+        Deposit X currency and Y currency to position.
+        Args:
+            x: Value of X currency
+            y: Value of Y currency
+        &#34;&#34;&#34;
+        self.x += x
+        self.y += y
+        return None
+
+    def withdraw(self, x: float, y: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Withdraw X currency and Y currency from position
+        Args:
+            x: Value of X currency
+            y: Value of Y currency
+        Returns:
+             Value of X, value of Y
+        &#34;&#34;&#34;
+        assert x &lt;= self.x, f&#39;Too much to withdraw X = {x}&#39;
+        assert y &lt;= self.y, f&#39;Too much to withdraw Y = {y}&#39;
+        self.x -= x
+        self.y -= y
+        return x, y
+
+    def withdraw_fraction(self, fraction: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Withdraw percent of X currency and percent of Y currency from position
+        Args:
+            fraction: Fraction from 0 to 1.
+        Returns:
+             Fraction of current X and Y.
+        &#34;&#34;&#34;
+        assert fraction &lt;= 1, f&#39;Too much to withdraw Fraction = {fraction}&#39;
+        x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
+        return x_out, y_out
+
+    def rebalance(self, x_fraction: float, y_fraction: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Rebalance bicurrency pair with respect to their proportion.
+        Args:
+            x_fraction: Fraction of X after rebalance from 0 to 1.
+            y_fraction: Fraction of Y after rebalance from 0 to 1.
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        assert x_fraction &lt;= 1, f&#39;Too much to rebalance Fraction X = {x_fraction}&#39;
+        assert y_fraction &lt;= 1, f&#39;Too much to rebalance Fraction Y = {y_fraction}&#39;
+        assert abs(x_fraction + y_fraction - 1) &lt;= 1e-6, f&#39;Incorrect fractions {x_fraction}, {y_fraction}&#39;
+
+        d_v = y_fraction * price * self.x - x_fraction * self.y
+        if d_v &gt; 0:
+            dx = d_v / price
+            self.swap_x_to_y(dx, price)
+        elif d_v &lt; 0:
+            dy = abs(d_v)
+            self.swap_y_to_x(dy, price)
+
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+
+        return None
+
+    def interest_gain(self, date) -&gt; None:
+        &#34;&#34;&#34;
+        Gain deposit interest.
+        Args:
+            date: Gaining date.
+        &#34;&#34;&#34;
+        if self.previous_gain is not None:
+            assert self.previous_gain &lt; date, &#34;Already gained this day&#34;
+        else:
+            self.previous_gain = date
+        multiplier = (date - self.previous_gain).days
+        self.x *= (1 + self.x_interest) ** multiplier
+        self.y *= (1 + self.x_interest) ** multiplier
+        self.previous_gain = date
+        return None
+
+    def to_x(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get total value of position expessed in X.
+        Args:
+            price: Current price of X in Y currency
+        Returns:
+            Total value of position expessed in X
+        &#34;&#34;&#34;
+        res = self.x + self.y / price
+        return res
+
+    def to_y(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get total value of position expessed in Y.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Total value of position expessed in Y.
+        &#34;&#34;&#34;
+        res = self.x * price + self.y
+        return res
+
+    def to_xy(self, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Get values of bicurrency pair.
+            price: Current price of X in Y currency.
+        Returns:
+            Position value to X and Y.
+        &#34;&#34;&#34;
+        return self.x, self.y
+
+    def swap_x_to_y(self, dx: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Swap X currency to Y.
+        Args:
+            dx: Amount of X to be swapped.
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        self.x -= dx
+        self.y += price * (1 - self.swap_fee) * dx
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+        return None
+
+    def swap_y_to_x(self, dy: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Swap Y currency to X.
+        Args:
+            dy: Amount of X to be swapped.
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        self.y -= dy
+        self.x += (1 - self.swap_fee) * dy / price
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+        return None
+
+    def snapshot(self, timestamp: datetime, price: float) -&gt; dict:
+        &#34;&#34;&#34;
+        Get position snapshot.
+        Args:
+            timestamp: Timestamp of snapshot
+            price: Current price of X in Y currency
+        Returns: Position snapshot
+        &#34;&#34;&#34;
+        value_to_x = self.to_x(price)
+        value_to_y = self.to_y(price)
+        snapshot = {
+                    f&#39;{self.name}_value_to_x&#39;: value_to_x,
+                    f&#39;{self.name}_value_to_y&#39;: value_to_y,
+                    f&#39;{self.name}_rebalance_costs_to_x&#39;: self.rebalance_costs_to_x,
+                    f&#39;{self.name}_rebalance_costs_to_y&#39;: self.rebalance_costs_to_y,
+                }
+        return snapshot
+
+
+class UniV3Position(AbstractPosition):
+    &#34;&#34;&#34;
+        ``UniV3Position`` is a class corresponding to one investment into UniswapV3 interval.
+        It&#39;s defined by lower and upper bounds ``lower_price``, ``upper_price`` and  pool fee percent ``fee_percent``.
+        Attributes:
+            name: Unique name for the position
+            lower_price: Lower bound of the interval (price)
+            upper_price:  Upper bound of the interval (price)
+            fee_percent: Amount of fee expressed as a percentage
+            rebalance_cost: Rebalancing cost, expressed in currency
+   &#34;&#34;&#34;
+    def __init__(self,
+                 name: str,
+                 lower_price: float,
+                 upper_price: float,
+                 fee_percent: float,
+                 rebalance_cost: float,
+                 ) -&gt; None:
+
+        super().__init__(name)
+
+        self.lower_price = lower_price
+        self.upper_price = upper_price
+        self.fee_percent = fee_percent
+        self.rebalance_cost = rebalance_cost
+
+        self.sqrt_lower = np.sqrt(self.lower_price)
+        self.sqrt_upper = np.sqrt(self.upper_price)
+
+        self.liquidity = 0
+        self.bi_currency = BiCurrencyPosition(&#39;Virtual&#39;, self.fee_percent, self.rebalance_cost)
+        self.rebalance_costs_to_x = 0
+        self.rebalance_costs_to_y = 0
+
+        self.realized_loss_to_x = 0
+        self.realized_loss_to_y = 0
+
+        self.fees_x = 0
+        self._fees_x_earned_ = 0
+
+        self.fees_y = 0
+        self._fees_y_earned_ = 0
+
+    def deposit(self, x: float, y: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Deposit X and Y to position.
+        Args:
+            x: Value of X currency.
+            y: Value of Y currency.
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        self.mint(x, y, price)
+        return None
+
+    def withdraw(self, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Withdraw all liquidity from UniswapV3 position.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X, value of Y.
+        &#34;&#34;&#34;
+        x_out, y_out = self.burn(self.liquidity, price)
+        x_fees, y_fees = self.collect_fees()
+        x_res, y_res = x_out + x_fees, y_out + y_fees
+        return x_res, y_res
+
+    def mint(self, x: float, y: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Mint X and Y to uniswapV3 interval.
+        Args:
+            x: Value of X currency.
+            y: Value of Y currency.
+            price:
+            Current price of X in Y currency.
+        &#34;&#34;&#34;
+        d_liq = self._xy_to_liq_(x, y, price)
+        self.liquidity += d_liq
+        self.bi_currency.deposit(x, y)
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+        return None
+
+    def burn(self, liq: float, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Burn liquidity from uniswapV3 interval.
+            liq: Value of liquidity.
+            price: Current price of X in Y currency.
+        Returns: Value of X, value of Y.
+        &#34;&#34;&#34;
+        assert liq &lt;= self.liquidity, f&#39;Too much liquidity too withdraw = {liq}&#39;
+        assert liq &gt; 1e-6, f&#39;Too small liquidity too withdraw = {liq}&#39;
+        il_x_0 = self.impermanent_loss_to_x(price)
+        il_y_0 = self.impermanent_loss_to_y(price)
+
+        x_out, y_out = self._liq_to_xy_(liq, price)
+
+        self.bi_currency.withdraw_fraction(liq / self.liquidity)
+        self.liquidity -= liq
+
+        il_x_1 = self.impermanent_loss_to_x(price)
+        il_y_1 = self.impermanent_loss_to_y(price)
+
+        self.realized_loss_to_x += (il_x_0 - il_x_1)
+        self.realized_loss_to_y += (il_y_0 - il_y_1)
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+        return x_out, y_out
+
+    def charge_fees(self, price_0: float, price_1: float) -&gt; None:
+        &#34;&#34;&#34;
+        Charge exchange fees.
+        Args:
+            price_0: Price before exchange.
+            price_1: Price after exchange.
+        &#34;&#34;&#34;
+        price_0_adj = self._adj_price_(price_0)
+        price_1_adj = self._adj_price_(price_1)
+
+        x_0, y_0 = self.to_xy(price_0_adj)
+        x_1, y_1 = self.to_xy(price_1_adj)
+
+        fee_x, fee_y = 0, 0
+        if y_0 &gt;= y_1:
+            fee_x = (x_1 - x_0) * self.fee_percent
+            if fee_x &lt; 0:
+                raise Exception(f&#39;Negative X fees earned: {fee_x}&#39;)
+        else:
+            fee_y = (y_1 - y_0) * self.fee_percent
+            if fee_y &lt; 0:
+                raise Exception(f&#39;Negative Y fees earned: {fee_y}&#39;)
+
+        self.fees_x += fee_x
+        self._fees_x_earned_ += fee_x
+
+        self.fees_y += fee_y
+        self._fees_y_earned_ += fee_y
+        return None
+
+    def collect_fees(self) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Collect all gained fees.
+        Returns:
+            Value of X fees, value of Y fees.
+        &#34;&#34;&#34;
+        fees_x = self.fees_x
+        fees_y = self.fees_y
+        self.fees_x = 0
+        self.fees_y = 0
+        return fees_x, fees_y
+
+    def reinvest_fees(self, price) -&gt; None:
+        &#34;&#34;&#34;
+        Collect all gained fees and reinvest to current position.
+        Args:
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        fees_x, fees_y = self.collect_fees()
+        self.mint(fees_x, fees_y, price)
+        return None
+
+    def impermanent_loss(self, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Calculate impermanent loss separately in X and Y currencies.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X il, value of Y il.
+        &#34;&#34;&#34;
+        x_hold, y_hold = self.bi_currency.to_xy(price)
+        x_stake, y_stake = self.to_xy(price)
+        il_x = x_hold - x_stake
+        il_y = y_hold - y_stake
+        return il_x, il_y
+
+    def impermanent_loss_to_x(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate impermanent loss denominated in X.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X il.
+        &#34;&#34;&#34;
+        v_hold = self.bi_currency.to_x(price)
+        v_stake = self.to_x(price)
+        il_x = v_hold - v_stake
+        return il_x
+
+    def impermanent_loss_to_y(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate impermanent loss denominated in Y.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Value of Y il.
+        &#34;&#34;&#34;
+        v_hold = self.bi_currency.to_y(price)
+        v_stake = self.to_y(price)
+        il_y = v_hold - v_stake
+        return il_y
+
+    def to_x(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get value of UniswapV3 position expessed in X.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Total value of uniswapV3 position expessed in X.
+        &#34;&#34;&#34;
+        x, y = self.to_xy(price)
+        vol_x = x + y / price
+        return vol_x
+
+    def to_y(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get value of UniswapV3 position expessed in Y.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Total value of UniswapV3 position expessed in Y.
+        &#34;&#34;&#34;
+        x, y = self.to_xy(price)
+        vol_y = x * price + y
+        return vol_y
+
+    def to_xy(self, price) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Get values of position in X and Y.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Position value to X and Y.
+        &#34;&#34;&#34;
+        x, y = self._liq_to_xy_(self.liquidity, price)
+        return x, y
+
+    def _adj_price_(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get adjusted price of current price and UniswapV3 interval boundaries.
+        Args:
+            price: current price of X in Y currency.
+        Returns:
+            Adjusted price.
+        &#34;&#34;&#34;
+        adj_price = min(max(self.lower_price, price), self.upper_price)
+        return adj_price
+
+    def _x_to_liq_(self, x: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform X to liquidity.
+        Args:
+            x: Value of X.
+            price: Current price of X in Y currency.
+        Returns:
+            Resulting liquidity.
+        &#34;&#34;&#34;
+        if self.upper_price &lt;= price:
+            return np.inf
+        sqrt_price = np.sqrt(price)
+        l_x = (x * sqrt_price * self.sqrt_upper) / (self.sqrt_upper - sqrt_price)
+        return l_x
+
+    def _y_to_liq_(self, y: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform Y to liquidity.
+        Args:
+            y: Value of Y.
+            price: Current price of X in Y currency.
+        Returns:
+            Resulting liquidity.
+        &#34;&#34;&#34;
+        if self.lower_price &gt;= price:
+            return np.inf
+        sqrt_price = np.sqrt(price)
+        l_y = y / (sqrt_price - self.sqrt_lower)
+        return l_y
+
+    def _xy_to_liq_(self, x: float, y: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform X and Y to liquidity.
+        Args:
+            x: Value of X.
+            y: Value of Y.
+            price: Current price of X in Y currency.
+        Returns:
+            Resulting liquidity.
+        &#34;&#34;&#34;
+        adj_price = self._adj_price_(price)
+        x_liq = self._x_to_liq_(x, adj_price)
+        y_liq = self._y_to_liq_(y, adj_price)
+        assert (x_liq &gt;= 0) &amp; (y_liq &gt;= 0), f&#39;Lx or Ly less then 0: Lx={x_liq}, Ly={y_liq}&#39;
+        if np.isinf(x_liq):
+            return y_liq
+        elif np.isinf(y_liq):
+            return x_liq
+        assert abs(x_liq - y_liq) &lt; 1e-6, f&#39;Lx != Ly: Lx={x_liq}, Ly={y_liq}&#39;
+        liq = min(x_liq, y_liq)
+        return liq
+
+    def _liq_to_x_(self, liq: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform liquidity to X.
+        Args:
+            liq: Value of liq.
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X.
+        &#34;&#34;&#34;
+        adj_price = self._adj_price_(price)
+        sqrt_price = np.sqrt(adj_price)
+        numer = self.sqrt_upper - sqrt_price
+        denom = self.sqrt_upper * sqrt_price
+        x = liq * numer / denom
+        return x
+
+    def _liq_to_y_(self, liq: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform liquidity to Y.
+        Args:
+            liq: Value of liq.
+            price: Current price of X in Y currency.
+        Returns:
+            Value of Y.
+        &#34;&#34;&#34;
+        adj_price = self._adj_price_(price)
+        sqrt_price = np.sqrt(adj_price)
+        y = liq * (sqrt_price - self.sqrt_lower)
+        return y
+
+    def _liq_to_xy_(self, liq: float, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Transform liquidity to X, Y pair .
+            liq: Value of liq.
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X and Y.
+        &#34;&#34;&#34;
+        x = self._liq_to_x_(liq, price)
+        y = self._liq_to_y_(liq, price)
+        return x, y
+
+    def snapshot(self, timestamp: datetime, price: float) -&gt; dict:
+        &#34;&#34;&#34;
+        Get uniswapV3 position snapshot.
+        Args:
+            timestamp: timestamp of snapshot.
+            price: Current price of X in Y currency.
+        Returns:
+            UniswapV3 position snapshot.
+        &#34;&#34;&#34;
+        volume_to_x = self.to_x(price)
+        volume_to_y = self.to_y(price)
+
+        fees_earned_to_x = self._fees_x_earned_ + self._fees_y_earned_ / price
+        fees_earned_to_y = price * self._fees_x_earned_ + self._fees_y_earned_
+
+        fees_to_x = self.fees_x + self.fees_y / price
+        fees_to_y = price * self.fees_x + self.fees_y
+
+        il_to_x = self.impermanent_loss_to_x(price)
+        il_to_y = self.impermanent_loss_to_y(price)
+        
+        current_liquidity = self.liquidity
+
+        snapshot = {f&#39;{self.name}_value_to_x&#39;: volume_to_x,
+                    f&#39;{self.name}_value_to_y&#39;: volume_to_y,
+
+                    f&#39;{self.name}_earned_fees_to_x&#39;: fees_earned_to_x,
+                    f&#39;{self.name}_earned_fees_to_y&#39;: fees_earned_to_y,
+
+                    f&#39;{self.name}_current_fees_to_x&#39;: fees_to_x,
+                    f&#39;{self.name}_current_fees_to_y&#39;: fees_to_y,
+
+                    f&#39;{self.name}_il_to_x&#39;: il_to_x,
+                    f&#39;{self.name}_il_to_y&#39;: il_to_y,
+
+                    f&#39;{self.name}_realized_loss_to_x&#39;: self.realized_loss_to_x,
+                    f&#39;{self.name}_realized_loss_to_y&#39;: self.realized_loss_to_y,
+
+                    f&#39;{self.name}_rebalance_costs_to_x&#39;: self.rebalance_costs_to_x,
+                    f&#39;{self.name}_rebalance_costs_to_y&#39;: self.rebalance_costs_to_y,
+                    
+                    f&#39;{self.name}_current_liquidity&#39;: current_liquidity
+                    }
+        return snapshot</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="strategy.Positions.AbstractPosition"><code class="flex name class">
+<span>class <span class="ident">AbstractPosition</span></span>
+<span>(</span><span>name: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p><code><a title="strategy.Positions.AbstractPosition" href="#strategy.Positions.AbstractPosition">AbstractPosition</a></code> is an abstract class for Position and Portfolio classes.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Unique name for the position.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AbstractPosition(ABC):
+    &#34;&#34;&#34;
+    ``AbstractPosition`` is an abstract class for Position and Portfolio classes.
+    Attributes:
+        name: Unique name for the position.
+    &#34;&#34;&#34;
+    def __init__(self, name: str) -&gt; None:
+        self.name = name
+    
+    def rename(self, new_name: str) -&gt; None:
+        &#34;&#34;&#34;
+        Rename position.
+        Args:
+            new_name: New name for position.
+        &#34;&#34;&#34;
+        self.name = new_name
+
+    @abstractmethod
+    def to_x(self, price: float) -&gt; float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def to_y(self, price: float) -&gt; float:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def to_xy(self, price: float) -&gt; Tuple[float, float]:
+        raise Exception(NotImplemented)
+
+    @abstractmethod
+    def snapshot(self, timestamp: datetime, price: float) -&gt; dict:
+        raise Exception(NotImplemented)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="strategy.Portfolio.Portfolio" href="Portfolio.html#strategy.Portfolio.Portfolio">Portfolio</a></li>
+<li><a title="strategy.Positions.BiCurrencyPosition" href="#strategy.Positions.BiCurrencyPosition">BiCurrencyPosition</a></li>
+<li><a title="strategy.Positions.UniV3Position" href="#strategy.Positions.UniV3Position">UniV3Position</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="strategy.Positions.AbstractPosition.rename"><code class="name flex">
+<span>def <span class="ident">rename</span></span>(<span>self, new_name: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Rename position.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>new_name</code></strong></dt>
+<dd>New name for position.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rename(self, new_name: str) -&gt; None:
+    &#34;&#34;&#34;
+    Rename position.
+    Args:
+        new_name: New name for position.
+    &#34;&#34;&#34;
+    self.name = new_name</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.AbstractPosition.snapshot"><code class="name flex">
+<span>def <span class="ident">snapshot</span></span>(<span>self, timestamp: datetime.datetime, price: float) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def snapshot(self, timestamp: datetime, price: float) -&gt; dict:
+    raise Exception(NotImplemented)</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.AbstractPosition.to_x"><code class="name flex">
+<span>def <span class="ident">to_x</span></span>(<span>self, price: float) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def to_x(self, price: float) -&gt; float:
+    raise Exception(NotImplemented)</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.AbstractPosition.to_xy"><code class="name flex">
+<span>def <span class="ident">to_xy</span></span>(<span>self, price: float) ‑> Tuple[float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def to_xy(self, price: float) -&gt; Tuple[float, float]:
+    raise Exception(NotImplemented)</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.AbstractPosition.to_y"><code class="name flex">
+<span>def <span class="ident">to_y</span></span>(<span>self, price: float) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@abstractmethod
+def to_y(self, price: float) -&gt; float:
+    raise Exception(NotImplemented)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition"><code class="flex name class">
+<span>class <span class="ident">BiCurrencyPosition</span></span>
+<span>(</span><span>name: str, swap_fee: float, rebalance_cost: float, x: float = None, y: float = None, x_interest: float = None, y_interest: float = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p><code><a title="strategy.Positions.BiCurrencyPosition" href="#strategy.Positions.BiCurrencyPosition">BiCurrencyPosition</a></code> is a class corresponding to currency pair.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Unique name for the position.</dd>
+<dt><strong><code>swap_fee</code></strong></dt>
+<dd>Exchange fee expressed as a percentage.</dd>
+<dt><strong><code>rebalance_cost</code></strong></dt>
+<dd>Rebalancing cost, expressed in Y currency.</dd>
+<dt><strong><code>x</code></strong></dt>
+<dd>Amount of asset X.</dd>
+<dt><strong><code>y</code></strong></dt>
+<dd>Amount of asset Y.</dd>
+<dt><strong><code>x_interest</code></strong></dt>
+<dd>Interest on currency X deposit expressed as a daily percentage yield.</dd>
+<dt><strong><code>y_interest</code></strong></dt>
+<dd>Interest on currency Y deposit expressed as a daily percentage yield.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BiCurrencyPosition(AbstractPosition):
+    &#34;&#34;&#34;
+        ``BiCurrencyPosition`` is a class corresponding to currency pair.
+        Attributes:
+            name: Unique name for the position.
+            swap_fee: Exchange fee expressed as a percentage.
+            rebalance_cost: Rebalancing cost, expressed in Y currency.
+            x: Amount of asset X.
+            y: Amount of asset Y.
+            x_interest: Interest on currency X deposit expressed as a daily percentage yield.
+            y_interest: Interest on currency Y deposit expressed as a daily percentage yield.
+   &#34;&#34;&#34;
+
+    def __init__(self, name: str,
+                 swap_fee: float,
+                 rebalance_cost: float,
+                 x: float = None,
+                 y: float = None,
+                 x_interest: float = None,
+                 y_interest: float = None,
+                 ) -&gt; None:
+        super().__init__(name)
+
+        self.x = x if x is not None else 0
+        self.y = y if y is not None else 0
+
+        self.x_interest = x_interest if x_interest is not None else 0
+        self.y_interest = y_interest if y_interest is not None else 0
+
+        self.swap_fee = swap_fee
+        self.rebalance_cost = rebalance_cost
+        self.rebalance_costs_to_x = 0
+        self.rebalance_costs_to_y = 0
+        self.previous_gain = None
+
+    def deposit(self, x: float, y: float) -&gt; None:
+        &#34;&#34;&#34;
+        Deposit X currency and Y currency to position.
+        Args:
+            x: Value of X currency
+            y: Value of Y currency
+        &#34;&#34;&#34;
+        self.x += x
+        self.y += y
+        return None
+
+    def withdraw(self, x: float, y: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Withdraw X currency and Y currency from position
+        Args:
+            x: Value of X currency
+            y: Value of Y currency
+        Returns:
+             Value of X, value of Y
+        &#34;&#34;&#34;
+        assert x &lt;= self.x, f&#39;Too much to withdraw X = {x}&#39;
+        assert y &lt;= self.y, f&#39;Too much to withdraw Y = {y}&#39;
+        self.x -= x
+        self.y -= y
+        return x, y
+
+    def withdraw_fraction(self, fraction: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Withdraw percent of X currency and percent of Y currency from position
+        Args:
+            fraction: Fraction from 0 to 1.
+        Returns:
+             Fraction of current X and Y.
+        &#34;&#34;&#34;
+        assert fraction &lt;= 1, f&#39;Too much to withdraw Fraction = {fraction}&#39;
+        x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
+        return x_out, y_out
+
+    def rebalance(self, x_fraction: float, y_fraction: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Rebalance bicurrency pair with respect to their proportion.
+        Args:
+            x_fraction: Fraction of X after rebalance from 0 to 1.
+            y_fraction: Fraction of Y after rebalance from 0 to 1.
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        assert x_fraction &lt;= 1, f&#39;Too much to rebalance Fraction X = {x_fraction}&#39;
+        assert y_fraction &lt;= 1, f&#39;Too much to rebalance Fraction Y = {y_fraction}&#39;
+        assert abs(x_fraction + y_fraction - 1) &lt;= 1e-6, f&#39;Incorrect fractions {x_fraction}, {y_fraction}&#39;
+
+        d_v = y_fraction * price * self.x - x_fraction * self.y
+        if d_v &gt; 0:
+            dx = d_v / price
+            self.swap_x_to_y(dx, price)
+        elif d_v &lt; 0:
+            dy = abs(d_v)
+            self.swap_y_to_x(dy, price)
+
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+
+        return None
+
+    def interest_gain(self, date) -&gt; None:
+        &#34;&#34;&#34;
+        Gain deposit interest.
+        Args:
+            date: Gaining date.
+        &#34;&#34;&#34;
+        if self.previous_gain is not None:
+            assert self.previous_gain &lt; date, &#34;Already gained this day&#34;
+        else:
+            self.previous_gain = date
+        multiplier = (date - self.previous_gain).days
+        self.x *= (1 + self.x_interest) ** multiplier
+        self.y *= (1 + self.x_interest) ** multiplier
+        self.previous_gain = date
+        return None
+
+    def to_x(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get total value of position expessed in X.
+        Args:
+            price: Current price of X in Y currency
+        Returns:
+            Total value of position expessed in X
+        &#34;&#34;&#34;
+        res = self.x + self.y / price
+        return res
+
+    def to_y(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get total value of position expessed in Y.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Total value of position expessed in Y.
+        &#34;&#34;&#34;
+        res = self.x * price + self.y
+        return res
+
+    def to_xy(self, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Get values of bicurrency pair.
+            price: Current price of X in Y currency.
+        Returns:
+            Position value to X and Y.
+        &#34;&#34;&#34;
+        return self.x, self.y
+
+    def swap_x_to_y(self, dx: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Swap X currency to Y.
+        Args:
+            dx: Amount of X to be swapped.
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        self.x -= dx
+        self.y += price * (1 - self.swap_fee) * dx
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+        return None
+
+    def swap_y_to_x(self, dy: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Swap Y currency to X.
+        Args:
+            dy: Amount of X to be swapped.
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        self.y -= dy
+        self.x += (1 - self.swap_fee) * dy / price
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+        return None
+
+    def snapshot(self, timestamp: datetime, price: float) -&gt; dict:
+        &#34;&#34;&#34;
+        Get position snapshot.
+        Args:
+            timestamp: Timestamp of snapshot
+            price: Current price of X in Y currency
+        Returns: Position snapshot
+        &#34;&#34;&#34;
+        value_to_x = self.to_x(price)
+        value_to_y = self.to_y(price)
+        snapshot = {
+                    f&#39;{self.name}_value_to_x&#39;: value_to_x,
+                    f&#39;{self.name}_value_to_y&#39;: value_to_y,
+                    f&#39;{self.name}_rebalance_costs_to_x&#39;: self.rebalance_costs_to_x,
+                    f&#39;{self.name}_rebalance_costs_to_y&#39;: self.rebalance_costs_to_y,
+                }
+        return snapshot</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="strategy.Positions.AbstractPosition" href="#strategy.Positions.AbstractPosition">AbstractPosition</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="strategy.Positions.BiCurrencyPosition.deposit"><code class="name flex">
+<span>def <span class="ident">deposit</span></span>(<span>self, x: float, y: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Deposit X currency and Y currency to position.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong></dt>
+<dd>Value of X currency</dd>
+<dt><strong><code>y</code></strong></dt>
+<dd>Value of Y currency</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def deposit(self, x: float, y: float) -&gt; None:
+    &#34;&#34;&#34;
+    Deposit X currency and Y currency to position.
+    Args:
+        x: Value of X currency
+        y: Value of Y currency
+    &#34;&#34;&#34;
+    self.x += x
+    self.y += y
+    return None</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.interest_gain"><code class="name flex">
+<span>def <span class="ident">interest_gain</span></span>(<span>self, date) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gain deposit interest.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>date</code></strong></dt>
+<dd>Gaining date.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def interest_gain(self, date) -&gt; None:
+    &#34;&#34;&#34;
+    Gain deposit interest.
+    Args:
+        date: Gaining date.
+    &#34;&#34;&#34;
+    if self.previous_gain is not None:
+        assert self.previous_gain &lt; date, &#34;Already gained this day&#34;
+    else:
+        self.previous_gain = date
+    multiplier = (date - self.previous_gain).days
+    self.x *= (1 + self.x_interest) ** multiplier
+    self.y *= (1 + self.x_interest) ** multiplier
+    self.previous_gain = date
+    return None</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.rebalance"><code class="name flex">
+<span>def <span class="ident">rebalance</span></span>(<span>self, x_fraction: float, y_fraction: float, price: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Rebalance bicurrency pair with respect to their proportion.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x_fraction</code></strong></dt>
+<dd>Fraction of X after rebalance from 0 to 1.</dd>
+<dt><strong><code>y_fraction</code></strong></dt>
+<dd>Fraction of Y after rebalance from 0 to 1.</dd>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rebalance(self, x_fraction: float, y_fraction: float, price: float) -&gt; None:
+    &#34;&#34;&#34;
+    Rebalance bicurrency pair with respect to their proportion.
+    Args:
+        x_fraction: Fraction of X after rebalance from 0 to 1.
+        y_fraction: Fraction of Y after rebalance from 0 to 1.
+        price: Current price of X in Y currency.
+    &#34;&#34;&#34;
+    assert x_fraction &lt;= 1, f&#39;Too much to rebalance Fraction X = {x_fraction}&#39;
+    assert y_fraction &lt;= 1, f&#39;Too much to rebalance Fraction Y = {y_fraction}&#39;
+    assert abs(x_fraction + y_fraction - 1) &lt;= 1e-6, f&#39;Incorrect fractions {x_fraction}, {y_fraction}&#39;
+
+    d_v = y_fraction * price * self.x - x_fraction * self.y
+    if d_v &gt; 0:
+        dx = d_v / price
+        self.swap_x_to_y(dx, price)
+    elif d_v &lt; 0:
+        dy = abs(d_v)
+        self.swap_y_to_x(dy, price)
+
+    self.rebalance_costs_to_x += self.rebalance_cost / price
+    self.rebalance_costs_to_y += self.rebalance_cost
+
+    return None</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.snapshot"><code class="name flex">
+<span>def <span class="ident">snapshot</span></span>(<span>self, timestamp: datetime.datetime, price: float) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get position snapshot.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>timestamp</code></strong></dt>
+<dd>Timestamp of snapshot</dd>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency</dd>
+</dl>
+<p>Returns: Position snapshot</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def snapshot(self, timestamp: datetime, price: float) -&gt; dict:
+    &#34;&#34;&#34;
+    Get position snapshot.
+    Args:
+        timestamp: Timestamp of snapshot
+        price: Current price of X in Y currency
+    Returns: Position snapshot
+    &#34;&#34;&#34;
+    value_to_x = self.to_x(price)
+    value_to_y = self.to_y(price)
+    snapshot = {
+                f&#39;{self.name}_value_to_x&#39;: value_to_x,
+                f&#39;{self.name}_value_to_y&#39;: value_to_y,
+                f&#39;{self.name}_rebalance_costs_to_x&#39;: self.rebalance_costs_to_x,
+                f&#39;{self.name}_rebalance_costs_to_y&#39;: self.rebalance_costs_to_y,
+            }
+    return snapshot</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.swap_x_to_y"><code class="name flex">
+<span>def <span class="ident">swap_x_to_y</span></span>(<span>self, dx: float, price: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Swap X currency to Y.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dx</code></strong></dt>
+<dd>Amount of X to be swapped.</dd>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def swap_x_to_y(self, dx: float, price: float) -&gt; None:
+    &#34;&#34;&#34;
+    Swap X currency to Y.
+    Args:
+        dx: Amount of X to be swapped.
+        price: Current price of X in Y currency.
+    &#34;&#34;&#34;
+    self.x -= dx
+    self.y += price * (1 - self.swap_fee) * dx
+    self.rebalance_costs_to_x += self.rebalance_cost / price
+    self.rebalance_costs_to_y += self.rebalance_cost
+    return None</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.swap_y_to_x"><code class="name flex">
+<span>def <span class="ident">swap_y_to_x</span></span>(<span>self, dy: float, price: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Swap Y currency to X.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dy</code></strong></dt>
+<dd>Amount of X to be swapped.</dd>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def swap_y_to_x(self, dy: float, price: float) -&gt; None:
+    &#34;&#34;&#34;
+    Swap Y currency to X.
+    Args:
+        dy: Amount of X to be swapped.
+        price: Current price of X in Y currency.
+    &#34;&#34;&#34;
+    self.y -= dy
+    self.x += (1 - self.swap_fee) * dy / price
+    self.rebalance_costs_to_x += self.rebalance_cost / price
+    self.rebalance_costs_to_y += self.rebalance_cost
+    return None</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.to_x"><code class="name flex">
+<span>def <span class="ident">to_x</span></span>(<span>self, price: float) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get total value of position expessed in X.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Total value of position expessed in X</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_x(self, price: float) -&gt; float:
+    &#34;&#34;&#34;
+    Get total value of position expessed in X.
+    Args:
+        price: Current price of X in Y currency
+    Returns:
+        Total value of position expessed in X
+    &#34;&#34;&#34;
+    res = self.x + self.y / price
+    return res</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.to_xy"><code class="name flex">
+<span>def <span class="ident">to_xy</span></span>(<span>self, price: float) ‑> Tuple[float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get values of bicurrency pair.
+price: Current price of X in Y currency.</p>
+<h2 id="returns">Returns</h2>
+<p>Position value to X and Y.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_xy(self, price: float) -&gt; Tuple[float, float]:
+    &#34;&#34;&#34;
+    Get values of bicurrency pair.
+        price: Current price of X in Y currency.
+    Returns:
+        Position value to X and Y.
+    &#34;&#34;&#34;
+    return self.x, self.y</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.to_y"><code class="name flex">
+<span>def <span class="ident">to_y</span></span>(<span>self, price: float) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get total value of position expessed in Y.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Total value of position expessed in Y.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_y(self, price: float) -&gt; float:
+    &#34;&#34;&#34;
+    Get total value of position expessed in Y.
+    Args:
+        price: Current price of X in Y currency.
+    Returns:
+        Total value of position expessed in Y.
+    &#34;&#34;&#34;
+    res = self.x * price + self.y
+    return res</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.withdraw"><code class="name flex">
+<span>def <span class="ident">withdraw</span></span>(<span>self, x: float, y: float) ‑> Tuple[float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Withdraw X currency and Y currency from position</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong></dt>
+<dd>Value of X currency</dd>
+<dt><strong><code>y</code></strong></dt>
+<dd>Value of Y currency</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Value of X, value of Y</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def withdraw(self, x: float, y: float) -&gt; Tuple[float, float]:
+    &#34;&#34;&#34;
+    Withdraw X currency and Y currency from position
+    Args:
+        x: Value of X currency
+        y: Value of Y currency
+    Returns:
+         Value of X, value of Y
+    &#34;&#34;&#34;
+    assert x &lt;= self.x, f&#39;Too much to withdraw X = {x}&#39;
+    assert y &lt;= self.y, f&#39;Too much to withdraw Y = {y}&#39;
+    self.x -= x
+    self.y -= y
+    return x, y</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.BiCurrencyPosition.withdraw_fraction"><code class="name flex">
+<span>def <span class="ident">withdraw_fraction</span></span>(<span>self, fraction: float) ‑> Tuple[float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Withdraw percent of X currency and percent of Y currency from position</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>fraction</code></strong></dt>
+<dd>Fraction from 0 to 1.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Fraction of current X and Y.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def withdraw_fraction(self, fraction: float) -&gt; Tuple[float, float]:
+    &#34;&#34;&#34;
+    Withdraw percent of X currency and percent of Y currency from position
+    Args:
+        fraction: Fraction from 0 to 1.
+    Returns:
+         Fraction of current X and Y.
+    &#34;&#34;&#34;
+    assert fraction &lt;= 1, f&#39;Too much to withdraw Fraction = {fraction}&#39;
+    x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
+    return x_out, y_out</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="strategy.Positions.AbstractPosition" href="#strategy.Positions.AbstractPosition">AbstractPosition</a></b></code>:
+<ul class="hlist">
+<li><code><a title="strategy.Positions.AbstractPosition.rename" href="#strategy.Positions.AbstractPosition.rename">rename</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="strategy.Positions.UniV3Position"><code class="flex name class">
+<span>class <span class="ident">UniV3Position</span></span>
+<span>(</span><span>name: str, lower_price: float, upper_price: float, fee_percent: float, rebalance_cost: float)</span>
+</code></dt>
+<dd>
+<div class="desc"><p><code><a title="strategy.Positions.UniV3Position" href="#strategy.Positions.UniV3Position">UniV3Position</a></code> is a class corresponding to one investment into UniswapV3 interval.
+It's defined by lower and upper bounds <code>lower_price</code>, <code>upper_price</code> and
+pool fee percent <code>fee_percent</code>.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>name</code></strong></dt>
+<dd>Unique name for the position</dd>
+<dt><strong><code>lower_price</code></strong></dt>
+<dd>Lower bound of the interval (price)</dd>
+<dt><strong><code>upper_price</code></strong></dt>
+<dd>Upper bound of the interval (price)</dd>
+<dt><strong><code>fee_percent</code></strong></dt>
+<dd>Amount of fee expressed as a percentage</dd>
+<dt><strong><code>rebalance_cost</code></strong></dt>
+<dd>Rebalancing cost, expressed in currency</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class UniV3Position(AbstractPosition):
+    &#34;&#34;&#34;
+        ``UniV3Position`` is a class corresponding to one investment into UniswapV3 interval.
+        It&#39;s defined by lower and upper bounds ``lower_price``, ``upper_price`` and  pool fee percent ``fee_percent``.
+        Attributes:
+            name: Unique name for the position
+            lower_price: Lower bound of the interval (price)
+            upper_price:  Upper bound of the interval (price)
+            fee_percent: Amount of fee expressed as a percentage
+            rebalance_cost: Rebalancing cost, expressed in currency
+   &#34;&#34;&#34;
+    def __init__(self,
+                 name: str,
+                 lower_price: float,
+                 upper_price: float,
+                 fee_percent: float,
+                 rebalance_cost: float,
+                 ) -&gt; None:
+
+        super().__init__(name)
+
+        self.lower_price = lower_price
+        self.upper_price = upper_price
+        self.fee_percent = fee_percent
+        self.rebalance_cost = rebalance_cost
+
+        self.sqrt_lower = np.sqrt(self.lower_price)
+        self.sqrt_upper = np.sqrt(self.upper_price)
+
+        self.liquidity = 0
+        self.bi_currency = BiCurrencyPosition(&#39;Virtual&#39;, self.fee_percent, self.rebalance_cost)
+        self.rebalance_costs_to_x = 0
+        self.rebalance_costs_to_y = 0
+
+        self.realized_loss_to_x = 0
+        self.realized_loss_to_y = 0
+
+        self.fees_x = 0
+        self._fees_x_earned_ = 0
+
+        self.fees_y = 0
+        self._fees_y_earned_ = 0
+
+    def deposit(self, x: float, y: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Deposit X and Y to position.
+        Args:
+            x: Value of X currency.
+            y: Value of Y currency.
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        self.mint(x, y, price)
+        return None
+
+    def withdraw(self, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Withdraw all liquidity from UniswapV3 position.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X, value of Y.
+        &#34;&#34;&#34;
+        x_out, y_out = self.burn(self.liquidity, price)
+        x_fees, y_fees = self.collect_fees()
+        x_res, y_res = x_out + x_fees, y_out + y_fees
+        return x_res, y_res
+
+    def mint(self, x: float, y: float, price: float) -&gt; None:
+        &#34;&#34;&#34;
+        Mint X and Y to uniswapV3 interval.
+        Args:
+            x: Value of X currency.
+            y: Value of Y currency.
+            price:
+            Current price of X in Y currency.
+        &#34;&#34;&#34;
+        d_liq = self._xy_to_liq_(x, y, price)
+        self.liquidity += d_liq
+        self.bi_currency.deposit(x, y)
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+        return None
+
+    def burn(self, liq: float, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Burn liquidity from uniswapV3 interval.
+            liq: Value of liquidity.
+            price: Current price of X in Y currency.
+        Returns: Value of X, value of Y.
+        &#34;&#34;&#34;
+        assert liq &lt;= self.liquidity, f&#39;Too much liquidity too withdraw = {liq}&#39;
+        assert liq &gt; 1e-6, f&#39;Too small liquidity too withdraw = {liq}&#39;
+        il_x_0 = self.impermanent_loss_to_x(price)
+        il_y_0 = self.impermanent_loss_to_y(price)
+
+        x_out, y_out = self._liq_to_xy_(liq, price)
+
+        self.bi_currency.withdraw_fraction(liq / self.liquidity)
+        self.liquidity -= liq
+
+        il_x_1 = self.impermanent_loss_to_x(price)
+        il_y_1 = self.impermanent_loss_to_y(price)
+
+        self.realized_loss_to_x += (il_x_0 - il_x_1)
+        self.realized_loss_to_y += (il_y_0 - il_y_1)
+        self.rebalance_costs_to_x += self.rebalance_cost / price
+        self.rebalance_costs_to_y += self.rebalance_cost
+        return x_out, y_out
+
+    def charge_fees(self, price_0: float, price_1: float) -&gt; None:
+        &#34;&#34;&#34;
+        Charge exchange fees.
+        Args:
+            price_0: Price before exchange.
+            price_1: Price after exchange.
+        &#34;&#34;&#34;
+        price_0_adj = self._adj_price_(price_0)
+        price_1_adj = self._adj_price_(price_1)
+
+        x_0, y_0 = self.to_xy(price_0_adj)
+        x_1, y_1 = self.to_xy(price_1_adj)
+
+        fee_x, fee_y = 0, 0
+        if y_0 &gt;= y_1:
+            fee_x = (x_1 - x_0) * self.fee_percent
+            if fee_x &lt; 0:
+                raise Exception(f&#39;Negative X fees earned: {fee_x}&#39;)
+        else:
+            fee_y = (y_1 - y_0) * self.fee_percent
+            if fee_y &lt; 0:
+                raise Exception(f&#39;Negative Y fees earned: {fee_y}&#39;)
+
+        self.fees_x += fee_x
+        self._fees_x_earned_ += fee_x
+
+        self.fees_y += fee_y
+        self._fees_y_earned_ += fee_y
+        return None
+
+    def collect_fees(self) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Collect all gained fees.
+        Returns:
+            Value of X fees, value of Y fees.
+        &#34;&#34;&#34;
+        fees_x = self.fees_x
+        fees_y = self.fees_y
+        self.fees_x = 0
+        self.fees_y = 0
+        return fees_x, fees_y
+
+    def reinvest_fees(self, price) -&gt; None:
+        &#34;&#34;&#34;
+        Collect all gained fees and reinvest to current position.
+        Args:
+            price: Current price of X in Y currency.
+        &#34;&#34;&#34;
+        fees_x, fees_y = self.collect_fees()
+        self.mint(fees_x, fees_y, price)
+        return None
+
+    def impermanent_loss(self, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Calculate impermanent loss separately in X and Y currencies.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X il, value of Y il.
+        &#34;&#34;&#34;
+        x_hold, y_hold = self.bi_currency.to_xy(price)
+        x_stake, y_stake = self.to_xy(price)
+        il_x = x_hold - x_stake
+        il_y = y_hold - y_stake
+        return il_x, il_y
+
+    def impermanent_loss_to_x(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate impermanent loss denominated in X.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X il.
+        &#34;&#34;&#34;
+        v_hold = self.bi_currency.to_x(price)
+        v_stake = self.to_x(price)
+        il_x = v_hold - v_stake
+        return il_x
+
+    def impermanent_loss_to_y(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate impermanent loss denominated in Y.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Value of Y il.
+        &#34;&#34;&#34;
+        v_hold = self.bi_currency.to_y(price)
+        v_stake = self.to_y(price)
+        il_y = v_hold - v_stake
+        return il_y
+
+    def to_x(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get value of UniswapV3 position expessed in X.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Total value of uniswapV3 position expessed in X.
+        &#34;&#34;&#34;
+        x, y = self.to_xy(price)
+        vol_x = x + y / price
+        return vol_x
+
+    def to_y(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get value of UniswapV3 position expessed in Y.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Total value of UniswapV3 position expessed in Y.
+        &#34;&#34;&#34;
+        x, y = self.to_xy(price)
+        vol_y = x * price + y
+        return vol_y
+
+    def to_xy(self, price) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Get values of position in X and Y.
+        Args:
+            price: Current price of X in Y currency.
+        Returns:
+            Position value to X and Y.
+        &#34;&#34;&#34;
+        x, y = self._liq_to_xy_(self.liquidity, price)
+        return x, y
+
+    def _adj_price_(self, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Get adjusted price of current price and UniswapV3 interval boundaries.
+        Args:
+            price: current price of X in Y currency.
+        Returns:
+            Adjusted price.
+        &#34;&#34;&#34;
+        adj_price = min(max(self.lower_price, price), self.upper_price)
+        return adj_price
+
+    def _x_to_liq_(self, x: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform X to liquidity.
+        Args:
+            x: Value of X.
+            price: Current price of X in Y currency.
+        Returns:
+            Resulting liquidity.
+        &#34;&#34;&#34;
+        if self.upper_price &lt;= price:
+            return np.inf
+        sqrt_price = np.sqrt(price)
+        l_x = (x * sqrt_price * self.sqrt_upper) / (self.sqrt_upper - sqrt_price)
+        return l_x
+
+    def _y_to_liq_(self, y: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform Y to liquidity.
+        Args:
+            y: Value of Y.
+            price: Current price of X in Y currency.
+        Returns:
+            Resulting liquidity.
+        &#34;&#34;&#34;
+        if self.lower_price &gt;= price:
+            return np.inf
+        sqrt_price = np.sqrt(price)
+        l_y = y / (sqrt_price - self.sqrt_lower)
+        return l_y
+
+    def _xy_to_liq_(self, x: float, y: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform X and Y to liquidity.
+        Args:
+            x: Value of X.
+            y: Value of Y.
+            price: Current price of X in Y currency.
+        Returns:
+            Resulting liquidity.
+        &#34;&#34;&#34;
+        adj_price = self._adj_price_(price)
+        x_liq = self._x_to_liq_(x, adj_price)
+        y_liq = self._y_to_liq_(y, adj_price)
+        assert (x_liq &gt;= 0) &amp; (y_liq &gt;= 0), f&#39;Lx or Ly less then 0: Lx={x_liq}, Ly={y_liq}&#39;
+        if np.isinf(x_liq):
+            return y_liq
+        elif np.isinf(y_liq):
+            return x_liq
+        assert abs(x_liq - y_liq) &lt; 1e-6, f&#39;Lx != Ly: Lx={x_liq}, Ly={y_liq}&#39;
+        liq = min(x_liq, y_liq)
+        return liq
+
+    def _liq_to_x_(self, liq: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform liquidity to X.
+        Args:
+            liq: Value of liq.
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X.
+        &#34;&#34;&#34;
+        adj_price = self._adj_price_(price)
+        sqrt_price = np.sqrt(adj_price)
+        numer = self.sqrt_upper - sqrt_price
+        denom = self.sqrt_upper * sqrt_price
+        x = liq * numer / denom
+        return x
+
+    def _liq_to_y_(self, liq: float, price: float) -&gt; float:
+        &#34;&#34;&#34;
+        Transform liquidity to Y.
+        Args:
+            liq: Value of liq.
+            price: Current price of X in Y currency.
+        Returns:
+            Value of Y.
+        &#34;&#34;&#34;
+        adj_price = self._adj_price_(price)
+        sqrt_price = np.sqrt(adj_price)
+        y = liq * (sqrt_price - self.sqrt_lower)
+        return y
+
+    def _liq_to_xy_(self, liq: float, price: float) -&gt; Tuple[float, float]:
+        &#34;&#34;&#34;
+        Transform liquidity to X, Y pair .
+            liq: Value of liq.
+            price: Current price of X in Y currency.
+        Returns:
+            Value of X and Y.
+        &#34;&#34;&#34;
+        x = self._liq_to_x_(liq, price)
+        y = self._liq_to_y_(liq, price)
+        return x, y
+
+    def snapshot(self, timestamp: datetime, price: float) -&gt; dict:
+        &#34;&#34;&#34;
+        Get uniswapV3 position snapshot.
+        Args:
+            timestamp: timestamp of snapshot.
+            price: Current price of X in Y currency.
+        Returns:
+            UniswapV3 position snapshot.
+        &#34;&#34;&#34;
+        volume_to_x = self.to_x(price)
+        volume_to_y = self.to_y(price)
+
+        fees_earned_to_x = self._fees_x_earned_ + self._fees_y_earned_ / price
+        fees_earned_to_y = price * self._fees_x_earned_ + self._fees_y_earned_
+
+        fees_to_x = self.fees_x + self.fees_y / price
+        fees_to_y = price * self.fees_x + self.fees_y
+
+        il_to_x = self.impermanent_loss_to_x(price)
+        il_to_y = self.impermanent_loss_to_y(price)
+        
+        current_liquidity = self.liquidity
+
+        snapshot = {f&#39;{self.name}_value_to_x&#39;: volume_to_x,
+                    f&#39;{self.name}_value_to_y&#39;: volume_to_y,
+
+                    f&#39;{self.name}_earned_fees_to_x&#39;: fees_earned_to_x,
+                    f&#39;{self.name}_earned_fees_to_y&#39;: fees_earned_to_y,
+
+                    f&#39;{self.name}_current_fees_to_x&#39;: fees_to_x,
+                    f&#39;{self.name}_current_fees_to_y&#39;: fees_to_y,
+
+                    f&#39;{self.name}_il_to_x&#39;: il_to_x,
+                    f&#39;{self.name}_il_to_y&#39;: il_to_y,
+
+                    f&#39;{self.name}_realized_loss_to_x&#39;: self.realized_loss_to_x,
+                    f&#39;{self.name}_realized_loss_to_y&#39;: self.realized_loss_to_y,
+
+                    f&#39;{self.name}_rebalance_costs_to_x&#39;: self.rebalance_costs_to_x,
+                    f&#39;{self.name}_rebalance_costs_to_y&#39;: self.rebalance_costs_to_y,
+                    
+                    f&#39;{self.name}_current_liquidity&#39;: current_liquidity
+                    }
+        return snapshot</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="strategy.Positions.AbstractPosition" href="#strategy.Positions.AbstractPosition">AbstractPosition</a></li>
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="strategy.Positions.UniV3Position.burn"><code class="name flex">
+<span>def <span class="ident">burn</span></span>(<span>self, liq: float, price: float) ‑> Tuple[float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Burn liquidity from uniswapV3 interval.
+liq: Value of liquidity.
+price: Current price of X in Y currency.
+Returns: Value of X, value of Y.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def burn(self, liq: float, price: float) -&gt; Tuple[float, float]:
+    &#34;&#34;&#34;
+    Burn liquidity from uniswapV3 interval.
+        liq: Value of liquidity.
+        price: Current price of X in Y currency.
+    Returns: Value of X, value of Y.
+    &#34;&#34;&#34;
+    assert liq &lt;= self.liquidity, f&#39;Too much liquidity too withdraw = {liq}&#39;
+    assert liq &gt; 1e-6, f&#39;Too small liquidity too withdraw = {liq}&#39;
+    il_x_0 = self.impermanent_loss_to_x(price)
+    il_y_0 = self.impermanent_loss_to_y(price)
+
+    x_out, y_out = self._liq_to_xy_(liq, price)
+
+    self.bi_currency.withdraw_fraction(liq / self.liquidity)
+    self.liquidity -= liq
+
+    il_x_1 = self.impermanent_loss_to_x(price)
+    il_y_1 = self.impermanent_loss_to_y(price)
+
+    self.realized_loss_to_x += (il_x_0 - il_x_1)
+    self.realized_loss_to_y += (il_y_0 - il_y_1)
+    self.rebalance_costs_to_x += self.rebalance_cost / price
+    self.rebalance_costs_to_y += self.rebalance_cost
+    return x_out, y_out</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.charge_fees"><code class="name flex">
+<span>def <span class="ident">charge_fees</span></span>(<span>self, price_0: float, price_1: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Charge exchange fees.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price_0</code></strong></dt>
+<dd>Price before exchange.</dd>
+<dt><strong><code>price_1</code></strong></dt>
+<dd>Price after exchange.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def charge_fees(self, price_0: float, price_1: float) -&gt; None:
+    &#34;&#34;&#34;
+    Charge exchange fees.
+    Args:
+        price_0: Price before exchange.
+        price_1: Price after exchange.
+    &#34;&#34;&#34;
+    price_0_adj = self._adj_price_(price_0)
+    price_1_adj = self._adj_price_(price_1)
+
+    x_0, y_0 = self.to_xy(price_0_adj)
+    x_1, y_1 = self.to_xy(price_1_adj)
+
+    fee_x, fee_y = 0, 0
+    if y_0 &gt;= y_1:
+        fee_x = (x_1 - x_0) * self.fee_percent
+        if fee_x &lt; 0:
+            raise Exception(f&#39;Negative X fees earned: {fee_x}&#39;)
+    else:
+        fee_y = (y_1 - y_0) * self.fee_percent
+        if fee_y &lt; 0:
+            raise Exception(f&#39;Negative Y fees earned: {fee_y}&#39;)
+
+    self.fees_x += fee_x
+    self._fees_x_earned_ += fee_x
+
+    self.fees_y += fee_y
+    self._fees_y_earned_ += fee_y
+    return None</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.collect_fees"><code class="name flex">
+<span>def <span class="ident">collect_fees</span></span>(<span>self) ‑> Tuple[float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Collect all gained fees.</p>
+<h2 id="returns">Returns</h2>
+<p>Value of X fees, value of Y fees.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def collect_fees(self) -&gt; Tuple[float, float]:
+    &#34;&#34;&#34;
+    Collect all gained fees.
+    Returns:
+        Value of X fees, value of Y fees.
+    &#34;&#34;&#34;
+    fees_x = self.fees_x
+    fees_y = self.fees_y
+    self.fees_x = 0
+    self.fees_y = 0
+    return fees_x, fees_y</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.deposit"><code class="name flex">
+<span>def <span class="ident">deposit</span></span>(<span>self, x: float, y: float, price: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Deposit X and Y to position.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong></dt>
+<dd>Value of X currency.</dd>
+<dt><strong><code>y</code></strong></dt>
+<dd>Value of Y currency.</dd>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def deposit(self, x: float, y: float, price: float) -&gt; None:
+    &#34;&#34;&#34;
+    Deposit X and Y to position.
+    Args:
+        x: Value of X currency.
+        y: Value of Y currency.
+        price: Current price of X in Y currency.
+    &#34;&#34;&#34;
+    self.mint(x, y, price)
+    return None</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.impermanent_loss"><code class="name flex">
+<span>def <span class="ident">impermanent_loss</span></span>(<span>self, price: float) ‑> Tuple[float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate impermanent loss separately in X and Y currencies.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Value of X il, value of Y il.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def impermanent_loss(self, price: float) -&gt; Tuple[float, float]:
+    &#34;&#34;&#34;
+    Calculate impermanent loss separately in X and Y currencies.
+    Args:
+        price: Current price of X in Y currency.
+    Returns:
+        Value of X il, value of Y il.
+    &#34;&#34;&#34;
+    x_hold, y_hold = self.bi_currency.to_xy(price)
+    x_stake, y_stake = self.to_xy(price)
+    il_x = x_hold - x_stake
+    il_y = y_hold - y_stake
+    return il_x, il_y</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.impermanent_loss_to_x"><code class="name flex">
+<span>def <span class="ident">impermanent_loss_to_x</span></span>(<span>self, price: float) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate impermanent loss denominated in X.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Value of X il.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def impermanent_loss_to_x(self, price: float) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate impermanent loss denominated in X.
+    Args:
+        price: Current price of X in Y currency.
+    Returns:
+        Value of X il.
+    &#34;&#34;&#34;
+    v_hold = self.bi_currency.to_x(price)
+    v_stake = self.to_x(price)
+    il_x = v_hold - v_stake
+    return il_x</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.impermanent_loss_to_y"><code class="name flex">
+<span>def <span class="ident">impermanent_loss_to_y</span></span>(<span>self, price: float) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Calculate impermanent loss denominated in Y.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Value of Y il.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def impermanent_loss_to_y(self, price: float) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate impermanent loss denominated in Y.
+    Args:
+        price: Current price of X in Y currency.
+    Returns:
+        Value of Y il.
+    &#34;&#34;&#34;
+    v_hold = self.bi_currency.to_y(price)
+    v_stake = self.to_y(price)
+    il_y = v_hold - v_stake
+    return il_y</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.mint"><code class="name flex">
+<span>def <span class="ident">mint</span></span>(<span>self, x: float, y: float, price: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Mint X and Y to uniswapV3 interval.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>x</code></strong></dt>
+<dd>Value of X currency.</dd>
+<dt><strong><code>y</code></strong></dt>
+<dd>Value of Y currency.</dd>
+</dl>
+<p>price:
+Current price of X in Y currency.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mint(self, x: float, y: float, price: float) -&gt; None:
+    &#34;&#34;&#34;
+    Mint X and Y to uniswapV3 interval.
+    Args:
+        x: Value of X currency.
+        y: Value of Y currency.
+        price:
+        Current price of X in Y currency.
+    &#34;&#34;&#34;
+    d_liq = self._xy_to_liq_(x, y, price)
+    self.liquidity += d_liq
+    self.bi_currency.deposit(x, y)
+    self.rebalance_costs_to_x += self.rebalance_cost / price
+    self.rebalance_costs_to_y += self.rebalance_cost
+    return None</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.reinvest_fees"><code class="name flex">
+<span>def <span class="ident">reinvest_fees</span></span>(<span>self, price) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Collect all gained fees and reinvest to current position.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def reinvest_fees(self, price) -&gt; None:
+    &#34;&#34;&#34;
+    Collect all gained fees and reinvest to current position.
+    Args:
+        price: Current price of X in Y currency.
+    &#34;&#34;&#34;
+    fees_x, fees_y = self.collect_fees()
+    self.mint(fees_x, fees_y, price)
+    return None</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.snapshot"><code class="name flex">
+<span>def <span class="ident">snapshot</span></span>(<span>self, timestamp: datetime.datetime, price: float) ‑> dict</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get uniswapV3 position snapshot.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>timestamp</code></strong></dt>
+<dd>timestamp of snapshot.</dd>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>UniswapV3 position snapshot.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def snapshot(self, timestamp: datetime, price: float) -&gt; dict:
+    &#34;&#34;&#34;
+    Get uniswapV3 position snapshot.
+    Args:
+        timestamp: timestamp of snapshot.
+        price: Current price of X in Y currency.
+    Returns:
+        UniswapV3 position snapshot.
+    &#34;&#34;&#34;
+    volume_to_x = self.to_x(price)
+    volume_to_y = self.to_y(price)
+
+    fees_earned_to_x = self._fees_x_earned_ + self._fees_y_earned_ / price
+    fees_earned_to_y = price * self._fees_x_earned_ + self._fees_y_earned_
+
+    fees_to_x = self.fees_x + self.fees_y / price
+    fees_to_y = price * self.fees_x + self.fees_y
+
+    il_to_x = self.impermanent_loss_to_x(price)
+    il_to_y = self.impermanent_loss_to_y(price)
+    
+    current_liquidity = self.liquidity
+
+    snapshot = {f&#39;{self.name}_value_to_x&#39;: volume_to_x,
+                f&#39;{self.name}_value_to_y&#39;: volume_to_y,
+
+                f&#39;{self.name}_earned_fees_to_x&#39;: fees_earned_to_x,
+                f&#39;{self.name}_earned_fees_to_y&#39;: fees_earned_to_y,
+
+                f&#39;{self.name}_current_fees_to_x&#39;: fees_to_x,
+                f&#39;{self.name}_current_fees_to_y&#39;: fees_to_y,
+
+                f&#39;{self.name}_il_to_x&#39;: il_to_x,
+                f&#39;{self.name}_il_to_y&#39;: il_to_y,
+
+                f&#39;{self.name}_realized_loss_to_x&#39;: self.realized_loss_to_x,
+                f&#39;{self.name}_realized_loss_to_y&#39;: self.realized_loss_to_y,
+
+                f&#39;{self.name}_rebalance_costs_to_x&#39;: self.rebalance_costs_to_x,
+                f&#39;{self.name}_rebalance_costs_to_y&#39;: self.rebalance_costs_to_y,
+                
+                f&#39;{self.name}_current_liquidity&#39;: current_liquidity
+                }
+    return snapshot</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.to_x"><code class="name flex">
+<span>def <span class="ident">to_x</span></span>(<span>self, price: float) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get value of UniswapV3 position expessed in X.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Total value of uniswapV3 position expessed in X.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_x(self, price: float) -&gt; float:
+    &#34;&#34;&#34;
+    Get value of UniswapV3 position expessed in X.
+    Args:
+        price: Current price of X in Y currency.
+    Returns:
+        Total value of uniswapV3 position expessed in X.
+    &#34;&#34;&#34;
+    x, y = self.to_xy(price)
+    vol_x = x + y / price
+    return vol_x</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.to_xy"><code class="name flex">
+<span>def <span class="ident">to_xy</span></span>(<span>self, price) ‑> Tuple[float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get values of position in X and Y.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Position value to X and Y.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_xy(self, price) -&gt; Tuple[float, float]:
+    &#34;&#34;&#34;
+    Get values of position in X and Y.
+    Args:
+        price: Current price of X in Y currency.
+    Returns:
+        Position value to X and Y.
+    &#34;&#34;&#34;
+    x, y = self._liq_to_xy_(self.liquidity, price)
+    return x, y</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.to_y"><code class="name flex">
+<span>def <span class="ident">to_y</span></span>(<span>self, price: float) ‑> float</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get value of UniswapV3 position expessed in Y.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Total value of UniswapV3 position expessed in Y.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_y(self, price: float) -&gt; float:
+    &#34;&#34;&#34;
+    Get value of UniswapV3 position expessed in Y.
+    Args:
+        price: Current price of X in Y currency.
+    Returns:
+        Total value of UniswapV3 position expessed in Y.
+    &#34;&#34;&#34;
+    x, y = self.to_xy(price)
+    vol_y = x * price + y
+    return vol_y</code></pre>
+</details>
+</dd>
+<dt id="strategy.Positions.UniV3Position.withdraw"><code class="name flex">
+<span>def <span class="ident">withdraw</span></span>(<span>self, price: float) ‑> Tuple[float, float]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Withdraw all liquidity from UniswapV3 position.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>price</code></strong></dt>
+<dd>Current price of X in Y currency.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Value of X, value of Y.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def withdraw(self, price: float) -&gt; Tuple[float, float]:
+    &#34;&#34;&#34;
+    Withdraw all liquidity from UniswapV3 position.
+    Args:
+        price: Current price of X in Y currency.
+    Returns:
+        Value of X, value of Y.
+    &#34;&#34;&#34;
+    x_out, y_out = self.burn(self.liquidity, price)
+    x_fees, y_fees = self.collect_fees()
+    x_res, y_res = x_out + x_fees, y_out + y_fees
+    return x_res, y_res</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="strategy.Positions.AbstractPosition" href="#strategy.Positions.AbstractPosition">AbstractPosition</a></b></code>:
+<ul class="hlist">
+<li><code><a title="strategy.Positions.AbstractPosition.rename" href="#strategy.Positions.AbstractPosition.rename">rename</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="strategy" href="index.html">strategy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="strategy.Positions.AbstractPosition" href="#strategy.Positions.AbstractPosition">AbstractPosition</a></code></h4>
+<ul class="">
+<li><code><a title="strategy.Positions.AbstractPosition.rename" href="#strategy.Positions.AbstractPosition.rename">rename</a></code></li>
+<li><code><a title="strategy.Positions.AbstractPosition.snapshot" href="#strategy.Positions.AbstractPosition.snapshot">snapshot</a></code></li>
+<li><code><a title="strategy.Positions.AbstractPosition.to_x" href="#strategy.Positions.AbstractPosition.to_x">to_x</a></code></li>
+<li><code><a title="strategy.Positions.AbstractPosition.to_xy" href="#strategy.Positions.AbstractPosition.to_xy">to_xy</a></code></li>
+<li><code><a title="strategy.Positions.AbstractPosition.to_y" href="#strategy.Positions.AbstractPosition.to_y">to_y</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="strategy.Positions.BiCurrencyPosition" href="#strategy.Positions.BiCurrencyPosition">BiCurrencyPosition</a></code></h4>
+<ul class="two-column">
+<li><code><a title="strategy.Positions.BiCurrencyPosition.deposit" href="#strategy.Positions.BiCurrencyPosition.deposit">deposit</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.interest_gain" href="#strategy.Positions.BiCurrencyPosition.interest_gain">interest_gain</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.rebalance" href="#strategy.Positions.BiCurrencyPosition.rebalance">rebalance</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.snapshot" href="#strategy.Positions.BiCurrencyPosition.snapshot">snapshot</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.swap_x_to_y" href="#strategy.Positions.BiCurrencyPosition.swap_x_to_y">swap_x_to_y</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.swap_y_to_x" href="#strategy.Positions.BiCurrencyPosition.swap_y_to_x">swap_y_to_x</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.to_x" href="#strategy.Positions.BiCurrencyPosition.to_x">to_x</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.to_xy" href="#strategy.Positions.BiCurrencyPosition.to_xy">to_xy</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.to_y" href="#strategy.Positions.BiCurrencyPosition.to_y">to_y</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.withdraw" href="#strategy.Positions.BiCurrencyPosition.withdraw">withdraw</a></code></li>
+<li><code><a title="strategy.Positions.BiCurrencyPosition.withdraw_fraction" href="#strategy.Positions.BiCurrencyPosition.withdraw_fraction">withdraw_fraction</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="strategy.Positions.UniV3Position" href="#strategy.Positions.UniV3Position">UniV3Position</a></code></h4>
+<ul class="">
+<li><code><a title="strategy.Positions.UniV3Position.burn" href="#strategy.Positions.UniV3Position.burn">burn</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.charge_fees" href="#strategy.Positions.UniV3Position.charge_fees">charge_fees</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.collect_fees" href="#strategy.Positions.UniV3Position.collect_fees">collect_fees</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.deposit" href="#strategy.Positions.UniV3Position.deposit">deposit</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.impermanent_loss" href="#strategy.Positions.UniV3Position.impermanent_loss">impermanent_loss</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.impermanent_loss_to_x" href="#strategy.Positions.UniV3Position.impermanent_loss_to_x">impermanent_loss_to_x</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.impermanent_loss_to_y" href="#strategy.Positions.UniV3Position.impermanent_loss_to_y">impermanent_loss_to_y</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.mint" href="#strategy.Positions.UniV3Position.mint">mint</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.reinvest_fees" href="#strategy.Positions.UniV3Position.reinvest_fees">reinvest_fees</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.snapshot" href="#strategy.Positions.UniV3Position.snapshot">snapshot</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.to_x" href="#strategy.Positions.UniV3Position.to_x">to_x</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.to_xy" href="#strategy.Positions.UniV3Position.to_xy">to_xy</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.to_y" href="#strategy.Positions.UniV3Position.to_y">to_y</a></code></li>
+<li><code><a title="strategy.Positions.UniV3Position.withdraw" href="#strategy.Positions.UniV3Position.withdraw">withdraw</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

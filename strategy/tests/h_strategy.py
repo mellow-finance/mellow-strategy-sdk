@@ -11,7 +11,15 @@ from strategy.MultiStrategy import MultiStrategy
 from strategy.primitives import Pool, Token, Fee
 
 
-def init_strat(pool):
+def init_strat(pool: Pool):
+    """
+    Initilize strategy.
+    Args:
+        data: UniswapV3 data.
+        pool: UniswapV3 pool.
+    Returns:
+        Initialized strategy.
+    """
     hb_strat = HBStrategy(600, 30, pool, 0.01,  0.0002, 0.0002)
     hu_strat = HUStrategy(10, 360, 60, 3, 30, pool, 0.01)
     ms = MultiStrategy('Multi', [hb_strat, hu_strat])
@@ -19,6 +27,14 @@ def init_strat(pool):
 
 
 def calc_perf(portfolio_history, data):
+    """
+    Calculate strategy performance metrics.
+    Args:
+        data: UniswapV3 data.
+        pool: UniswapV3 pool.
+    Returns:
+        Performance metrics.
+    """
     snaphot_last = portfolio_history.snapshots[-1]
     snaphot_first = portfolio_history.snapshots[0]
     
@@ -46,6 +62,13 @@ def calc_perf(portfolio_history, data):
 
 
 def evaluate(path):
+    """
+    Evaluate backtesting.
+    Args:
+        path: Path to data.
+    Returns:
+        Performance metrics.
+    """
     pool = Pool(Token.WBTC, Token.WETH, Fee.MIDDLE)
     data = RawDataUniV3(pool, folder=f'{path}/data/').load_from_folder()
     strat = init_strat(pool)

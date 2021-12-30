@@ -3,20 +3,18 @@ import pandas as pd
 from pathlib import Path
 from decimal import Decimal
 
-from .primitives import Pool
+from strategy.primitives import Pool
 
 
 class PoolDataUniV3:
     """
-       ``PoolDataUniV3`` contains data for backtesting.
-       The data represented as a ``pandas`` DataFrame with datetime index.
-       All data is denominated in eth rather then wei (or btc rather that sat, etc.)
-       :param pool: UniswapV3 pool meta data
-       :param mints: UniswapV3 mints data
-       :param burns: UniswapV3 burns data
-       :param swaps: UniswapV3 swaps data
-   """
-
+    ``PoolDataUniV3`` contains data for backtesting.
+    Attributes:
+        pool: UniswapV3 ``Pool`` data
+        mints: UniswapV3 mints data.
+        burns: UniswapV3 burns data.
+        swaps: UniswapV3 swaps data.
+    """
     def __init__(self,
                  pool: Pool,
                  mints: pd.DataFrame = None,
@@ -32,9 +30,10 @@ class PoolDataUniV3:
 
 class RawDataUniV3:
     """
-       ``RawDataUniV3`` preprocess UniswapV3 data.
-       :param pool: UniswapV3 pool meta data
-       :param folder: path to data
+      ``RawDataUniV3`` preprocess UniswapV3 data.
+      Attributes:
+         pool: UniswapV3 pool meta data.
+         folder: path to data.
    """
     def __init__(self, pool: Pool, folder: Path = '../data/'):
         self.pool = pool
@@ -42,8 +41,11 @@ class RawDataUniV3:
 
     def load_from_folder(self) -> PoolDataUniV3:
         """
-        Loads data - swaps, mint, burns from predefined folder
+        Loads data: swaps, mint, burns from predefined folder.
+        Returns:
+            PoolDataUniV3 instance with loaded data.
         """
+
         mints_converters = {
             "block_time": int,
             "block_number": int,
@@ -83,8 +85,11 @@ class RawDataUniV3:
 
     def preprocess_mints(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Preprocess Uniswap mints data
-        :param df: Mints data frame
+        Preprocess UniswapV3 mints data.
+        Args:
+            df: Mints data frame.
+        Returns:
+            Preprocessed mints data frame.
         """
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df = df.set_index('timestamp')
@@ -96,8 +101,11 @@ class RawDataUniV3:
 
     def preprocess_burns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Preprocess Uniswap burns data
-        :param df: Burns data frame
+        Preprocess UniswapV3 burns data.
+        Args:
+            df: Burns data frame.
+        Returns:
+            Preprocessed burns data frame.
         """
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df = df.set_index('timestamp')
@@ -109,9 +117,13 @@ class RawDataUniV3:
 
     def preprocess_swaps(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Preprocess Uniswap swap data
-        :param df: Swap data frame
+        Preprocess UniswapV3 swap data.
+        Args:
+            df: Swaps data frame.
+        Returns:
+            Preprocessed swap data frame.
         """
+
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df['timestamp'] = df['timestamp'] + pd.to_timedelta(df['log_index'], unit='ns')
         df = df.sort_values(by='timestamp', ascending=True)
@@ -134,14 +146,15 @@ class RawDataUniV3:
 
 class SyntheticData:
     """
-       ``SyntheticData`` generates synthetic UniswapV3 exchange data.
-       :param pool: UniswapV3 pool meta data
-       :param start_date: starting date for generating
-       :param n_points: how many samples to generate
-       :param init_price: initial price
-       :param mu: expectation of random walk
-       :param sigma: variance of random walk
-       :param seed: seed for random generator
+       ``SyntheticData`` generates UniswapV3 synthetic exchange data.
+       Attributes:
+            pool: UniswapV3 ``Pool`` instance.
+            start_date: Generating starting date.
+            n_points: Amount samples to generate.
+            init_price: Initial price.
+            mu: Expectation of normal distribution.
+            sigma: Variance of normal distributio.
+            seed: Seed for random generator.
    """
     def __init__(self, pool, start_date='1-1-2022', n_points=365, init_price=1, mu=0, sigma=0.1, seed=42):
         self.pool = pool
@@ -156,8 +169,9 @@ class SyntheticData:
 
     def generate_data(self):
         """
-        Generate synthetic UniswapV3 exchange data
-        :return: PoolDataUniV3
+        Generate synthetic UniswapV3 exchange data.
+        Returns:
+            PoolDataUniV3 instance with synthetic data.
         """
         timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq='D', normalize=True)
         # np.random.seed(self.seed)
