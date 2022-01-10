@@ -522,7 +522,7 @@ class MUStrategy(AbstractStrategy):
         x_uni, y_uni = vault.withdraw_fraction(fraction_uni)
 
         uni_aligner = UniswapLiquidityAligner(lower_price, upper_price)
-        x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(x_uni, y_uni,  price)
+        x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(x_uni, y_uni, price)
 
         univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent, self.rebalance_cost)
         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
@@ -696,121 +696,6 @@ class LidoStrategy(AbstractStrategy):
         upper_bound = right_bound + self.grid_width * self.interval_width_num
         mid_tick = (right_bound + upper_bound) / 2
         return right_bound, mid_tick, upper_bound
-
-
-# class UniV3Passive(AbstractStrategy):
-#     """
-#     ``UniV3Passive`` is the passive strategy on UniswapV3 without rebalances.
-#         lower_price: Lower bound of the interval
-#         upper_price: Upper bound of the interval
-#         rebalance_cost: Rebalancing cost, expressed in currency
-#         pool: UniswapV3 Pool instance
-#         name: Unique name for the instance
-#     """
-#     def __init__(self,
-#                  lower_price: float,
-#                  upper_price: float,
-#                  pool: Pool,
-#                  rebalance_cost: float,
-#                  name: str = None,
-#                  ):
-#         super().__init__(name)
-#         self.lower_price = lower_price
-#         self.upper_price = upper_price
-#         self.decimal_diff = -pool.decimals_diff
-#         self.fee_percent = pool.fee.percent
-#         self.rebalance_cost = rebalance_cost
-
-#     def rebalance(self, *args, **kwargs) -> bool:
-#         timestamp = kwargs['timestamp']
-#         row = kwargs['row']
-#         portfolio = kwargs['portfolio']
-#         price_before, price = row['price_before'], row['price']
-
-#         is_rebalanced = False
-
-#         if len(portfolio.positions) == 0:
-#             bicurrency = BiCurrencyPosition('Vault',
-#                                             self.fee_percent,
-#                                             self.rebalance_cost,
-#                                             1 / price, 1,
-#                                             0.0,
-#                                             0.0)
-#             portfolio.append(bicurrency)
-
-#         if 'UniV3Passive' in portfolio.positions:
-#             uni_pos = portfolio.get_position('UniV3Passive')
-#             uni_pos.charge_fees(price_before, price)
-
-#         if 'UniV3Passive' not in portfolio.positions:
-#             self.create_uni_position(portfolio, price)
-#             is_rebalanced = True
-
-#         return is_rebalanced
-
-#     # def create_uni_position(self, price) -> UniV3Position:
-#     #     uni_fabric = UniswapV3Utils(self.lower_price, self.upper_price)
-#     #     x_uni_aligned, y_uni_aligned = uni_fabric._align_to_liq_(1 / price, 1, self.lower_price, self.upper_price, price)
-#     #     univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
-#     #     univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
-#     #     return univ3_pos
-
-#     def create_uni_position(self, portfolio, price):
-#         uni_fabric = UniswapV3Utils(0, 1e8)
-
-#         vault = portfolio.get_position('Vault')
-#         x_all, y_all = vault.to_xy(price)
-
-#         fraction_uni = uni_fabric.calc_fraction_to_uni(self.lower_price, self.upper_price, price)
-#         print('fraction_uni', fraction_uni)
-#         x_uni, y_uni = x_all * fraction_uni, y_all * fraction_uni
-#         x_uni_aligned, y_uni_aligned = uni_fabric.align_to_liq(x_uni, y_uni, self.lower_price, self.upper_price, price)
-
-#         vault.withdraw(x_uni_aligned, y_uni_aligned)
-
-#         univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
-#         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
-
-#         portfolio.append(univ3_pos)
-#         return None
-
-
-# class BiCurrencyPassive(AbstractStrategy):
-#     """
-#     ``BiCurrencyPassive`` is the simplest strategy for asset pair.
-#     This strategy only tracks own statistic in time
-#         pool: UniswapV3 Pool instance
-#         name: Unique name for the instance
-#     """
-#     def __init__(self,
-#                  pool: Pool,
-#                  name: str = None,
-#                  ):
-#         super().__init__(name)
-#         self.decimal_diff = -pool.decimals_diff
-#         self.fees_percent = pool.fee.percent
-
-#     def rebalance(self, *args, **kwargs) -> bool:
-#         timestamp = kwargs['timestamp']
-#         row = kwargs['row']
-#         portfolio = kwargs['portfolio']
-
-#         price = row['price']
-
-#         is_rebalanced = False
-
-#         if 'Vault' not in portfolio.positions:
-#             bicurrency = BiCurrencyPosition('Vault',
-#                                             0.003,
-#                                             0.01,
-#                                             1 / price, 1,
-#                                             0.0,
-#                                             0.0)
-#             portfolio.append(bicurrency)
-#             is_rebalanced = True
-
-#         return is_rebalanced
-
 
 
 
