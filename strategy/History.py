@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import datetime
 
+
 class PortfolioHistory:
     """
        ``PortfolioHistory`` tracks position stats over time.
