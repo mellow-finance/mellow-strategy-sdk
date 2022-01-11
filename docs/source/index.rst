@@ -8,7 +8,7 @@ Welcome to mellow_strategy_sdk's documentation!
 
 .. toctree::
    :maxdepth: 3
-   :caption: API:
+   :caption: API
    strategy
    strategy/Backtest
    strategy/Data
