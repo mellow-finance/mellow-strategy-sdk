@@ -8,7 +8,7 @@ from strategy.primitives import Pool
 
 class PoolDataUniV3:
     """
-    PoolDataUniV3 contains data for backtesting.
+    ``PoolDataUniV3`` contains data for backtesting.
 
     Attributes:
         pool: UniswapV3 ``Pool`` data
@@ -31,7 +31,7 @@ class PoolDataUniV3:
 
 class RawDataUniV3:
     """
-     RawDataUniV3 preprocess UniswapV3 data.
+     ``RawDataUniV3`` preprocess UniswapV3 data.
 
      Attributes:
         pool: UniswapV3 pool meta data.
@@ -155,7 +155,7 @@ class RawDataUniV3:
 
 class SyntheticData:
     """
-    SyntheticData generates UniswapV3 synthetic exchange data.
+    ``SyntheticData`` generates UniswapV3 synthetic exchange data.
 
     Attributes:
         pool: UniswapV3 ``Pool`` instance.

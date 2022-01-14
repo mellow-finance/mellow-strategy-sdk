@@ -7,7 +7,7 @@ Backtest
     :members:
 
 .. automodule:: strategy.cross_validation
-Cross Validation
+CrossValidation
 ~~~~~~~~~~~~~~
 .. autoclass:: FolderSimple
     :members:
@@ -64,8 +64,15 @@ Primitives
 .. autoclass:: Pool
     :members:
 
+.. automodule:: strategy.strategies
+Strategies
+~~~~~~~~~~~~~~
+.. autoclass:: AbstractStrategy
+    :members:
+
+
 .. automodule:: strategy.uniswap_utils
-Uniswap Utils
+UniswapUtils
 ~~~~~~~~~~~~~~
 .. autoclass:: UniswapLiquidityAligner
     :members:

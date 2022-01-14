@@ -9,7 +9,7 @@ import copy
 
 class Backtest:
     """
-    Backtest is used for backtesting strategy on pool data.
+    ``Backtest`` is used for backtesting strategy on pool data.
 
     It contains the logic of running strategy on the market data and tracks results.
 

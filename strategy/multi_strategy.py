@@ -1,10 +1,10 @@
 from strategy.strategies import AbstractStrategy
-from typing import List
+from typing import List, Hashable
 
 
 class MultiStrategy(AbstractStrategy):
     """
-    MultiStrategy is used for making composition of several strategies.
+    ``MultiStrategy`` is used for making composition of several strategies.
 
     Attributes:
         name: Unique name for the instance.
@@ -38,7 +38,7 @@ class MultiStrategy(AbstractStrategy):
         del self.strategies[name]
         return None
 
-    def rebalance(self, *args: list, **kwargs: dict) -> list:
+    def rebalance(self, *args: list, **kwargs: dict) -> Hashable:
         """
         Rebalance implementation for strategy composition.
 
@@ -49,4 +49,11 @@ class MultiStrategy(AbstractStrategy):
         Returns: Rebalnaces status of each strategy in composition.
         """
         status = [strategy.rebalance(*args, **kwargs) for name, strategy in self.strategies.items()]
-        return status
+        status_cleaned = [st for st in status if st is not None]
+        if len(status_cleaned) == 0:
+            is_rebalanced = None
+        elif len(status_cleaned) == 1:
+            is_rebalanced = status_cleaned[0]
+        else:
+            is_rebalanced = 'multi_call'
+        return is_rebalanced

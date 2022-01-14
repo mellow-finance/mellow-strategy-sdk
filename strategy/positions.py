@@ -42,16 +42,16 @@ class AbstractPosition(ABC):
 
 class BiCurrencyPosition(AbstractPosition):
     """
-        ``BiCurrencyPosition`` is a class corresponding to currency pair.
-        Attributes:
+    ``BiCurrencyPosition`` is a class corresponding to currency pair.
+    Attributes:
 
-            name: Unique name for the position.
-            swap_fee: Exchange fee expressed as a percentage.
-            rebalance_cost: Rebalancing cost, expressed in Y currency.
-            x: Amount of asset X.
-            y: Amount of asset Y.
-            x_interest: Interest on currency X deposit expressed as a daily percentage yield.
-            y_interest: Interest on currency Y deposit expressed as a daily percentage yield.
+        name: Unique name for the position.
+        swap_fee: Exchange fee expressed as a percentage.
+        rebalance_cost: Rebalancing cost, expressed in Y currency.
+        x: Amount of asset X.
+        y: Amount of asset Y.
+        x_interest: Interest on currency X deposit expressed as a daily percentage yield.
+        y_interest: Interest on currency Y deposit expressed as a daily percentage yield.
    """
 
     def __init__(self, name: str,
@@ -251,15 +251,15 @@ class BiCurrencyPosition(AbstractPosition):
 
 class UniV3Position(AbstractPosition):
     """
-        ``UniV3Position`` is a class corresponding to one investment into UniswapV3 interval.
-        It's defined by lower and upper bounds ``lower_price``, ``upper_price`` and  pool fee percent ``fee_percent``.
+    ``UniV3Position`` is a class corresponding to one investment into UniswapV3 interval.
+    It's defined by lower and upper bounds ``lower_price``, ``upper_price`` and  pool fee percent ``fee_percent``.
 
-        Attributes:
-            name: Unique name for the position
-            lower_price: Lower bound of the interval (price)
-            upper_price:  Upper bound of the interval (price)
-            fee_percent: Amount of fee expressed as a percentage
-            rebalance_cost: Rebalancing cost, expressed in currency
+    Attributes:
+        name: Unique name for the position
+        lower_price: Lower bound of the interval (price)
+        upper_price:  Upper bound of the interval (price)
+        fee_percent: Amount of fee expressed as a percentage
+        rebalance_cost: Rebalancing cost, expressed in currency
    """
     def __init__(self,
                  name: str,

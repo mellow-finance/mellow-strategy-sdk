@@ -9,7 +9,7 @@ from strategy.primitives import Pool
 
 class PotrfolioViewer:
     """
-    PotrfolioViewer is class for potrfolio visualisation.
+    ``PotrfolioViewer`` is class for potrfolio visualisation.
 
     Attributes:
         portfolio_history: Portfolio history instance.
@@ -248,7 +248,7 @@ class PotrfolioViewer:
 
 class UniswapViewer:
     """
-     UniswapViewer is class for visualizing UniswapV3 intervals in time.
+     ``UniswapViewer`` is class for visualizing UniswapV3 intervals in time.
 
      Attributes:
         uni_postition_history: Uniswap positions history instance.
@@ -312,7 +312,7 @@ class UniswapViewer:
 
 class RebalanceViewer:
     """
-    RebalanceViewer is class for rebalance visualisation.
+    ``RebalanceViewer`` is class for rebalance visualisation.
 
     Attributes:
         rebalance_history: Rebalance history instance.
@@ -366,7 +366,7 @@ class RebalanceViewer:
 
 class LiquidityViewer:
     """
-    LiquidityViewer is class for liquidity visualisation.
+    ``LiquidityViewer`` is class for liquidity visualisation.
     """
     def __init__(self, pool_data: PoolDataUniV3):
         self.pool = pool_data

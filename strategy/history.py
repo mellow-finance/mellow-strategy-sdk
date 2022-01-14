@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
 import datetime
+from typing import Hashable
 
 
 class PortfolioHistory:
     """
-    PortfolioHistory tracks position stats over time.
+    ``PortfolioHistory`` tracks position stats over time.
 
     Each time ``add_snapshot`` method is called it remembers current state in time.
     All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
@@ -301,7 +302,7 @@ class RebalanceHistory:
     def __init__(self):
         self.rebalances = {}
 
-    def add_snapshot(self, timestamp: datetime.datetime, snapshot: dict):
+    def add_snapshot(self, timestamp: datetime.datetime, snapshot: Hashable):
         """
         Add portfolio rebalance snapshot to history
 
@@ -326,7 +327,7 @@ class RebalanceHistory:
 
 class UniPositionsHistory:
     """
-    UniPositionsHistory tracks Uniswap positions over time.
+    ``UniPositionsHistory`` tracks Uniswap positions over time.
     Each time ``add_snapshot`` method is called it remembers all Uniswap positions at current time.
     All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
     """

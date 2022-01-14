@@ -6,7 +6,7 @@ from datetime import datetime
 
 class Portfolio(AbstractPosition):
     """
-    Portfolio is a container for several open positions.
+    ``Portfolio`` is a container for several open positions.
 
     Attributes:
         name: Unique name for the position.

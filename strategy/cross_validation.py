@@ -7,7 +7,7 @@ from strategy.backtest import Backtest
 
 class FolderSimple:
     """
-    FolderSimple makes the splitting into equal folds.
+    ``FolderSimple`` makes the splitting into equal folds.
 
     Attributes:
         n_folds: Number of folds.
@@ -61,7 +61,7 @@ class FolderSimple:
 
 class CrossValidation:
     """
-    CrossValidation backtests strategy on folds.
+    ``CrossValidation`` backtests strategy on folds.
 
     Attributes:
         folder: Folder class that splits data on folds
