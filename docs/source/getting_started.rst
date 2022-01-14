@@ -13,7 +13,7 @@ A typical notebook would start with downloading and preparing data for a specifi
 
 Next optional step is for visualizing the data in the notebook::
 
-    LiqudityViewer(data).draw_plot() # Optional step to visualize the data in the notebook
+    LiquidityViewer(data).draw_plot() # Optional step to visualize the data in the notebook
 
 Then you define your strategy by inheriting :ref:`class AbstractStrategy` and overriding the ``rebalance`` method::
 
@@ -55,7 +55,7 @@ Then you define your strategy by inheriting :ref:`class AbstractStrategy` and ov
             is_rebalanced = None
 
             if len(portfolio.positions) == 0:
-                univ3_pos = self.create_uni_position(portfolio, price)
+                univ3_pos = self.create_uni_position(price)
                 portfolio.append(univ3_pos)
                 is_rebalanced = 'mint'
 
@@ -66,7 +66,7 @@ Then you define your strategy by inheriting :ref:`class AbstractStrategy` and ov
             return is_rebalanced
 
 
-        def create_uni_position(self, portfolio, price):
+        def create_uni_position(self, price):
             uni_aligner = UniswapLiquidityAligner(self.lower_price, self.upper_price)
             x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(1 / price, 1, price)
             univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
