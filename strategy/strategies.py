@@ -1,5 +1,5 @@
-from strategy.UniUtils import UniswapV3Utils, UniswapV2Utils, UniswapLiquidityAligner
-from strategy.Positions import UniV3Position, BiCurrencyPosition
+from strategy.uniswap_utils import UniswapV3Utils, UniswapV2Utils, UniswapLiquidityAligner
+from strategy.positions import UniV3Position, BiCurrencyPosition
 from strategy.primitives import Pool
 
 from abc import ABC, abstractmethod
@@ -10,6 +10,7 @@ import numpy as np
 class AbstractStrategy(ABC):
     """
     ``AbstractStrategy`` is an abstract class for Strategies.
+
     Attributes:
         name: Unique name for the instance.
     """
@@ -23,9 +24,11 @@ class AbstractStrategy(ABC):
     def rebalance(self, *args, **kwargs) -> bool:
         """
         Rebalance implementation.
+
         Args:
             args: Any args.
             kwargs: Any kwargs.
+
         Returns:
             True if strategy rebalances portfolio or False otherwise
         """
@@ -36,6 +39,7 @@ class HBStrategy(AbstractStrategy):
     """
     ``HBStrategy`` is the strategy for asset pair, that rebalances asset weights over time.
     Weights are calculated by the formula. Rebalancing occurs by a trigger.
+
     Attributes:
         bicur_tolerance: UniswapV3 Pool instance.
         pool: UniswapV3 Pool instance.
@@ -134,6 +138,7 @@ class HUStrategy(AbstractStrategy):
     """
     ``HUStrategy`` is the strategy for asset pair and UniswapV3 position. Strategy rebalances asset weights over time, and
     Weights are calculated by the formula. Rebalancing occurs by a trigger.
+
     Attributes:
         mint_tolerance: The width of the interval of the small neighborhood of the tickspacing.
         burn_tolerance: Amount of ticks which it is necessary deviate from previous position to trigger rebalancing.
@@ -277,6 +282,7 @@ class MBStrategy(AbstractStrategy):
     """
     ``MBStrategy`` is the strategy for asset pair, that rebalances asset weights over time.
     Weights are calculated by the formula. Rebalancing occurs by a trigger.
+
     Attributes:
         bicur_tolerance: UniswapV3 Pool instance.
         lower_0: Base lower bound of the emulated interval.
@@ -403,6 +409,7 @@ class MUStrategy(AbstractStrategy):
     """
     ``MUstrategy`` is the strategy for asset pair and UniswapV3 position. Strategy rebalances asset weights over time, and
     Weights are calculated by the formula. Rebalancing occurs by a trigger.
+
     Attributes:
         mint_tolerance: The width of the interval of the small neighborhood of the tickspacing.
         burn_tolerance: Amount of ticks which it is necessary deviate from previous position to trigger rebalancing.
@@ -471,7 +478,7 @@ class MUStrategy(AbstractStrategy):
                   'mean_tick': mean_tick}
         return output
 
-    def rebalance(self, *args, **kwargs) -> bool:
+    def rebalance(self, *args, **kwargs) -> str:
         timestamp = kwargs['timestamp']
         portfolio = kwargs['portfolio']
         # prepare data for strategy
@@ -549,6 +556,7 @@ class LidoStrategy(AbstractStrategy):
     """
     ``LidoStrategy`` is the strategy for wEth/stEth pair on UniswapV3. Strategy rebalances LP positions on UniswapV3.
      Rebalancing occurs by a trigger.
+
      Attributes:
         grid_width: The width of tickspacing grid.
         interval_width_num: The width of position interval.
@@ -696,6 +704,3 @@ class LidoStrategy(AbstractStrategy):
         upper_bound = right_bound + self.grid_width * self.interval_width_num
         mid_tick = (right_bound + upper_bound) / 2
         return right_bound, mid_tick, upper_bound
-
-
-

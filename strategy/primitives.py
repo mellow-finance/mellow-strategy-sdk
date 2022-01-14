@@ -5,13 +5,7 @@ from functools import total_ordering
 class Fee(Enum):
     """
     ``Fee`` defines available fees for UniV3 pools. Currently 3 values are available: 0.05%, 0.3%, 1%.
-    The actual enum values are fee * 100_000, i.e. 0.05% enum value is integer 500
-
-    Values:
-
-    - `LOW` - 500
-    - `MIDDLE` - 3000
-    - `HIGH` - 10000
+    The actual enum values are fee * 100_000, i.e. 0.05% enum value is integer 500.
     """
 
     LOW = 500
@@ -22,6 +16,7 @@ class Fee(Enum):
     def percent(self) -> float:
         """
         The actual uniswap percentage fee, i.e. 0.05%, 0.3% or 1%.
+
         Returns:
             UniswapV3 percentage fee.
         """
@@ -31,6 +26,7 @@ class Fee(Enum):
     def spacing(self) -> int:
         """
         Tick spacing for this fee.
+
         Returns:
             Tick spacing for this fee.
         """
@@ -42,14 +38,6 @@ class Token(Enum):
     """
     ``Token`` represents one of mainnet tokens and contains some additional data line address and decimals.
     This class is ordered according to token address. E.g. :code:`Token.WBTC < Token.USDC`.
-
-    Values:
-
-    - `WBTC`
-    - `WETH`
-    - `USDC`
-    - `USDT`
-
     """
 
     WBTC = "WBTC"
@@ -62,6 +50,7 @@ class Token(Enum):
     def address(self) -> str:
         """
         Mainnet address of the token.
+
         Returns:
             Mainnet address of the token.
         """
@@ -71,6 +60,7 @@ class Token(Enum):
     def decimals(self) -> int:
         """
         Decimals of the token.
+
         Returns:
             Decimals of the token.
         """
@@ -79,8 +69,10 @@ class Token(Enum):
     def _is_valid_operand(self, other: 'Token') -> bool:
         """
         Checks if Token is valid.
+
         Args:
             other: Other Token
+
         Returns:
             Valid or not.
         """
@@ -89,8 +81,10 @@ class Token(Enum):
     def __eq__(self, other: 'Token') -> bool:
         """
         Checks if Tokens are equal.
+
         Args:
             other: Other Token
+
         Returns:
             Equal or not.
         """
@@ -115,6 +109,7 @@ class Token(Enum):
 class Pool:
     """
     ``Pool`` represents a mainnet UniV3 pool.
+
     Attributes:
         tokenA: First token of the pool.
         tokenB: Second token of the pool.
@@ -140,6 +135,7 @@ class Pool:
     def decimals_diff(self) -> int:
         """
         Difference between ``token0`` and ``token1`` decimals. Used for conversion of price from `wei` to `eth`.
+
         Returns:
             Decimal difference between Tokens.
         """
@@ -149,6 +145,7 @@ class Pool:
     def l_decimals_diff(self) -> float:
         """
         Used for conversion of liquidity from `wei` to `eth`.
+
         Returns:
             Decimal difference between Tokens in Eth.
         """
@@ -158,6 +155,7 @@ class Pool:
     def name(self) -> str:
         """
         Unique name for the pool.
+
         Returns:
             Pool name.
         """
@@ -167,6 +165,7 @@ class Pool:
     def address(self) -> str:
         """
         Address of the pool on the mainnet.
+
         Returns:
             Pool mainnet address.
         """
@@ -176,6 +175,7 @@ class Pool:
     def token0(self) -> "Token":
         """
         First token of the pool.
+
         Returns:
             First token name.
         """
@@ -185,6 +185,7 @@ class Pool:
     def token1(self) -> "Token":
         """
         Second token of the pool.
+
         Returns:
             Second token name.
         """
@@ -194,6 +195,7 @@ class Pool:
     def fee(self) -> "Fee":
         """
         Fee of the pool.
+
         Returns:
             Fee of the pool.
         """

@@ -7,6 +7,7 @@ from datetime import datetime
 class AbstractPosition(ABC):
     """
     ``AbstractPosition`` is an abstract class for Position and Portfolio classes.
+
     Attributes:
         name: Unique name for the position.
     """
@@ -16,6 +17,7 @@ class AbstractPosition(ABC):
     def rename(self, new_name: str) -> None:
         """
         Rename position.
+
         Args:
             new_name: New name for position.
         """
@@ -42,6 +44,7 @@ class BiCurrencyPosition(AbstractPosition):
     """
         ``BiCurrencyPosition`` is a class corresponding to currency pair.
         Attributes:
+
             name: Unique name for the position.
             swap_fee: Exchange fee expressed as a percentage.
             rebalance_cost: Rebalancing cost, expressed in Y currency.
@@ -76,6 +79,7 @@ class BiCurrencyPosition(AbstractPosition):
     def deposit(self, x: float, y: float) -> None:
         """
         Deposit X currency and Y currency to position.
+
         Args:
             x: Value of X currency
             y: Value of Y currency
@@ -87,9 +91,11 @@ class BiCurrencyPosition(AbstractPosition):
     def withdraw(self, x: float, y: float) -> Tuple[float, float]:
         """
         Withdraw X currency and Y currency from position
+
         Args:
             x: Value of X currency
             y: Value of Y currency
+
         Returns:
              Value of X, value of Y
         """
@@ -102,8 +108,10 @@ class BiCurrencyPosition(AbstractPosition):
     def withdraw_fraction(self, fraction: float) -> Tuple[float, float]:
         """
         Withdraw percent of X currency and percent of Y currency from position
+
         Args:
             fraction: Fraction from 0 to 1.
+
         Returns:
              Fraction of current X and Y.
         """
@@ -114,6 +122,7 @@ class BiCurrencyPosition(AbstractPosition):
     def rebalance(self, x_fraction: float, y_fraction: float, price: float) -> None:
         """
         Rebalance bicurrency pair with respect to their proportion.
+
         Args:
             x_fraction: Fraction of X after rebalance from 0 to 1.
             y_fraction: Fraction of Y after rebalance from 0 to 1.
@@ -139,6 +148,7 @@ class BiCurrencyPosition(AbstractPosition):
     def interest_gain(self, date) -> None:
         """
         Gain deposit interest.
+
         Args:
             date: Gaining date.
         """
@@ -155,8 +165,10 @@ class BiCurrencyPosition(AbstractPosition):
     def to_x(self, price: float) -> float:
         """
         Get total value of position expessed in X.
+
         Args:
             price: Current price of X in Y currency
+
         Returns:
             Total value of position expessed in X
         """
@@ -166,8 +178,10 @@ class BiCurrencyPosition(AbstractPosition):
     def to_y(self, price: float) -> float:
         """
         Get total value of position expessed in Y.
+
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             Total value of position expessed in Y.
         """
@@ -177,7 +191,10 @@ class BiCurrencyPosition(AbstractPosition):
     def to_xy(self, price: float) -> Tuple[float, float]:
         """
         Get values of bicurrency pair.
+
+        Args:
             price: Current price of X in Y currency.
+
         Returns:
             Position value to X and Y.
         """
@@ -186,6 +203,7 @@ class BiCurrencyPosition(AbstractPosition):
     def swap_x_to_y(self, dx: float, price: float) -> None:
         """
         Swap X currency to Y.
+
         Args:
             dx: Amount of X to be swapped.
             price: Current price of X in Y currency.
@@ -199,6 +217,7 @@ class BiCurrencyPosition(AbstractPosition):
     def swap_y_to_x(self, dy: float, price: float) -> None:
         """
         Swap Y currency to X.
+
         Args:
             dy: Amount of X to be swapped.
             price: Current price of X in Y currency.
@@ -212,9 +231,11 @@ class BiCurrencyPosition(AbstractPosition):
     def snapshot(self, timestamp: datetime, price: float) -> dict:
         """
         Get position snapshot.
+
         Args:
             timestamp: Timestamp of snapshot
             price: Current price of X in Y currency
+
         Returns: Position snapshot
         """
         value_to_x = self.to_x(price)
@@ -232,6 +253,7 @@ class UniV3Position(AbstractPosition):
     """
         ``UniV3Position`` is a class corresponding to one investment into UniswapV3 interval.
         It's defined by lower and upper bounds ``lower_price``, ``upper_price`` and  pool fee percent ``fee_percent``.
+
         Attributes:
             name: Unique name for the position
             lower_price: Lower bound of the interval (price)
@@ -274,6 +296,7 @@ class UniV3Position(AbstractPosition):
     def deposit(self, x: float, y: float, price: float) -> None:
         """
         Deposit X and Y to position.
+
         Args:
             x: Value of X currency.
             y: Value of Y currency.
@@ -285,8 +308,10 @@ class UniV3Position(AbstractPosition):
     def withdraw(self, price: float) -> Tuple[float, float]:
         """
         Withdraw all liquidity from UniswapV3 position.
+
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             Value of X, value of Y.
         """
@@ -298,6 +323,7 @@ class UniV3Position(AbstractPosition):
     def mint(self, x: float, y: float, price: float) -> None:
         """
         Mint X and Y to uniswapV3 interval.
+
         Args:
             x: Value of X currency.
             y: Value of Y currency.
@@ -314,8 +340,11 @@ class UniV3Position(AbstractPosition):
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
         """
         Burn liquidity from uniswapV3 interval.
+
+        Args:
             liq: Value of liquidity.
             price: Current price of X in Y currency.
+
         Returns: Value of X, value of Y.
         """
         assert liq <= self.liquidity, f'Too much liquidity too withdraw = {liq}'
@@ -340,6 +369,7 @@ class UniV3Position(AbstractPosition):
     def charge_fees(self, price_0: float, price_1: float) -> None:
         """
         Charge exchange fees.
+
         Args:
             price_0: Price before exchange.
             price_1: Price after exchange.
@@ -370,6 +400,7 @@ class UniV3Position(AbstractPosition):
     def collect_fees(self) -> Tuple[float, float]:
         """
         Collect all gained fees.
+
         Returns:
             Value of X fees, value of Y fees.
         """
@@ -382,6 +413,7 @@ class UniV3Position(AbstractPosition):
     def reinvest_fees(self, price) -> None:
         """
         Collect all gained fees and reinvest to current position.
+
         Args:
             price: Current price of X in Y currency.
         """
@@ -392,8 +424,10 @@ class UniV3Position(AbstractPosition):
     def impermanent_loss(self, price: float) -> Tuple[float, float]:
         """
         Calculate impermanent loss separately in X and Y currencies.
+
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             Value of X il, value of Y il.
         """
@@ -406,8 +440,10 @@ class UniV3Position(AbstractPosition):
     def impermanent_loss_to_x(self, price: float) -> float:
         """
         Calculate impermanent loss denominated in X.
+
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             Value of X il.
         """
@@ -419,8 +455,10 @@ class UniV3Position(AbstractPosition):
     def impermanent_loss_to_y(self, price: float) -> float:
         """
         Calculate impermanent loss denominated in Y.
+
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             Value of Y il.
         """
@@ -432,8 +470,10 @@ class UniV3Position(AbstractPosition):
     def to_x(self, price: float) -> float:
         """
         Get value of UniswapV3 position expessed in X.
+
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             Total value of uniswapV3 position expessed in X.
         """
@@ -444,8 +484,10 @@ class UniV3Position(AbstractPosition):
     def to_y(self, price: float) -> float:
         """
         Get value of UniswapV3 position expessed in Y.
+
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             Total value of UniswapV3 position expessed in Y.
         """
@@ -456,8 +498,10 @@ class UniV3Position(AbstractPosition):
     def to_xy(self, price) -> Tuple[float, float]:
         """
         Get values of position in X and Y.
+
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             Position value to X and Y.
         """
@@ -467,8 +511,10 @@ class UniV3Position(AbstractPosition):
     def _adj_price_(self, price: float) -> float:
         """
         Get adjusted price of current price and UniswapV3 interval boundaries.
+
         Args:
             price: current price of X in Y currency.
+
         Returns:
             Adjusted price.
         """
@@ -478,9 +524,11 @@ class UniV3Position(AbstractPosition):
     def _x_to_liq_(self, x: float, price: float) -> float:
         """
         Transform X to liquidity.
+
         Args:
             x: Value of X.
             price: Current price of X in Y currency.
+
         Returns:
             Resulting liquidity.
         """
@@ -493,9 +541,11 @@ class UniV3Position(AbstractPosition):
     def _y_to_liq_(self, y: float, price: float) -> float:
         """
         Transform Y to liquidity.
+
         Args:
             y: Value of Y.
             price: Current price of X in Y currency.
+
         Returns:
             Resulting liquidity.
         """
@@ -508,10 +558,12 @@ class UniV3Position(AbstractPosition):
     def _xy_to_liq_(self, x: float, y: float, price: float) -> float:
         """
         Transform X and Y to liquidity.
+
         Args:
             x: Value of X.
             y: Value of Y.
             price: Current price of X in Y currency.
+
         Returns:
             Resulting liquidity.
         """
@@ -530,9 +582,11 @@ class UniV3Position(AbstractPosition):
     def _liq_to_x_(self, liq: float, price: float) -> float:
         """
         Transform liquidity to X.
+
         Args:
             liq: Value of liq.
             price: Current price of X in Y currency.
+
         Returns:
             Value of X.
         """
@@ -546,9 +600,11 @@ class UniV3Position(AbstractPosition):
     def _liq_to_y_(self, liq: float, price: float) -> float:
         """
         Transform liquidity to Y.
+
         Args:
             liq: Value of liq.
             price: Current price of X in Y currency.
+
         Returns:
             Value of Y.
         """
@@ -559,9 +615,12 @@ class UniV3Position(AbstractPosition):
 
     def _liq_to_xy_(self, liq: float, price: float) -> Tuple[float, float]:
         """
-        Transform liquidity to X, Y pair .
+        Transform liquidity to X, Y pair.
+
+        Args:
             liq: Value of liq.
             price: Current price of X in Y currency.
+
         Returns:
             Value of X and Y.
         """
@@ -572,9 +631,11 @@ class UniV3Position(AbstractPosition):
     def snapshot(self, timestamp: datetime, price: float) -> dict:
         """
         Get uniswapV3 position snapshot.
+
         Args:
             timestamp: timestamp of snapshot.
             price: Current price of X in Y currency.
+
         Returns:
             UniswapV3 position snapshot.
         """

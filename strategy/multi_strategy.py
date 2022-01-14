@@ -1,13 +1,14 @@
-from strategy.Strategies import AbstractStrategy
+from strategy.strategies import AbstractStrategy
 from typing import List
 
 
 class MultiStrategy(AbstractStrategy):
     """
-        ``MultiStrategy`` is used for making composition of several strategies.
-        Attributes:
-            name: Unique name for the instance
-            strategies: List of strategies
+    MultiStrategy is used for making composition of several strategies.
+
+    Attributes:
+        name: Unique name for the instance.
+        strategies: List of strategies.
     """
     def __init__(self, name: str = None, strategies: List[AbstractStrategy] = None):
         super().__init__(name)
@@ -18,6 +19,7 @@ class MultiStrategy(AbstractStrategy):
     def append(self, strategy: AbstractStrategy) -> None:
         """
         Add strategy to composition.
+
         Args:
             strategy: Any AbstractStrategy.
         """
@@ -27,6 +29,7 @@ class MultiStrategy(AbstractStrategy):
     def remove(self, name: str) -> None:
         """
         Remove strategy from composition by name.
+
         Args:
             name: Strategy name.
         """
@@ -38,9 +41,11 @@ class MultiStrategy(AbstractStrategy):
     def rebalance(self, *args: list, **kwargs: dict) -> list:
         """
         Rebalance implementation for strategy composition.
+
         Args:
             args: Any args.
             kwargs: Any kwargs.
+
         Returns: Rebalnaces status of each strategy in composition.
         """
         status = [strategy.rebalance(*args, **kwargs) for name, strategy in self.strategies.items()]

@@ -1,4 +1,4 @@
-from strategy.Positions import AbstractPosition
+from strategy.positions import AbstractPosition
 
 from typing import List, Tuple
 from datetime import datetime
@@ -6,10 +6,11 @@ from datetime import datetime
 
 class Portfolio(AbstractPosition):
     """
-        ``Portfolio`` is a container for several open positions.
-        Attributes:
-            name: Unique name for the position.
-            positions: List of initial positions.
+    Portfolio is a container for several open positions.
+
+    Attributes:
+        name: Unique name for the position.
+        positions: List of initial positions.
     """
 
     def __init__(self,
@@ -23,6 +24,7 @@ class Portfolio(AbstractPosition):
     def rename_position(self, current_name: str, new_name: str) -> None:
         """
         Rename position in portfolio by its name.
+
         Args:
             current_name: Current name of position.
             new_name: New name for position.
@@ -34,6 +36,7 @@ class Portfolio(AbstractPosition):
     def append(self, position: AbstractPosition) -> None:
         """
         Add position to portfolio.
+
         Args:
             position: Any ``AbstractPosition`` instance.
         """
@@ -43,6 +46,7 @@ class Portfolio(AbstractPosition):
     def remove(self, name: str) -> None:
         """
         Remove position from portfolio by its name.
+
         Args:
             name: Position name.
         """
@@ -54,8 +58,10 @@ class Portfolio(AbstractPosition):
     def get_position(self, name: str) -> AbstractPosition:
         """
         Get position from portfolio by name.
+
         Args:
             name: Position name.
+
         Returns:
             ``AbstractPosition`` instance.
         """
@@ -66,6 +72,7 @@ class Portfolio(AbstractPosition):
     def get_last_position(self) -> AbstractPosition:
         """
         Get last position from portfolio.
+
         Returns:
              Last position in portfolio.
         """
@@ -79,6 +86,7 @@ class Portfolio(AbstractPosition):
     def positions_list(self) -> List[AbstractPosition]:
         """
         Get list of all positions in portfolio.
+
         Returns:
             List of all positions in portfolio.
         """
@@ -87,6 +95,7 @@ class Portfolio(AbstractPosition):
     def position_names(self) -> List[str]:
         """
         Get list of position names in portfolio.
+
         Returns:
             List of all position names in portfolio.
         """
@@ -95,8 +104,10 @@ class Portfolio(AbstractPosition):
     def to_x(self, price: float) -> float:
         """
         Get total value of portfolio denominated to X.
+
         Args:
             price: Current price of X in Y currency
+
         Returns:
             Total value of portfolio denominated in X
         """
@@ -108,8 +119,10 @@ class Portfolio(AbstractPosition):
     def to_y(self, price: float) -> float:
         """
         Get total value of portfolio expressed in Y
+
         Args:
             price: Current price of X in Y currency
+
         Returns:
             Total value of portfolio denominated in Y
         """
@@ -121,8 +134,10 @@ class Portfolio(AbstractPosition):
     def to_xy(self, price: float) -> Tuple[float, float]:
         """
         Get bicurrency equivalence of portfolio.
+
         Args:
             price: Сurrent price of X in Y currency.
+
         Returns:
             Portfolio value to X and Y.
         """
@@ -137,9 +152,11 @@ class Portfolio(AbstractPosition):
     def snapshot(self, timestamp: datetime, price: float) -> dict:
         """
         Get portfolio snapshot.
+
         Args:
             timestamp: Timestamp of snapshot.
             price: Current price of X in Y currency.
+
         Returns: Portfolio snapshot.
         """
         snapshot = {'timestamp': timestamp, 'price': price}

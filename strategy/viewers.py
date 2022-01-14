@@ -2,17 +2,18 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from strategy.History import PortfolioHistory, UniPositionsHistory, RebalanceHistory
-from strategy.Data import PoolDataUniV3
+from strategy.history import PortfolioHistory, UniPositionsHistory, RebalanceHistory
+from strategy.data import PoolDataUniV3
 from strategy.primitives import Pool
 
 
 class PotrfolioViewer:
     """
-       ``PotrfolioViewer`` is class for potrfolio visualisation.
-       Attributes:
-           portfolio_history: Portfolio history instance.
-           pool: UniV3 pool meta information.
+    PotrfolioViewer is class for potrfolio visualisation.
+
+    Attributes:
+        portfolio_history: Portfolio history instance.
+        pool: UniV3 pool meta information.
     """
     def __init__(self, portfolio_history: PortfolioHistory, pool: Pool):
         self.portfolio_history = portfolio_history
@@ -20,7 +21,8 @@ class PotrfolioViewer:
 
     def draw_portfolio(self):
         """
-        Plot in pool in time
+        Plot in pool in time.
+
         Returns:
             Portfolio visualization.
         """
@@ -34,8 +36,10 @@ class PotrfolioViewer:
     def draw_portfolio_to_x(self, portfolio_df: pd.DataFrame):
         """
         Plot portfolio value and fees in X.
+
         Args:
             portfolio_df: Portfolio history data frame.
+
         Returns:
             Portfolio plot with value, fees, il.
         """
@@ -74,8 +78,10 @@ class PotrfolioViewer:
     def draw_portfolio_to_y(self, portfolio_df: pd.DataFrame):
         """
         Plot portfolio value and fees in Y.
+
         Args:
             portfolio_df: Portfolio history data frame.
+
         Returns:
             Portfolio plot with value, fees, il.
         """
@@ -116,8 +122,10 @@ class PotrfolioViewer:
     def draw_performance_x(self, portfolio_df: pd.DataFrame):
         """
         Plot portfolio performance in X.
+
         Args:
             portfolio_df: portfolio history data frame
+
         Returns:
             Portfolio plot with value and apy.
         """
@@ -161,8 +169,10 @@ class PotrfolioViewer:
     def draw_performance_y(self, portfolio_df: pd.DataFrame):
         """
         Plot portfolio performance in Y.
+
         Args:
             portfolio_df: Portfolio history data frame.
+
         Returns:
             Portfolio plot with value and apy.
         """
@@ -201,8 +211,10 @@ class PotrfolioViewer:
     def draw_liquidity(self, portfolio_df):
         """
         Plot portfolio liquidity in UniswapV3.
+
         Args:
             portfolio_df: Portfolio history data frame.
+
         Returns:
             Portfolio plot with liquidity.
         """
@@ -236,9 +248,10 @@ class PotrfolioViewer:
 
 class UniswapViewer:
     """
-       ``UniswapViewer`` is class for visualizing UniswapV3 intervals in time.
-       Args:
-           uni_postition_history: Uniswap positions history instance.
+     UniswapViewer is class for visualizing UniswapV3 intervals in time.
+
+     Attributes:
+        uni_postition_history: Uniswap positions history instance.
     """
     def __init__(self, uni_postition_history: UniPositionsHistory):
         self.uni_postition_history = uni_postition_history
@@ -246,8 +259,10 @@ class UniswapViewer:
     def draw_intervals(self, swaps_df):
         """
         Plot uniswap positions intervals in time.
+
         Args:
             swaps_df: UniswapV3 exchange data.
+
         Returns:
             Plot with UniswapV3 position intervals.
         """
@@ -297,9 +312,10 @@ class UniswapViewer:
 
 class RebalanceViewer:
     """
-       ``RebalanceViewer`` is class for rebalance visualisation.
-       Args:
-           rebalance_history: Rebalance history instance.
+    RebalanceViewer is class for rebalance visualisation.
+
+    Attributes:
+        rebalance_history: Rebalance history instance.
     """
     def __init__(self, rebalance_history: RebalanceHistory):
         self.rebalance_history = rebalance_history
@@ -307,7 +323,10 @@ class RebalanceViewer:
     def draw_rebalances(self, swaps_df: pd.DataFrame):
         """
         Plot portfolio rabalances.
+
+        Args:
             swaps_df: UniswapV3 exchange data.
+
         Returns: Plot with portfolio rabalances
         """
         rebalance_df = self.rebalance_history.to_df()
@@ -345,13 +364,17 @@ class RebalanceViewer:
         return fig
 
 
-class LiqudityViewer:
+class LiquidityViewer:
+    """
+    LiquidityViewer is class for liquidity visualisation.
+    """
     def __init__(self, pool_data: PoolDataUniV3):
         self.pool = pool_data
 
     def draw_plot(self):
         """
         Plot liquidity in pool in time.
+
         Returns:
             Plot with Pool liquidity.
         """
@@ -386,4 +409,3 @@ class LiqudityViewer:
         fig.update_yaxes(title_text='Liquidity', secondary_y=True)
         fig.update_layout(title='Price and Liquidity')
         return fig
-

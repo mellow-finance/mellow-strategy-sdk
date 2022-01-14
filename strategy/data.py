@@ -8,7 +8,8 @@ from strategy.primitives import Pool
 
 class PoolDataUniV3:
     """
-    ``PoolDataUniV3`` contains data for backtesting.
+    PoolDataUniV3 contains data for backtesting.
+
     Attributes:
         pool: UniswapV3 ``Pool`` data
         mints: UniswapV3 mints data.
@@ -30,11 +31,12 @@ class PoolDataUniV3:
 
 class RawDataUniV3:
     """
-      ``RawDataUniV3`` preprocess UniswapV3 data.
-      Attributes:
-         pool: UniswapV3 pool meta data.
-         folder: path to data.
-   """
+     RawDataUniV3 preprocess UniswapV3 data.
+
+     Attributes:
+        pool: UniswapV3 pool meta data.
+        folder: Path to data.
+     """
     def __init__(self, pool: Pool, folder: Path = '../data/'):
         self.pool = pool
         self.folder = folder
@@ -42,6 +44,7 @@ class RawDataUniV3:
     def load_from_folder(self) -> PoolDataUniV3:
         """
         Loads data: swaps, mint, burns from predefined folder.
+
         Returns:
             PoolDataUniV3 instance with loaded data.
         """
@@ -86,8 +89,10 @@ class RawDataUniV3:
     def preprocess_mints(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Preprocess UniswapV3 mints data.
+
         Args:
             df: Mints data frame.
+
         Returns:
             Preprocessed mints data frame.
         """
@@ -102,8 +107,10 @@ class RawDataUniV3:
     def preprocess_burns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Preprocess UniswapV3 burns data.
+
         Args:
             df: Burns data frame.
+
         Returns:
             Preprocessed burns data frame.
         """
@@ -118,8 +125,10 @@ class RawDataUniV3:
     def preprocess_swaps(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Preprocess UniswapV3 swap data.
+
         Args:
             df: Swaps data frame.
+
         Returns:
             Preprocessed swap data frame.
         """
@@ -146,15 +155,16 @@ class RawDataUniV3:
 
 class SyntheticData:
     """
-       ``SyntheticData`` generates UniswapV3 synthetic exchange data.
-       Attributes:
-            pool: UniswapV3 ``Pool`` instance.
-            start_date: Generating starting date.
-            n_points: Amount samples to generate.
-            init_price: Initial price.
-            mu: Expectation of normal distribution.
-            sigma: Variance of normal distributio.
-            seed: Seed for random generator.
+    SyntheticData generates UniswapV3 synthetic exchange data.
+
+    Attributes:
+        pool: UniswapV3 ``Pool`` instance.
+        start_date: Generating starting date.
+        n_points: Amount samples to generate.
+        init_price: Initial price.
+        mu: Expectation of normal distribution.
+        sigma: Variance of normal distributio.
+        seed: Seed for random generator.
    """
     def __init__(self, pool, start_date='1-1-2022', n_points=365, init_price=1, mu=0, sigma=0.1, seed=42):
         self.pool = pool
@@ -170,6 +180,7 @@ class SyntheticData:
     def generate_data(self):
         """
         Generate synthetic UniswapV3 exchange data.
+
         Returns:
             PoolDataUniV3 instance with synthetic data.
         """

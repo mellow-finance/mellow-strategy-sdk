@@ -2,14 +2,15 @@ import numpy as np
 import pandas as pd
 from multiprocessing import Pool
 
-from strategy.Backtest import Backtest
+from strategy.backtest import Backtest
 
 
 class FolderSimple:
     """
-       ``FolderSimple`` makes the splitting into equal folds.
-        Attributes:
-            n_folds: Number of folds.
+    FolderSimple makes the splitting into equal folds.
+
+    Attributes:
+        n_folds: Number of folds.
    """
     def __init__(self,
                  n_folds: int = 5,
@@ -22,6 +23,7 @@ class FolderSimple:
     def generate_folds_by_index(self, data):
         """
         Split data into folds
+
         Args:
              data: Uniswap exchancge data
         """
@@ -44,9 +46,11 @@ class FolderSimple:
     def get_fold(self, data, fold_name):
         """
         Get fold by name.
+
         Args:
             data: Uniswap exchancge data
             fold_name: Folds name
+
         Returns:
             Fold data as PoolDataUniV3
         """
@@ -57,10 +61,11 @@ class FolderSimple:
 
 class CrossValidation:
     """
-       ``CrossValidation`` backtests strategy on folds.
-        Attributes:
-            folder: Folder class that splits data on folds
-            strategy: Strategy to backtest
+    CrossValidation backtests strategy on folds.
+
+    Attributes:
+        folder: Folder class that splits data on folds
+        strategy: Strategy to backtest
    """
     def __init__(self, folder, strategy):
         self.folder = folder
@@ -69,9 +74,11 @@ class CrossValidation:
     def _backtest_(self, *args):
         """
         Run backtest on single fold
+
         Args:
             args[0]: Uniswap exchancge data
             args[1]: Folds name
+
         Returns:
             Dict of history results
         """
@@ -87,8 +94,10 @@ class CrossValidation:
     def backtest(self, data):
         """
         Parallel backtesting on folded data
+
         Args:
             data: Uniswap exchancge data
+
         Returns:
             List of history dicts by folds
         """
@@ -105,8 +114,10 @@ class CrossValidation:
     def aggregate(self, folds_result):
         """
         Aggregate backtesting results from folds
+
         Args:
             folds_result: History from folds
+
         Returns:
             Dict of APY's by folds
         """

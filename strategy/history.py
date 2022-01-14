@@ -5,20 +5,20 @@ import datetime
 
 class PortfolioHistory:
     """
-       ``PortfolioHistory`` tracks position stats over time.
+    PortfolioHistory tracks position stats over time.
 
-       Each time ``add_snapshot`` method is called it remembers current state in time.
-       All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
+    Each time ``add_snapshot`` method is called it remembers current state in time.
+    All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
     """
-
     def __init__(self):
         self.snapshots = []
 
     def add_snapshot(self, snapshot: dict):
         """
-        Add portfolio snapshot to history
+        Add portfolio snapshot to history.
+
         Args:
-            snapshot: dict of portfolio params
+            snapshot: Dict of portfolio params.
         """
         if snapshot:
             self.snapshots.append(snapshot)
@@ -26,7 +26,8 @@ class PortfolioHistory:
 
     def to_df(self):
         """
-        Transform list of portfolio snapshots to data frame
+        Transform list of portfolio snapshots to data frame.
+
         Returns:
             Portfolio history data frame.
         """
@@ -36,9 +37,11 @@ class PortfolioHistory:
 
     def calculate_value(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate total value of portfolio denomitated in X and Y.
+        Calculate total value of portfolio denominated in X and Y.
+
         Args:
             df: Portfolio history DataFrame.
+
         Returns:
             Portfolio history data frame with new columns.
         """
@@ -54,9 +57,11 @@ class PortfolioHistory:
 
     def calculate_il(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate IL of portfolio denomitated in X and Y.
+        Calculate IL of portfolio denominated in X and Y.
+
         Args:
             df: Portfolio history DataFrame.
+
         Returns:
             Portfolio history data frame with new columns.
         """
@@ -75,9 +80,11 @@ class PortfolioHistory:
 
     def calculate_costs(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Costs of portfolio management denomitated in X and Y.
+        Costs of portfolio management denominated in X and Y.
+
         Args:
             df: Portfolio history DataFrame.
+
         Returns:
              Portfolio history data frame with new columns.
         """
@@ -100,8 +107,10 @@ class PortfolioHistory:
     def calculate_liquidity(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate total liquidity of all Uniswap positions.
+
         Args:
             df: Portfolio history DataFrame.
+
         Returns:
              Portfolio history data frame with new columns.
         """
@@ -118,9 +127,11 @@ class PortfolioHistory:
 
     def calculate_actual_fees(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate actual fees of Uniswap positions denomitated in X and Y.
+        Calculate actual fees of Uniswap positions denominated in X and Y.
+
         Args:
             df: Portfolio history DataFrame.
+
         Returns:
             Portfolio history data frame with new columns.
         """
@@ -140,9 +151,11 @@ class PortfolioHistory:
 
     def calculate_earned_fees(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate total erned fees of Uniswap positions denomitated in X and Y.
+        Calculate total erned fees of Uniswap positions denominated in X and Y.
+
         Args:
             df: Portfolio history DataFrame.
+
         Returns:
             Portfolio history data frame  with new columns.
         """
@@ -165,9 +178,11 @@ class PortfolioHistory:
 
     def calculate_porfolio_returns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate porfolio returns.
+        Calculate portfolio returns.
+
         Args:
             df: Portfolio history DataFrame.
+
         Returns:
             Portfolio history data frame with new columns.
         """
@@ -177,9 +192,11 @@ class PortfolioHistory:
 
     def calculate_performance_adj(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate porfolio performance relative to bicurrency pair.
+        Calculate portfolio performance relative to currency pair.
+
         Args:
             df: Portfolio history DataFrame.
+
         Returns:
             Portfolio history data frame with new columns.
         """
@@ -206,9 +223,11 @@ class PortfolioHistory:
 
     def calculate_performance(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate porfolio performance.
+        Calculate portfolio performance.
+
         Args:
             df: Portfolio stats DataFrame.
+
         Returns:
             Portfolio history data frame with new column.
         """
@@ -230,6 +249,7 @@ class PortfolioHistory:
     def portfolio_stats(self) -> pd.DataFrame:
         """
         Calculate all statistics for portfolio.
+
         Returns:
             Portfolio history data frame.
         """
@@ -284,6 +304,7 @@ class RebalanceHistory:
     def add_snapshot(self, timestamp: datetime.datetime, snapshot: dict):
         """
         Add portfolio rebalance snapshot to history
+
         Args:
             timestamp: Timestamp of snapshot.
             snapshot: Dict of portfolio rebalances.
@@ -294,6 +315,7 @@ class RebalanceHistory:
     def to_df(self) -> pd.DataFrame:
         """
         Transform list of portfolio rebalance snapshots to data frame.
+
         Returns:
             Portfolio rebalance history data frame.
         """
@@ -304,9 +326,9 @@ class RebalanceHistory:
 
 class UniPositionsHistory:
     """
-       ``UniPositionsHistory`` tracks Uniswap positions over time.
-       Each time ``add_snapshot`` method is called it remembers all Uniswap positions at current time.
-       All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
+    UniPositionsHistory tracks Uniswap positions over time.
+    Each time ``add_snapshot`` method is called it remembers all Uniswap positions at current time.
+    All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
     """
 
     def __init__(self):
@@ -314,10 +336,11 @@ class UniPositionsHistory:
 
     def add_snapshot(self, timestamp: datetime.datetime, positions: dict):
         """
-        Add uniswap position snapshot to history
+        Add Uniswap position snapshot to history.
+
         Args:
-            timestamp: timestamp of snapshot
-            positions: list of Uniswap positions
+            timestamp: Timestamp of snapshot.
+            positions: List of Uniswap positions.
         """
         uni_positions = {}
         for name, position in positions.items():
@@ -331,8 +354,9 @@ class UniPositionsHistory:
     def to_df(self) -> pd.DataFrame:
         """
         Transform list of Uniswap positions snapshots to data frame.
+
         Returns:
-            Uniswap positions history data frame
+            Uniswap positions history data frame.
         """
         intervals_df = pd.DataFrame(self.positions).T
         intervals_df.columns = pd.MultiIndex.from_tuples(intervals_df.columns, names=["pos_name", "bound_type"])
@@ -341,10 +365,13 @@ class UniPositionsHistory:
 
     def get_coverage(self, swaps_df: pd.DataFrame) -> float:
         """
-        Get coverage metric for all uniswap positions in historic portfolio
+        Get coverage metric for all Uniswap positions in historic portfolio.
+
         Args:
-            swaps_df: UniswapV3 exchange data
-        Returns: Uniswap positions history data frame
+            swaps_df: UniswapV3 exchange data.
+
+        Returns:
+            Uniswap positions history data frame.
         """
         prices = swaps_df[['price']]
         prices['covered'] = np.nan
