@@ -36,7 +36,7 @@ class PortfolioHistory:
         df = df.set_index('timestamp')
         return df
 
-    def calculate_value(self, df: pd.DataFrame) -> pd.DataFrame:
+    def calculate_value_to(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate total value of portfolio denominated in X and Y.
 
@@ -54,6 +54,30 @@ class PortfolioHistory:
 
         df['total_value_to_x'] = df[value_to_x_cols].sum(axis=1)
         df['total_value_to_y'] = df[value_to_y_cols].sum(axis=1)
+        return df
+
+    def calculate_value(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate total value of portfolio in X and Y.
+
+        Args:
+            df: Portfolio history DataFrame.
+
+        Returns:
+            Portfolio history data frame with new columns.
+        """
+        value_x_cols = [col for col in df.columns if 'value_x' in col]
+        value_y_cols = [col for col in df.columns if 'value_y' in col]
+
+        df[value_x_cols] = df[value_x_cols].fillna(0)
+        df[value_y_cols] = df[value_y_cols].fillna(0)
+
+        df['total_value_x'] = df[value_x_cols].sum(axis=1)
+        df['total_value_y'] = df[value_y_cols].sum(axis=1)
+        return df
+
+    def calculate_bicurr_hold(self, df: pd.DataFrame) -> pd.DataFrame:
+        df['bicurr_hold_to_y'] = df.iloc[0]['total_value_x'] * df['price'] + df.iloc[0]['total_value_y']
         return df
 
     def calculate_il(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -191,6 +215,18 @@ class PortfolioHistory:
         df['portfolio_returns_to_y'] = df['portfolio_value_to_y'] / df['portfolio_value_to_y'].shift()
         return df
 
+    def calculate_apy_hold(self, df: pd.DataFrame) -> pd.DataFrame:
+        def yearly_adj(_df):
+            days_gone = (_df.index[-1] - _df.index[0]).days + 1
+            out = _df.iloc[-1] ** (365 / days_gone)
+            return out
+
+        df['bicurr_returns_to_y'] = df['bicurr_hold_to_y'] / df['bicurr_hold_to_y'].shift()
+        df['bicurr_performance_to_y_apy'] = df['bicurr_returns_to_y'].cumprod().expanding().apply(yearly_adj)
+
+        df['bicurr_performance_to_y_apy'] -= 1
+        return df
+
     def calculate_performance_adj(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate portfolio performance relative to currency pair.
@@ -202,16 +238,16 @@ class PortfolioHistory:
             Portfolio history data frame with new columns.
         """
 
-        def yearly_adj(df):
-            days_gone = (df.index[-1] - df.index[0]).days + 1
-            out = df.iloc[-1] ** (365 / days_gone)
+        def yearly_adj(_df):
+            days_gone = (_df.index[-1] - _df.index[0]).days + 1
+            out = _df.iloc[-1] ** (365 / days_gone)
             return out
 
-        df['price_returns_y'] = df['price'] / df['price'].shift()
-        df['price_returns_x'] = df['price'].shift() / df['price']
+        df['price_returns_to_y'] = df['price'] / df['price'].shift()
+        df['price_returns_to_x'] = df['price'].shift() / df['price']
 
-        df['portfolio_returns_rel_to_x'] = df['portfolio_returns_to_x'] / df['price_returns_x']
-        df['portfolio_returns_rel_to_y'] = df['portfolio_returns_to_y'] / df['price_returns_y']
+        df['portfolio_returns_rel_to_x'] = df['portfolio_returns_to_x'] / df['price_returns_to_x']
+        df['portfolio_returns_rel_to_y'] = df['portfolio_returns_to_y'] / df['price_returns_to_y']
 
         df['portfolio_performance_rel_to_x_apy'] = df[
             'portfolio_returns_rel_to_x'].cumprod().expanding().apply(yearly_adj)
@@ -256,6 +292,8 @@ class PortfolioHistory:
         """
         df = self.to_df()
         df = self.calculate_value(df)
+        df = self.calculate_bicurr_hold(df)
+        df = self.calculate_value_to(df)
         df = self.calculate_il(df)
         # df = self.calculate_rl(df)
         df = self.calculate_liquidity(df)
@@ -285,6 +323,7 @@ class PortfolioHistory:
             df['total_earned_fees_to_x'] = 0
             df['total_earned_fees_to_y'] = 0
 
+        df = self.calculate_apy_hold(df)
         df = self.calculate_porfolio_returns(df)
         df = self.calculate_performance(df)
         df = self.calculate_performance_adj(df)

@@ -31,7 +31,10 @@ class PotrfolioViewer:
         fig2 = self.draw_portfolio_to_y(portfolio_df)
         fig3 = self.draw_performance_x(portfolio_df)
         fig4 = self.draw_performance_y(portfolio_df)
-        return fig1, fig2, fig3, fig4
+        fig5 = self.draw_x_y(portfolio_df)
+        fig6 = self.draw_tvl_vs_hodl(portfolio_df)
+        fig7 = self.draw_apy_price_vs_portfolio(portfolio_df)
+        return fig1, fig2, fig3, fig4, fig5, fig6, fig7
 
     def draw_portfolio_to_x(self, portfolio_df: pd.DataFrame):
         """
@@ -149,15 +152,15 @@ class PotrfolioViewer:
             secondary_y=True
         )
         
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_performance_rel_to_x_apy'],
-                name=f"APY relative to bicurrency in {self.pool.token0.name}",
-                yaxis="y2"
-            ),
-            secondary_y=True
-        )
+        # fig.add_trace(
+        #     go.Scatter(
+        #         x=portfolio_df.index,
+        #         y=portfolio_df['portfolio_performance_rel_to_x_apy'],
+        #         name=f"APY in {self.pool.token1.name}",
+        #         yaxis="y2"
+        #     ),
+        #     secondary_y=True
+        # )
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to X", secondary_y=False)
@@ -193,13 +196,13 @@ class PotrfolioViewer:
                 yaxis="y2"
             ), secondary_y=True)
         
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_performance_rel_to_y_apy'],
-                name=f"APY relative to bicurrency in {self.pool.token1.name}",
-                yaxis="y2"
-            ), secondary_y=True)
+        # fig.add_trace(
+        #     go.Scatter(
+        #         x=portfolio_df.index,
+        #         y=portfolio_df['portfolio_performance_rel_to_y_apy'],
+        #         name=f"APY relative to bicurrency in {self.pool.token1.name}",
+        #         yaxis="y2"
+        #     ), secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to Y", secondary_y=False)
@@ -207,7 +210,104 @@ class PotrfolioViewer:
 
         fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token1.name}')
         return fig
-    
+
+    def draw_x_y(self, portfolio_df: pd.DataFrame):
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['total_value_x'],
+                name=f"Portfolio value in {self.pool.token0.name}",
+            ),
+            secondary_y=False)
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['total_value_y'],
+                name=f'Portfolio value in {self.pool.token1.name}',
+                yaxis='y2',
+
+            ), secondary_y=True)
+
+        fig.update_xaxes(title_text="Timeline")
+        fig.update_yaxes(title_text="Value in X", secondary_y=False)
+        fig.update_yaxes(title_text='Value in Y', secondary_y=True)
+        fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, {self.pool.token1.name}')
+        return fig
+
+    def draw_tvl_vs_hodl(self, portfolio_df: pd.DataFrame):
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_value_to_y'],
+                name=f"Portfolio total value in {self.pool.token1.name}",
+            ),
+            secondary_y=False)
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['bicurr_hold_to_y'],
+                name=f'HODL total value in {self.pool.token1.name}',
+            ),
+            secondary_y=False)
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_value_to_y'] - portfolio_df['bicurr_hold_to_y'],
+                name=f'TVL - HODL in {self.pool.token1.name}',
+                yaxis='y2',
+            ),
+            secondary_y=True)
+
+
+        fig.update_xaxes(title_text="Timeline")
+        fig.update_yaxes(title_text="Value in Y", secondary_y=False)
+        fig.update_yaxes(title_text='Difference in Y', secondary_y=True)
+        fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, TVL VS HODL')
+        return fig
+
+    def draw_apy_price_vs_portfolio(self, portfolio_df: pd.DataFrame):
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_performance_to_y_apy'],
+                name=f"Portfolio APY in {self.pool.token1.name}",
+                yaxis="y2"
+            ),
+            secondary_y=False)
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['bicurr_performance_to_y_apy'],
+                name=f"Bicurrency APY in {self.pool.token1.name}",
+                yaxis="y2"
+            ),
+            secondary_y=False)
+
+        fig.add_trace(
+            go.Scatter(
+                x=portfolio_df.index,
+                y=portfolio_df['portfolio_performance_to_y_apy'] - portfolio_df['bicurr_performance_to_y_apy'],
+                name=f'Portfolio APY - HODL APY in {self.pool.token1.name}',
+                yaxis='y2',
+            ),
+            secondary_y=True)
+
+        fig.update_xaxes(title_text="Timeline")
+        fig.update_yaxes(title_text=f"APY in {self.pool.token1.name}", secondary_y=False)
+        fig.update_yaxes(title_text=f"APY difference in {self.pool.token1.name}", secondary_y=True)
+        fig.update_layout(title=f'Portfolio APY vs Price APY in {self.pool.token1.name}')
+        return fig
+
     def draw_liquidity(self, portfolio_df):
         """
         Plot portfolio liquidity in UniswapV3.
@@ -269,7 +369,9 @@ class UniswapViewer:
         intervals = self.uni_postition_history.to_df()
         fig = go.Figure()
 
-        for col_0 in intervals.columns.get_level_values(level=0).unique():
+        positions = intervals.columns.get_level_values(level=0).unique()
+        positions_num = len(positions) - 1
+        for i, col_0 in enumerate(positions):
             pos = intervals.loc[:, intervals.columns.get_level_values(level=0) == col_0]
             pos_clear = pos.dropna()
 
@@ -277,16 +379,18 @@ class UniswapViewer:
             up = pos_clear[(col_0, 'upper_bound')].to_numpy()
 
             batch = [go.Scatter(
-                name='Upper Bound ' + str(col_0),
+                name='Lower Bound ', # + str(col_0),
                 x=pos_clear.index,
                 y=up,
                 mode='lines',
                 marker=dict(color='blue'),
                 line=dict(width=1),
-                showlegend=False
+                legendgroup='Interval',
+                showlegend=(False if i != positions_num else True)
+
             ),
                 go.Scatter(
-                    name='Lower Bound ' + str(col_0),
+                    name='Upper Bound ',# + str(col_0),
                     x=pos_clear.index,
                     y=low,
                     marker=dict(color='blue'),
@@ -294,8 +398,8 @@ class UniswapViewer:
                     mode='lines',
                     fillcolor='rgba(0, 0, 200, 0.1)',
                     fill='tonexty',
-
-                    showlegend=False
+                    legendgroup='Interval',
+                    showlegend=(False if i != positions_num else True)
                 )]
             fig.add_traces(batch)
 
@@ -306,6 +410,8 @@ class UniswapViewer:
             mode='lines',
             line=dict(color='rgb(0, 200, 0)'),
         ))
+        fig.update_xaxes(title_text="Timeline")
+        fig.update_yaxes(title_text="Price")
         fig.update_layout(title='UniV3 positions')
         return fig
 

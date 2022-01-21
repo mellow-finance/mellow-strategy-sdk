@@ -238,14 +238,14 @@ class BiCurrencyPosition(AbstractPosition):
 
         Returns: Position snapshot
         """
-        value_to_x = self.to_x(price)
-        value_to_y = self.to_y(price)
         snapshot = {
-                    f'{self.name}_value_to_x': value_to_x,
-                    f'{self.name}_value_to_y': value_to_y,
-                    f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
-                    f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
-                }
+                f'{self.name}_value_x': self.x,
+                f'{self.name}_value_y': self.y,
+                f'{self.name}_value_to_x': self.to_x(price),
+                f'{self.name}_value_to_y': self.to_y(price),
+                f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
+                f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
+            }
         return snapshot
 
 
@@ -639,6 +639,8 @@ class UniV3Position(AbstractPosition):
         Returns:
             UniswapV3 position snapshot.
         """
+        x, y = self.to_xy(price)
+
         volume_to_x = self.to_x(price)
         volume_to_y = self.to_y(price)
 
@@ -653,24 +655,28 @@ class UniV3Position(AbstractPosition):
         
         current_liquidity = self.liquidity
 
-        snapshot = {f'{self.name}_value_to_x': volume_to_x,
-                    f'{self.name}_value_to_y': volume_to_y,
+        snapshot = {
+                f'{self.name}_value_x': x,
+                f'{self.name}_value_y': y,
 
-                    f'{self.name}_earned_fees_to_x': fees_earned_to_x,
-                    f'{self.name}_earned_fees_to_y': fees_earned_to_y,
+                f'{self.name}_value_to_x': volume_to_x,
+                f'{self.name}_value_to_y': volume_to_y,
 
-                    f'{self.name}_current_fees_to_x': fees_to_x,
-                    f'{self.name}_current_fees_to_y': fees_to_y,
+                f'{self.name}_earned_fees_to_x': fees_earned_to_x,
+                f'{self.name}_earned_fees_to_y': fees_earned_to_y,
 
-                    f'{self.name}_il_to_x': il_to_x,
-                    f'{self.name}_il_to_y': il_to_y,
+                f'{self.name}_current_fees_to_x': fees_to_x,
+                f'{self.name}_current_fees_to_y': fees_to_y,
 
-                    f'{self.name}_realized_loss_to_x': self.realized_loss_to_x,
-                    f'{self.name}_realized_loss_to_y': self.realized_loss_to_y,
+                f'{self.name}_il_to_x': il_to_x,
+                f'{self.name}_il_to_y': il_to_y,
 
-                    f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
-                    f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
-                    
-                    f'{self.name}_current_liquidity': current_liquidity
-                    }
+                f'{self.name}_realized_loss_to_x': self.realized_loss_to_x,
+                f'{self.name}_realized_loss_to_y': self.realized_loss_to_y,
+
+                f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
+                f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
+
+                f'{self.name}_current_liquidity': current_liquidity
+            }
         return snapshot

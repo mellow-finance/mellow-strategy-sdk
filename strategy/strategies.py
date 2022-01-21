@@ -328,10 +328,12 @@ class MBStrategy(AbstractStrategy):
         price, price_next = row['price'], row['price_next']
         current_tick = self._price_to_tick_(price)
 
-        mean_price_df = df_swaps_prev[-5 * self.window_width:].resample(f'{self.window_width}min')['price'].mean().ffill()
-        idx = mean_price_df.index[mean_price_df.index.get_loc(timestamp, method='nearest')]
-        mean_price = mean_price_df[idx]
-        mean_tick = self._price_to_tick_(mean_price)
+        # mean_price_df = df_swaps_prev[-5 * self.window_width:].resample(f'{self.window_width}min')['price'].mean().ffill()
+        # idx = mean_price_df.index[mean_price_df.index.get_loc(timestamp, method='nearest')]
+        # mean_price = mean_price_df[idx]
+        # mean_tick = self._price_to_tick_(mean_price)
+        mean_tick = self._price_to_tick_(price)
+
 
         output = {'current_tick': current_tick,
                   'price': price,
@@ -365,10 +367,13 @@ class MBStrategy(AbstractStrategy):
         if abs(self.prev_rebalance_tick - params['mean_tick']) >= self.bicur_tolerance:
             fraction_x = self.calc_fraction_to_x(params['price'])
             fraction_y = self.calc_fraction_to_y(params['price'])
-            vault = portfolio.get_position('Vault')
-            vault.rebalance(fraction_x, fraction_y, params['price_next'])
-            self.prev_rebalance_tick = params['mean_tick']
-            is_rebalanced = 'rebalance'
+            if (0 <= fraction_x <= 1) and (0 <= fraction_y <= 1) and (abs(fraction_x + fraction_y - 1) <= 1e-6):
+                vault = portfolio.get_position('Vault')
+                vault.rebalance(fraction_x, fraction_y, params['price_next'])
+                self.prev_rebalance_tick = params['mean_tick']
+                is_rebalanced = 'rebalance'
+            # else:
+            #     print(f'Incorrect rebalance weights x={fraction_x}, y={fraction_y}')
 
         if self.prev_gain_date is None:
             self.prev_gain_date = timestamp.normalize()
