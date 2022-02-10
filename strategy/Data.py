@@ -4,7 +4,11 @@ from pathlib import Path
 from decimal import Decimal
 
 from strategy.primitives import Pool
+from strategy.primitives import POOLS
+from utilities import get_db_connector, get_main_path
 
+import os
+import sys
 
 class PoolDataUniV3:
     """
@@ -190,3 +194,166 @@ class SyntheticData:
         df["price_next"] = df["price_next"].ffill()
         
         return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df)
+
+
+class DownloaderRawDataUniV3:
+    """
+        downloader of raw data from db
+    """
+    def __init__(self):
+        self.db_connection = get_db_connector()
+        self.root = get_main_path()
+
+
+    def _get_event(self, event: str, pool_address: str, file_name: Path):
+        """
+            private func, download event from pool and save it
+        Args:
+            event: 'mint', 'burn' or 'swap'
+            pool_address:
+            file_name: file name to save in mellow-strategy-sdk/data/
+        Returns:
+            None
+        """
+        print(f'get {event}')
+        query = f'select * from {event} WHERE pool="{pool_address}" ORDER BY block_time'
+
+        try:
+            if event == 'burn':
+                print()
+                query = f"""
+                    select
+                        pool,
+                        block_number,
+                        block_hash,
+                        block_time,
+                        log_index,
+                        tx_hash,
+                        owner,
+                        (tick_lower div 1) as tick_lower,
+                        (tick_upper div 1) as tick_upper,
+                        cast(amount as char) as amount,
+                        cast(amount0 as char) as amount0,
+                        cast(amount1 as char) as amount1
+                    from {event} 
+                    WHERE pool="{pool_address}" 
+                    ORDER BY block_time
+                """
+                df = pd.read_sql_query(query, con=self.db_connection)
+            if event == 'mint':
+                query = f"""
+                    select
+                        pool,
+                        block_number,
+                        block_hash,
+                        block_time,
+                        log_index,
+                        tx_hash,
+                        sender,
+                        owner,
+                        (tick_lower div 1) as tick_lower,
+                        (tick_upper div 1) as tick_upper,
+                        cast(amount as char) as amount,
+                        cast(amount0 as char) as amount0,
+                        cast(amount1 as char) as amount1
+                    from {event} 
+                    WHERE pool="{pool_address}" 
+                    ORDER BY block_time
+                """
+                df = pd.read_sql_query(query, con=self.db_connection)
+
+            if event == 'swap':
+                query = f"""
+                    select
+                        pool,
+                        block_number,
+                        block_hash,
+                        block_time,
+                        log_index,
+                        tx_hash,
+                        sender,
+                        recipient,
+                        cast(amount0 as char) as amount0,
+                        cast(amount1 as char) as amount1,
+                        cast(sqrt_price_x96 as char) as sqrt_price_x96,
+                        cast(liquidity as char) as liquidity,
+                        (tick div 1) as tick
+
+                    from {event} 
+                    WHERE pool="{pool_address}" 
+                    ORDER BY block_time
+                """
+                df = pd.read_sql_query(query, con=self.db_connection)
+
+            df.to_csv(f'{self.root}/data/{file_name}', index=False)
+            print(f'saved to {file_name}')
+        except Exception as e:
+            print(e)
+            print(f'Failed to download from db or save to {file_name}')
+
+    def load_events(self, pool_number: int):
+        """
+        by pool_number download all events in separate files
+        Args:
+            pool_number:
+        Returns:
+            None
+        """
+        pool_address = POOLS[pool_number]['address']
+        file_name_base = POOLS[pool_number]['token0'].name + '_' + POOLS[pool_number]['token1'].name + '_' + str(
+            POOLS[pool_number]['fee'].value) + '.csv'
+
+        events = ["burn", "mint", "swap"]
+
+        for event in events:
+            file_name = event + '_' + file_name_base
+            self._get_event(event, pool_address, file_name)
+
+    def get_transactions(self):
+        """
+            download all transactions
+        Returns:
+
+        """
+        file_name = "all_transactions.csv"
+
+        query = f"""
+        select 
+            hash, block_number, gas, gas_price
+            from transaction
+            ORDER BY block_time
+        """
+        try:
+            df = pd.pandas.read_sql_query(query, con=self.db_connection, dtype={
+                'hash': str,
+                'block_number': int,
+                'gas': int,
+                'gas_price': int
+            })
+
+            df.to_csv(f'{self.root}/data/{file_name}', index=False)
+            print(f'saved to {file_name}')
+        except:
+            print(f'Failed to download from db or save to {file_name}')
+
+
+    # def get_curvefi(self):
+    #     """
+    #         Doesnt work, Doesnt need for while
+    #     Args:
+    #         self:
+    #
+    #     Returns:
+    #
+    #     """
+    #     event = 'curve_steth_eth'
+    #     file_name = "curve_steth_eth.csv"
+    #
+    #     print(f'get {event}')
+    #     query = f'select * from {event}'
+    #     try:
+    #         df = pd.read_sql(query, con=self.db_connection)
+    #         df.to_csv(f'{self.root}/data/{file_name}', index=False)
+    #         print(f'saved to {file_name}')
+    #     except:
+    #         print(f'Failed to download from db or save to {file_name}')
