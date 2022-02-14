@@ -65,9 +65,7 @@ class Portfolio(AbstractPosition):
         Returns:
             ``AbstractPosition`` instance.
         """
-        if name not in self.positions:
-            raise Exception(f'Invalid name = {name}')
-        return self.positions[name]
+        return self.positions.get(name, None)
 
     def get_last_position(self) -> AbstractPosition:
         """

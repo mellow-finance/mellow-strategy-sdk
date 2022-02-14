@@ -77,6 +77,7 @@ class PortfolioHistory:
         return df
 
     def calculate_bicurr_hold(self, df: pd.DataFrame) -> pd.DataFrame:
+        df['bicurr_hold_to_x'] = df.iloc[0]['total_value_x'] + df.iloc[0]['total_value_y'] / df['price']
         df['bicurr_hold_to_y'] = df.iloc[0]['total_value_x'] * df['price'] + df.iloc[0]['total_value_y']
         return df
 
@@ -103,6 +104,30 @@ class PortfolioHistory:
             df['total_il_to_y'] = 0
         return df
 
+    def calculate_rl(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate IL of portfolio denominated in X and Y.
+
+        Args:
+            df: Portfolio history DataFrame.
+
+        Returns:
+            Portfolio history data frame with new columns.
+        """
+        rl_to_x_cols = [col for col in df.columns if 'realized_loss_to_x' in col]
+        rl_to_y_cols = [col for col in df.columns if 'realized_loss_to_y' in col]
+
+        if rl_to_x_cols:
+            df[rl_to_x_cols] = df[rl_to_x_cols].fillna(0)
+            df[rl_to_y_cols] = df[rl_to_y_cols].fillna(0)
+
+            df['total_rl_to_x'] = df[rl_to_x_cols].sum(axis=1)
+            df['total_rl_to_y'] = df[rl_to_y_cols].sum(axis=1)
+        else:
+            df['total_rl_to_x'] = 0
+            df['total_rl_to_y'] = 0
+        return df
+
     def calculate_costs(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Costs of portfolio management denominated in X and Y.
@@ -113,20 +138,14 @@ class PortfolioHistory:
         Returns:
              Portfolio history data frame with new columns.
         """
-        costs_to_x_cols = [col for col in df.columns if 'rebalance_costs_to_x' in col]
-        costs_to_y_cols = [col for col in df.columns if 'rebalance_costs_to_y' in col]
-        if costs_to_x_cols:
-            df[costs_to_x_cols] = df[costs_to_x_cols].ffill()
-            df[costs_to_y_cols] = df[costs_to_y_cols].ffill()
+        costs_cols = [col for col in df.columns if 'total_rebalance_costs' in col]
+        if costs_cols:
+            df[costs_cols] = df[costs_cols].ffill()
+            df[costs_cols] = df[costs_cols].fillna(0)
 
-            df[costs_to_x_cols] = df[costs_to_x_cols].fillna(0)
-            df[costs_to_y_cols] = df[costs_to_y_cols].fillna(0)
-
-            df['total_costs_to_x'] = df[costs_to_x_cols].sum(axis=1)
-            df['total_costs_to_y'] = df[costs_to_y_cols].sum(axis=1)
+            df['total_rebalance_costs'] = df[costs_cols].sum(axis=1)
         else:
-            df['total_costs_to_x'] = 0
-            df['total_costs_to_y'] = 0
+            df['total_rebalance_costs'] = 0
         return df
 
     def calculate_liquidity(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -295,7 +314,7 @@ class PortfolioHistory:
         df = self.calculate_bicurr_hold(df)
         df = self.calculate_value_to(df)
         df = self.calculate_il(df)
-        # df = self.calculate_rl(df)
+        df = self.calculate_rl(df)
         df = self.calculate_liquidity(df)
         df = self.calculate_actual_fees(df)
         df = self.calculate_earned_fees(df)

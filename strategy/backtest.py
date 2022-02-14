@@ -1,6 +1,7 @@
 from strategy.strategies import AbstractStrategy
 from strategy.portfolio import Portfolio
 from strategy.history import PortfolioHistory, RebalanceHistory, UniPositionsHistory
+from strategy.history_v2 import PortfolioHistoryV2
 
 from typing import Tuple
 import pandas as pd
@@ -28,9 +29,9 @@ class Backtest:
             self.portfolio = portfolio
 
     def backtest(
-            self,
-            df_swaps: pd.DataFrame
-        ) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
+        self,
+        df_swaps: pd.DataFrame
+    ) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
         """
         Run backtest on data.
 
@@ -45,7 +46,10 @@ class Backtest:
         uni_history = UniPositionsHistory()
 
         for idx, row in df_swaps.iterrows():
-            df_swaps_prev = df_swaps[['price']][:idx]
+            # df_swaps_prev = df_swaps[['price']][:idx]
+            '''FAST'''
+            df_swaps_prev = None
+
             is_rebalanced = self.strategy.rebalance(timestamp=idx, row=row, prev_data=df_swaps_prev, portfolio=self.portfolio)
             portfolio_snapshot = self.portfolio.snapshot(idx, row['price'])
             portfolio_history.add_snapshot(portfolio_snapshot)

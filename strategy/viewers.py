@@ -263,8 +263,7 @@ class PotrfolioViewer:
                 name=f'TVL - HODL in {self.pool.token1.name}',
                 yaxis='y2',
             ),
-            secondary_y=True)
-
+            secondary_y=False)
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value in Y", secondary_y=False)
@@ -280,7 +279,7 @@ class PotrfolioViewer:
                 x=portfolio_df.index,
                 y=portfolio_df['portfolio_performance_to_y_apy'],
                 name=f"Portfolio APY in {self.pool.token1.name}",
-                yaxis="y2"
+                # yaxis="y2"
             ),
             secondary_y=False)
 
@@ -289,7 +288,7 @@ class PotrfolioViewer:
                 x=portfolio_df.index,
                 y=portfolio_df['bicurr_performance_to_y_apy'],
                 name=f"Bicurrency APY in {self.pool.token1.name}",
-                yaxis="y2"
+                # yaxis="y2"
             ),
             secondary_y=False)
 
@@ -298,13 +297,13 @@ class PotrfolioViewer:
                 x=portfolio_df.index,
                 y=portfolio_df['portfolio_performance_to_y_apy'] - portfolio_df['bicurr_performance_to_y_apy'],
                 name=f'Portfolio APY - HODL APY in {self.pool.token1.name}',
-                yaxis='y2',
+                # yaxis='y2',
             ),
-            secondary_y=True)
+            secondary_y=False)
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text=f"APY in {self.pool.token1.name}", secondary_y=False)
-        fig.update_yaxes(title_text=f"APY difference in {self.pool.token1.name}", secondary_y=True)
+        # fig.update_yaxes(title_text=f"APY difference in {self.pool.token1.name}", secondary_y=True)
         fig.update_layout(title=f'Portfolio APY vs Price APY in {self.pool.token1.name}')
         return fig
 

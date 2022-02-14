@@ -98,7 +98,7 @@ class RawDataUniV3:
         """
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df = df.set_index('timestamp')
-        df = df.sort_values(by=['timestamp', 'amount'], ascending=[True, False])
+        df = df.sort_values(by=['timestamp'])
         df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
         df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
         df['amount'] = df['amount'] / 10**(-self.pool.decimals_diff)
@@ -116,7 +116,7 @@ class RawDataUniV3:
         """
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df = df.set_index('timestamp')
-        df = df.sort_values(by=['timestamp', 'amount'], ascending=[True, False])
+        df = df.sort_values(by=['timestamp'])
         df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
         df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
         df['amount'] = df['amount'] / 10**(-self.pool.decimals_diff)
@@ -144,12 +144,8 @@ class RawDataUniV3:
         df["price"] = df["sqrt_price_x96"].transform(
                 lambda x: float(Decimal(x) * Decimal(x) / (Decimal(2 ** 192) * Decimal(10 ** (-self.pool.decimals_diff))))
                         )
-        df["price_before"] = df["price"].shift(1)
-        df["price_before"] = df["price_before"].bfill()
-
-        df["price_next"] = df["price"].shift(-1)
-        df["price_next"] = df["price_next"].ffill()
-
+        df["price_before"] = df["price"].shift(1).bfill()
+        df["price_next"] = df["price"].shift(-1).ffill()
         return df
 
 
