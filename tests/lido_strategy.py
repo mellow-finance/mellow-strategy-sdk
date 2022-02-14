@@ -7,10 +7,10 @@ import pandas as pd
 import numpy as np
 import pprint
 
-from strategy.Data import PoolDataUniV3
-from strategy.Strategies import LidoStrategy
+from strategy.data import PoolDataUniV3
+from strategy.strategies import LidoStrategy
 from strategy.primitives import Pool, Token, Fee
-from strategy.Backtest import Backtest
+from strategy.backtest import Backtest
 
 
 class LinearData:

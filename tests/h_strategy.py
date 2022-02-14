@@ -4,10 +4,10 @@ import os
 root = os.getcwd()
 sys.path.append(root)
 
-from strategy.Data import SyntheticData, RawDataUniV3
-from strategy.Backtest import Backtest
-from strategy.Strategies import HUStrategy, HBStrategy
-from strategy.MultiStrategy import MultiStrategy
+from strategy.data import SyntheticData, RawDataUniV3
+from strategy.backtest import Backtest
+from strategy.strategies import HUStrategy, HBStrategy
+from strategy.multi_strategy import MultiStrategy
 from strategy.primitives import Pool, Token, Fee
 
 

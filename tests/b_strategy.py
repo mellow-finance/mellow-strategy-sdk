@@ -4,9 +4,9 @@ import os
 root = os.getcwd()
 sys.path.append(root)
 
-from strategy.Data import SyntheticData, RawDataUniV3
-from strategy.Backtest import Backtest
-from strategy.Strategies import MBStrategy
+from strategy.data import SyntheticData, RawDataUniV3
+from strategy.backtest import Backtest
+from strategy.strategies import MBStrategy
 from strategy.primitives import Pool, Token, Fee
 
 

@@ -3,17 +3,14 @@ import pandas as pd
 from pathlib import Path
 from decimal import Decimal
 
-from strategy.primitives import Pool
-from strategy.primitives import POOLS
+from strategy.primitives import Pool, POOLS
 from utilities import get_db_connector, get_main_path
-
-import os
-import sys
 
 
 class PoolDataUniV3:
     """
     ``PoolDataUniV3`` contains data for backtesting.
+
     Attributes:
         pool: UniswapV3 ``Pool`` data
         mints: UniswapV3 mints data.
@@ -35,11 +32,12 @@ class PoolDataUniV3:
 
 class RawDataUniV3:
     """
-      ``RawDataUniV3`` preprocess UniswapV3 data.
-      Attributes:
-         pool: UniswapV3 pool meta data.
-         folder: path to data.
-   """
+     ``RawDataUniV3`` preprocess UniswapV3 data.
+
+     Attributes:
+        pool: UniswapV3 pool meta data.
+        folder: Path to data.
+     """
     def __init__(self, pool: Pool, folder: Path = '../data/'):
         self.pool = pool
         self.folder = folder
@@ -47,6 +45,7 @@ class RawDataUniV3:
     def load_from_folder(self) -> PoolDataUniV3:
         """
         Loads data: swaps, mint, burns from predefined folder.
+
         Returns:
             PoolDataUniV3 instance with loaded data.
         """
@@ -91,14 +90,16 @@ class RawDataUniV3:
     def preprocess_mints(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Preprocess UniswapV3 mints data.
+
         Args:
             df: Mints data frame.
+
         Returns:
             Preprocessed mints data frame.
         """
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df = df.set_index('timestamp')
-        df = df.sort_values(by=['timestamp', 'amount'], ascending=[True, False]) # TODO: amount -> log_index ??
+        df = df.sort_values(by=['timestamp'])
         df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
         df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
         df['amount'] = df['amount'] / 10**(-self.pool.decimals_diff)
@@ -107,14 +108,16 @@ class RawDataUniV3:
     def preprocess_burns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Preprocess UniswapV3 burns data.
+
         Args:
             df: Burns data frame.
+
         Returns:
             Preprocessed burns data frame.
         """
         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
         df = df.set_index('timestamp')
-        df = df.sort_values(by=['timestamp', 'amount'], ascending=[True, False])
+        df = df.sort_values(by=['timestamp'])
         df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
         df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
         df['amount'] = df['amount'] / 10**(-self.pool.decimals_diff)
@@ -123,8 +126,10 @@ class RawDataUniV3:
     def preprocess_swaps(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Preprocess UniswapV3 swap data.
+
         Args:
             df: Swaps data frame.
+
         Returns:
             Preprocessed swap data frame.
         """
@@ -140,26 +145,23 @@ class RawDataUniV3:
         df["price"] = df["sqrt_price_x96"].transform(
                 lambda x: float(Decimal(x) * Decimal(x) / (Decimal(2 ** 192) * Decimal(10 ** (-self.pool.decimals_diff))))
                         )
-        df["price_before"] = df["price"].shift(1)
-        df["price_before"] = df["price_before"].bfill()
-
-        df["price_next"] = df["price"].shift(-1)
-        df["price_next"] = df["price_next"].ffill()
-
+        df["price_before"] = df["price"].shift(1).bfill()
+        df["price_next"] = df["price"].shift(-1).ffill()
         return df
 
 
 class SyntheticData:
     """
-       ``SyntheticData`` generates UniswapV3 synthetic exchange data.
-       Attributes:
-            pool: UniswapV3 ``Pool`` instance.
-            start_date: Generating starting date.
-            n_points: Amount samples to generate.
-            init_price: Initial price.
-            mu: Expectation of normal distribution.
-            sigma: Variance of normal distributio.
-            seed: Seed for random generator.
+    ``SyntheticData`` generates UniswapV3 synthetic exchange data.
+
+    Attributes:
+        pool: UniswapV3 ``Pool`` instance.
+        start_date: Generating starting date.
+        n_points: Amount samples to generate.
+        init_price: Initial price.
+        mu: Expectation of normal distribution.
+        sigma: Variance of normal distributio.
+        seed: Seed for random generator.
    """
     def __init__(self, pool, start_date='1-1-2022', n_points=365, init_price=1, mu=0, sigma=0.1, seed=42):
         self.pool = pool
@@ -175,6 +177,7 @@ class SyntheticData:
     def generate_data(self):
         """
         Generate synthetic UniswapV3 exchange data.
+
         Returns:
             PoolDataUniV3 instance with synthetic data.
         """

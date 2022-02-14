@@ -1,13 +1,14 @@
-from strategy.Strategies import AbstractStrategy
-from typing import List
+from strategy.strategies import AbstractStrategy
+from typing import List, Hashable
 
 
 class MultiStrategy(AbstractStrategy):
     """
-        ``MultiStrategy`` is used for making composition of several strategies.
-        Attributes:
-            name: Unique name for the instance
-            strategies: List of strategies
+    ``MultiStrategy`` is used for making composition of several strategies.
+
+    Attributes:
+        name: Unique name for the instance.
+        strategies: List of strategies.
     """
     def __init__(self, name: str = None, strategies: List[AbstractStrategy] = None):
         super().__init__(name)
@@ -18,6 +19,7 @@ class MultiStrategy(AbstractStrategy):
     def append(self, strategy: AbstractStrategy) -> None:
         """
         Add strategy to composition.
+
         Args:
             strategy: Any AbstractStrategy.
         """
@@ -27,6 +29,7 @@ class MultiStrategy(AbstractStrategy):
     def remove(self, name: str) -> None:
         """
         Remove strategy from composition by name.
+
         Args:
             name: Strategy name.
         """
@@ -35,13 +38,22 @@ class MultiStrategy(AbstractStrategy):
         del self.strategies[name]
         return None
 
-    def rebalance(self, *args: list, **kwargs: dict) -> list:
+    def rebalance(self, *args: list, **kwargs: dict) -> Hashable:
         """
         Rebalance implementation for strategy composition.
+
         Args:
             args: Any args.
             kwargs: Any kwargs.
+
         Returns: Rebalnaces status of each strategy in composition.
         """
         status = [strategy.rebalance(*args, **kwargs) for name, strategy in self.strategies.items()]
-        return status
+        status_cleaned = [st for st in status if st is not None]
+        if len(status_cleaned) == 0:
+            is_rebalanced = None
+        elif len(status_cleaned) == 1:
+            is_rebalanced = status_cleaned[0]
+        else:
+            is_rebalanced = 'multi_call'
+        return is_rebalanced

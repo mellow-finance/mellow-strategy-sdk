@@ -1,5 +1,5 @@
-from strategy.UniUtils import UniswapV3Utils, UniswapV2Utils, UniswapLiquidityAligner
-from strategy.Positions import UniV3Position, BiCurrencyPosition
+from strategy.uniswap_utils import UniswapV3Utils, UniswapV2Utils, UniswapLiquidityAligner
+from strategy.positions import UniV3Position, BiCurrencyPosition
 from strategy.primitives import Pool
 
 from abc import ABC, abstractmethod
@@ -10,6 +10,7 @@ import numpy as np
 class AbstractStrategy(ABC):
     """
     ``AbstractStrategy`` is an abstract class for Strategies.
+
     Attributes:
         name: Unique name for the instance.
     """
@@ -20,42 +21,61 @@ class AbstractStrategy(ABC):
             self.name = name
 
     @abstractmethod
-    def rebalance(self, *args, **kwargs) -> bool:
+    def rebalance(self, *args, **kwargs) -> str:
         """
         Rebalance implementation.
+
         Args:
             args: Any args.
             kwargs: Any kwargs.
+
         Returns:
-            True if strategy rebalances portfolio or False otherwise
+            Name of event.
         """
         raise Exception(NotImplemented)
 
 
-class HBStrategy(AbstractStrategy):
+class HStrategy(AbstractStrategy):
     """
-    ``HBStrategy`` is the strategy for asset pair, that rebalances asset weights over time.
+    ``HUStrategy`` is the strategy for asset pair and UniswapV3 position. Strategy rebalances asset weights over time, and
     Weights are calculated by the formula. Rebalancing occurs by a trigger.
+
     Attributes:
-        bicur_tolerance: UniswapV3 Pool instance.
+        mint_tolerance: The width of the interval of the small neighborhood of the tickspacing.
+        burn_tolerance: Amount of ticks which it is necessary deviate from previous position to trigger rebalancing.
+        grid_width: The width of tickspacing grid.
+        width_num: The width of position interval.
+        window_width: The width of window for average.
         pool: UniswapV3 Pool instance.
         rebalance_cost: Rebalancing cost, expressed in currency.
-        x_interest: Interest on  currency X deposit expressed as a daily percentage yield.
-        y_interest: Interest on  currency Y deposit expressed as a daily percentage yield.
         name: Unique name for the instance.
     """
-    def __init__(self,
-                 bicur_tolerance: int,
-                 window_width: int,
-                 pool: Pool,
-                 rebalance_cost: float,
-                 x_interest: float = None,
-                 y_interest: float = None,
-                 name: str = None,
-                 ):
+    def __init__(
+            self,
+            bicur_tolerance: int,
+            mint_tolerance: int,
+            burn_tolerance: int,
+            lower_0: int,
+            upper_0: int,
+            grid_width: int,
+            width_num: int,
+            pool: Pool,
+            rebalance_cost: float,
+            x_interest: float = None,
+            y_interest: float = None,
+            name: str = None,
+    ):
         super().__init__(name)
+
         self.bicur_tolerance = bicur_tolerance
-        self.window_width = window_width
+        self.mint_tolerance = mint_tolerance
+        self.burn_tolerance = burn_tolerance
+
+        self.lower_0 = lower_0
+        self.upper_0 = upper_0
+
+        self.grid_width = grid_width
+        self.width_num = width_num
 
         self.decimal_diff = -pool.decimals_diff
         self.fee_percent = pool.fee.percent
@@ -64,26 +84,31 @@ class HBStrategy(AbstractStrategy):
         self.x_interest = x_interest
         self.y_interest = y_interest
 
-        self.prev_rebalance_tick = None
+        self.previous_uni_tick = None
+        self.prev_swap_tick = None
         self.prev_gain_date = None
 
     def prepare_data(self, *args, **kwargs):
-        timestamp = kwargs['timestamp']
         row = kwargs['row']
-        df_swaps_prev = kwargs['prev_data']
 
-        price, price_next = row['price'], row['price_next']
+        price_before, price, price_next = row['price_before'], row['price'], row['price_next']
         current_tick = self._price_to_tick_(price)
 
-        mean_price_df = df_swaps_prev[-5 * self.window_width:].resample(f'{self.window_width}min')['price'].mean().ffill()
-        idx = mean_price_df.index[mean_price_df.index.get_loc(timestamp, method='nearest')]
-        mean_price = mean_price_df[idx]
-        mean_tick = self._price_to_tick_(mean_price)
+        lower_tick, center_tick, upper_tick = self._get_bounds_(current_tick)
+        center_price = self._tick_to_price_(center_tick)
+        lower_price = self._tick_to_price_(lower_tick)
+        upper_price = self._tick_to_price_(upper_tick)
 
-        output = {'current_tick': current_tick,
-                  'price': price,
-                  'price_next': price_next,
-                  'mean_tick': mean_tick}
+        output = {
+            'price': price,
+            'price_before': price_before,
+            'price_next': price_next,
+            'center_tick': center_tick,
+            'center_price': center_price,
+            'lower_price': lower_price,
+            'upper_price': upper_price,
+            'current_tick': current_tick,
+                  }
         return output
 
     def rebalance(self, *args, **kwargs):
@@ -94,26 +119,50 @@ class HBStrategy(AbstractStrategy):
 
         is_rebalanced = None
 
-        # if portfolio is empty initilize it with bi-currency position
-        if 'Vault' not in portfolio.positions:
-            bicurrency = BiCurrencyPosition('Vault',
-                                            self.fee_percent,
-                                            self.rebalance_cost,
-                                            1 / params['price'], 1,
-                                            self.x_interest,
-                                            self.y_interest)
-            portfolio.append(bicurrency)
-            self.prev_rebalance_tick = params['current_tick']
+        # bi-currency position part
+        if len(portfolio.positions) == 0:
+            vault = BiCurrencyPosition(
+                        'Vault',
+                        self.fee_percent,
+                        self.rebalance_cost,
+                        1 / params['price'],
+                        1,
+                        self.x_interest,
+                        self.y_interest
+                    )
+            portfolio.append(vault)
+            self.prev_swap_tick = self._price_to_tick_(vault.y / vault.x)
 
-        if self.prev_rebalance_tick is None:
+        # if current price deviated too much from previous swap - trigger swap
+        if abs(self.prev_swap_tick - params['current_tick']) >= self.bicur_tolerance:
             vault = portfolio.get_position('Vault')
-            self.prev_rebalance_tick = self._price_to_tick_(vault.y / vault.x)
+            uni_utils = UniswapV3Utils(self.lower_0, self.upper_0)
+            fraction_x = uni_utils.calc_fraction_to_x(params['price'], params['upper_price'])
+            fraction_y = uni_utils.calc_fraction_to_y(params['price'], params['lower_price'])
+            denom = fraction_x + fraction_y
 
-        if abs(self.prev_rebalance_tick - params['mean_tick']) >= self.bicur_tolerance:
-            vault = portfolio.get_position('Vault')
-            vault.rebalance(1 / 2, 1 / 2, params['price_next'])
-            self.prev_rebalance_tick = params['mean_tick']
-            is_rebalanced = 'rebalance'
+            vault.rebalance(fraction_x / denom, fraction_y / denom, params['price'])
+            self.prev_swap_tick = params['current_tick']
+            is_rebalanced = 'swap'
+
+        # if current price deviated too much from previous uni position - burn uni position
+        if len(portfolio.positions) > 1:
+            if abs(self.previous_uni_tick - params['current_tick']) >= self.burn_tolerance:
+                self.remove_last_uni_position(portfolio, params['price'])
+                is_rebalanced = 'burn'
+
+        # if you could mint the position - mint uni position
+        if len(portfolio.positions) < 2:
+            if abs(params['current_tick'] - params['center_tick']) <= self.mint_tolerance:
+                self.create_uni_position(f'UniV3_{timestamp}', portfolio,
+                                         params['lower_price'], params['upper_price'], params['price'])
+                self.previous_uni_tick = params['current_tick']
+                is_rebalanced = 'mint'
+
+        # get fees for swap
+        for name, pos in portfolio.positions.items():
+            if 'Uni' in name:
+                pos.charge_fees(params['price_before'], params['price'])
 
         if self.prev_gain_date is None:
             self.prev_gain_date = timestamp.normalize()
@@ -125,116 +174,6 @@ class HBStrategy(AbstractStrategy):
 
         return is_rebalanced
 
-    def _price_to_tick_(self, price):
-        tick = math.log(price, 1.0001) + self.decimal_diff * math.log(10, 1.0001)
-        return int(round(tick))
-
-
-class HUStrategy(AbstractStrategy):
-    """
-    ``HUStrategy`` is the strategy for asset pair and UniswapV3 position. Strategy rebalances asset weights over time, and
-    Weights are calculated by the formula. Rebalancing occurs by a trigger.
-    Attributes:
-        mint_tolerance: The width of the interval of the small neighborhood of the tickspacing.
-        burn_tolerance: Amount of ticks which it is necessary deviate from previous position to trigger rebalancing.
-        grid_width: The width of tickspacing grid.
-        width_num: The width of position interval.
-        window_width: The width of window for average.
-        pool: UniswapV3 Pool instance.
-        rebalance_cost: Rebalancing cost, expressed in currency.
-        name: Unique name for the instance.
-    """
-    def __init__(self,
-                 mint_tolerance: int,
-                 burn_tolerance: int,
-                 grid_width: int,
-                 width_num: int,
-                 window_width: int,
-                 pool: Pool,
-                 rebalance_cost: float,
-                 name: str = None,
-                 ):
-
-        super().__init__(name)
-        self.mint_tolerance = mint_tolerance
-        self.burn_tolerance = burn_tolerance
-
-        self.grid_width = grid_width
-        self.width_num = width_num
-        self.window_width = window_width
-
-        self.decimal_diff = -pool.decimals_diff
-        self.fee_percent = pool.fee.percent
-        self.rebalance_cost = rebalance_cost
-
-        self.previous_uni_tick = None
-
-    def prepare_data(self, *args, **kwargs):
-        timestamp = kwargs['timestamp']
-        row = kwargs['row']
-        df_swaps_prev = kwargs['prev_data']
-
-        price_before, price, price_next = row['price_before'], row['price'], row['price_next']
-        current_tick = self._price_to_tick_(price)
-
-        mean_price_df = df_swaps_prev[-5 * self.window_width:].resample(f'{self.window_width}min')['price'].mean().ffill()
-        idx = mean_price_df.index[mean_price_df.index.get_loc(timestamp, method='nearest')]
-        mean_price = mean_price_df[idx]
-        mean_tick = self._price_to_tick_(mean_price)
-
-        lower_tick, center_tick, upper_tick = self._get_bounds_(current_tick)
-        lower_price = self._tick_to_price_(lower_tick)
-        upper_price = self._tick_to_price_(upper_tick)
-
-        output = {'price': price,
-                  'price_before': price_before,
-                  'price_next': price_next,
-                  'center_tick': center_tick,
-                  'lower_price': lower_price,
-                  'upper_price': upper_price,
-                  'mean_tick': mean_tick}
-        return output
-
-    def rebalance(self, *args, **kwargs):
-        timestamp = kwargs['timestamp']
-        portfolio = kwargs['portfolio']
-        # prepare data for strategy
-        params = self.prepare_data(*args, **kwargs)
-
-        is_rebalanced = None
-
-        # if portfolio is empty initilize it with bi-currency position
-        if len(portfolio.positions) == 0:
-            bicurrency = BiCurrencyPosition('Vault',
-                                            self.fee_percent,
-                                            self.rebalance_cost,
-                                            1 / params['price'],
-                                            1)
-            portfolio.append(bicurrency)
-
-        # get fees for swap
-        for name, pos in portfolio.positions.items():
-            if 'Uni' in name:
-                pos.charge_fees(params['price_before'], params['price'])
-
-        # if mean price deviated too much from previous uni position - burn uni position
-        if len(portfolio.positions) > 1:
-            if abs(self.previous_uni_tick - params['mean_tick']) >= self.burn_tolerance:
-                self.remove_last_uni_position(portfolio, params['price_next'])
-                is_rebalanced = 'burn'
-
-        # if you could mint the position - mint uni position
-        if len(portfolio.positions) < 2:
-            if abs(params['mean_tick'] - params['center_tick']) <= self.mint_tolerance:
-                # idx = self.signal.index[self.signal.index.get_loc(timestamp, method='nearest')]
-                # if self.signal[idx] >= 1:
-                self.create_uni_position(f'UniV3_{timestamp}', portfolio,
-                                         params['lower_price'], params['upper_price'], params['price_next'])
-                self.previous_uni_tick = params['mean_tick']
-                is_rebalanced = 'mint'
-
-        return is_rebalanced
-
     def remove_last_uni_position(self, portfolio, price) -> None:
         last_pos = portfolio.get_last_position()
         x_out, y_out = last_pos.withdraw(price)
@@ -243,7 +182,7 @@ class HUStrategy(AbstractStrategy):
         return None
 
     def create_uni_position(self, name, portfolio, lower_price, upper_price, price):
-        uni_utils = UniswapV2Utils()
+        uni_utils = UniswapV3Utils(self.lower_0, self.upper_0)
         fraction_uni = uni_utils.calc_fraction_to_uni(price, lower_price, upper_price)
 
         vault = portfolio.get_position('Vault')
@@ -277,6 +216,7 @@ class MBStrategy(AbstractStrategy):
     """
     ``MBStrategy`` is the strategy for asset pair, that rebalances asset weights over time.
     Weights are calculated by the formula. Rebalancing occurs by a trigger.
+
     Attributes:
         bicur_tolerance: UniswapV3 Pool instance.
         lower_0: Base lower bound of the emulated interval.
@@ -289,7 +229,7 @@ class MBStrategy(AbstractStrategy):
     """
     def __init__(self,
                  bicur_tolerance: int,
-                 window_width: int,
+                 # window_width: int,
                  lower_0: float,
                  upper_0: float,
                  pool: Pool,
@@ -300,7 +240,7 @@ class MBStrategy(AbstractStrategy):
                  ):
         super().__init__(name)
         self.bicur_tolerance = bicur_tolerance
-        self.window_width = window_width
+        # self.window_width = window_width
         self.lower_0 = lower_0
         self.upper_0 = upper_0
 
@@ -322,10 +262,12 @@ class MBStrategy(AbstractStrategy):
         price, price_next = row['price'], row['price_next']
         current_tick = self._price_to_tick_(price)
 
-        mean_price_df = df_swaps_prev[-5 * self.window_width:].resample(f'{self.window_width}min')['price'].mean().ffill()
-        idx = mean_price_df.index[mean_price_df.index.get_loc(timestamp, method='nearest')]
-        mean_price = mean_price_df[idx]
-        mean_tick = self._price_to_tick_(mean_price)
+        # mean_price_df = df_swaps_prev[-5 * self.window_width:].resample(f'{self.window_width}min')['price'].mean().ffill()
+        # idx = mean_price_df.index[mean_price_df.index.get_loc(timestamp, method='nearest')]
+        # mean_price = mean_price_df[idx]
+        # mean_tick = self._price_to_tick_(mean_price)
+        mean_tick = self._price_to_tick_(price)
+
 
         output = {'current_tick': current_tick,
                   'price': price,
@@ -359,10 +301,14 @@ class MBStrategy(AbstractStrategy):
         if abs(self.prev_rebalance_tick - params['mean_tick']) >= self.bicur_tolerance:
             fraction_x = self.calc_fraction_to_x(params['price'])
             fraction_y = self.calc_fraction_to_y(params['price'])
-            vault = portfolio.get_position('Vault')
-            vault.rebalance(fraction_x, fraction_y, params['price_next'])
-            self.prev_rebalance_tick = params['mean_tick']
-            is_rebalanced = 'rebalance'
+            print(fraction_x, fraction_y)
+            if (0 <= fraction_x <= 1) and (0 <= fraction_y <= 1) and (abs(fraction_x + fraction_y - 1) <= 1e-6):
+                vault = portfolio.get_position('Vault')
+                vault.rebalance(fraction_x, fraction_y, params['price_next'])
+                self.prev_rebalance_tick = params['mean_tick']
+                is_rebalanced = 'rebalance'
+            # else:
+            #     print(f'Incorrect rebalance weights x={fraction_x}, y={fraction_y}')
 
         if self.prev_gain_date is None:
             self.prev_gain_date = timestamp.normalize()
@@ -403,6 +349,7 @@ class MUStrategy(AbstractStrategy):
     """
     ``MUstrategy`` is the strategy for asset pair and UniswapV3 position. Strategy rebalances asset weights over time, and
     Weights are calculated by the formula. Rebalancing occurs by a trigger.
+
     Attributes:
         mint_tolerance: The width of the interval of the small neighborhood of the tickspacing.
         burn_tolerance: Amount of ticks which it is necessary deviate from previous position to trigger rebalancing.
@@ -471,7 +418,7 @@ class MUStrategy(AbstractStrategy):
                   'mean_tick': mean_tick}
         return output
 
-    def rebalance(self, *args, **kwargs) -> bool:
+    def rebalance(self, *args, **kwargs) -> str:
         timestamp = kwargs['timestamp']
         portfolio = kwargs['portfolio']
         # prepare data for strategy
@@ -549,6 +496,7 @@ class LidoStrategy(AbstractStrategy):
     """
     ``LidoStrategy`` is the strategy for wEth/stEth pair on UniswapV3. Strategy rebalances LP positions on UniswapV3.
      Rebalancing occurs by a trigger.
+
      Attributes:
         grid_width: The width of tickspacing grid.
         interval_width_num: The width of position interval.
@@ -698,4 +646,53 @@ class LidoStrategy(AbstractStrategy):
         return right_bound, mid_tick, upper_bound
 
 
+class UniV3Passive(AbstractStrategy):
+    """
+    ``UniV3Passive`` is the passive strategy on UniswapV3 without rebalances.
+        lower_price: Lower bound of the interval
+        upper_price: Upper bound of the interval
+        rebalance_cost: Rebalancing cost, expressed in currency
+        pool: UniswapV3 Pool instance
+        name: Unique name for the instance
+    """
+
+    def __init__(self,
+                 lower_price: float,
+                 upper_price: float,
+                 pool: Pool,
+                 rebalance_cost: float,
+                 name: str = None,
+                 ):
+        super().__init__(name)
+        self.lower_price = lower_price
+        self.upper_price = upper_price
+        self.decimal_diff = -pool.decimals_diff
+        self.fee_percent = pool.fee.percent
+        self.rebalance_cost = rebalance_cost
+
+    def rebalance(self, *args, **kwargs) -> bool:
+        timestamp = kwargs['timestamp']
+        row = kwargs['row']
+        portfolio = kwargs['portfolio']
+        price_before, price = row['price_before'], row['price']
+
+        is_rebalanced = None
+
+        if len(portfolio.positions) == 0:
+            univ3_pos = self.create_uni_position(price)
+            portfolio.append(univ3_pos)
+            is_rebalanced = 'mint'
+
+        if 'UniV3Passive' in portfolio.positions:
+            uni_pos = portfolio.get_position('UniV3Passive')
+            uni_pos.charge_fees(price_before, price)
+
+        return is_rebalanced
+
+    def create_uni_position(self, price):
+        uni_aligner = UniswapLiquidityAligner(self.lower_price, self.upper_price)
+        x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(1 / price, 1, price)
+        univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
+        univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
+        return univ3_pos
 
