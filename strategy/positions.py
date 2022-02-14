@@ -244,13 +244,14 @@ class BiCurrencyPosition(AbstractPosition):
 
         Returns: Position snapshot
         """
+        # TODO: AttributeError: 'BiCurrencyPosition' object has no attribute 'rebalance_costs_to_x'
         snapshot = {
                 f'{self.name}_value_x': self.x,
                 f'{self.name}_value_y': self.y,
                 f'{self.name}_value_to_x': self.to_x(price),
                 f'{self.name}_value_to_y': self.to_y(price),
-                f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
-                f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
+                # f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
+                # f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
             }
         return snapshot
 
@@ -703,9 +704,9 @@ class UniV3Position(AbstractPosition):
 
                 f'{self.name}_realized_loss_to_x': self.realized_loss_to_x,
                 f'{self.name}_realized_loss_to_y': self.realized_loss_to_y,
-
-                f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
-                f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
+                # TODO: AttributeError: 'UniV3Position' object has no attribute 'rebalance_costs_to_x'
+                # f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
+                # f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
 
                 f'{self.name}_current_liquidity': current_liquidity
             }

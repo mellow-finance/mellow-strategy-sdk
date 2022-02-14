@@ -1,7 +1,9 @@
 from strategy.strategies import AbstractStrategy
 from strategy.portfolio import Portfolio
 from strategy.history import PortfolioHistory, RebalanceHistory, UniPositionsHistory
-from strategy.history_v2 import PortfolioHistoryV2
+
+# TODO: нет такого файла history_v2
+# from strategy.history_v2 import PortfolioHistoryV2
 
 from typing import Tuple
 import pandas as pd
