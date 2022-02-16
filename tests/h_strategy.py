@@ -1,17 +1,13 @@
-import pprint
-import sys
-import os
-root = os.getcwd()
-sys.path.append(root)
-
 from strategy.data import SyntheticData, RawDataUniV3
 from strategy.backtest import Backtest
-from strategy.strategies import HUStrategy, HBStrategy
-from strategy.multi_strategy import MultiStrategy
+from strategy.strategies import HStrategy
 from strategy.primitives import Pool, Token, Fee
 
+import warnings
+warnings.filterwarnings('ignore')
 
-def init_strat(pool: Pool):
+
+def init_strat(data, pool):
     """
     Initilize strategy.
     Args:
@@ -20,48 +16,13 @@ def init_strat(pool: Pool):
     Returns:
         Initialized strategy.
     """
-    hb_strat = HBStrategy(600, 30, pool, 0.01,  0.0002, 0.0002)
-    hu_strat = HUStrategy(10, 360, 60, 3, 30, pool, 0.01)
-    ms = MultiStrategy('Multi', [hb_strat, hu_strat])
-    return ms
+    lower_0 = data.swaps['price'].min() - 2
+    upper_0 = data.swaps['price'].max() + 2
+    h_strat = HStrategy(900, 10, 1200, lower_0, upper_0, 60, 15, pool, 0.01, 1e-5, 1e-5)
+    return h_strat
 
 
-def calc_perf(portfolio_history, data):
-    """
-    Calculate strategy performance metrics.
-    Args:
-        data: UniswapV3 data.
-        pool: UniswapV3 pool.
-    Returns:
-        Performance metrics.
-    """
-    snaphot_last = portfolio_history.snapshots[-1]
-    snaphot_first = portfolio_history.snapshots[0]
-    
-    return_x = snaphot_last['Vault_value_to_x'] / snaphot_first['Vault_value_to_x']
-    return_y = snaphot_last['Vault_value_to_y'] / snaphot_first['Vault_value_to_y']
-    
-    days = (snaphot_last['timestamp'] - snaphot_first['timestamp']).days
-    return_x_apy = return_x**(365 / days) - 1
-    return_y_apy = return_y**(365 / days) - 1
-    
-    price_0 = data.swaps['price'].values[0]
-    price_1 = data.swaps['price'].values[-1]
-    price_return = price_1 / price_0
-    price_return_apy = price_return**(365 / days) - 1
-    
-    res = {'return_x': return_x, 
-           'return_y': return_y, 
-           'days': days, 
-           'return_x_apy': return_x_apy,
-           'return_y_apy': return_y_apy,
-           'price_return': price_return,
-           'price_return_apy': price_return_apy}
-    
-    return res
-
-
-def evaluate(path):
+def evaluate():
     """
     Evaluate backtesting.
     Args:
@@ -70,14 +31,14 @@ def evaluate(path):
         Performance metrics.
     """
     pool = Pool(Token.WBTC, Token.WETH, Fee.MIDDLE)
-    data = RawDataUniV3(pool, folder=f'{path}/data/').load_from_folder()
-    strat = init_strat(pool)
+    data = RawDataUniV3(pool).load_from_folder()
+    strat = init_strat(data, pool)
     portfolio_history, rebalance_history, uni_history = Backtest(strat).backtest(data.swaps)
-    metrics = calc_perf(portfolio_history, data)
+    metrics = portfolio_history.calculate_stats()
     print('Uni Coverage = ', uni_history.get_coverage(data.swaps))
-    return metrics
+    return metrics.tail()
 
 
 if __name__ == '__main__':
-    out = evaluate(root)
-    pprint.pprint(out)
+    out = evaluate()
+    print(out)

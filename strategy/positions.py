@@ -244,14 +244,10 @@ class BiCurrencyPosition(AbstractPosition):
 
         Returns: Position snapshot
         """
-        # TODO: AttributeError: 'BiCurrencyPosition' object has no attribute 'rebalance_costs_to_x'
         snapshot = {
                 f'{self.name}_value_x': self.x,
                 f'{self.name}_value_y': self.y,
-                f'{self.name}_value_to_x': self.to_x(price),
-                f'{self.name}_value_to_y': self.to_y(price),
-                # f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
-                # f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
+                # f'{self.name}total_rebalance_costs': self.total_rebalance_costs,
             }
         return snapshot
 
@@ -671,43 +667,19 @@ class UniV3Position(AbstractPosition):
             UniswapV3 position snapshot.
         """
         x, y = self.to_xy(price)
-
-        volume_to_x = self.to_x(price)
-        volume_to_y = self.to_y(price)
-
-        fees_earned_to_x = self._fees_x_earned_ + self._fees_y_earned_ / price
-        fees_earned_to_y = price * self._fees_x_earned_ + self._fees_y_earned_
-
-        fees_to_x = self.fees_x + self.fees_y / price
-        fees_to_y = price * self.fees_x + self.fees_y
-
-        il_to_x = self.impermanent_loss_to_x(price)
-        il_to_y = self.impermanent_loss_to_y(price)
-
-        current_liquidity = self.liquidity
+        il_x, il_y = self.impermanent_loss(price)
 
         snapshot = {
                 f'{self.name}_value_x': x,
                 f'{self.name}_value_y': y,
 
-                f'{self.name}_value_to_x': volume_to_x,
-                f'{self.name}_value_to_y': volume_to_y,
+                f'{self.name}_fees_x': self.fees_x,
+                f'{self.name}_fees_y': self.fees_y,
 
-                f'{self.name}_earned_fees_to_x': fees_earned_to_x,
-                f'{self.name}_earned_fees_to_y': fees_earned_to_y,
+                f'{self.name}_il_x': il_x,
+                f'{self.name}_il_y': il_y,
 
-                f'{self.name}_current_fees_to_x': fees_to_x,
-                f'{self.name}_current_fees_to_y': fees_to_y,
-
-                f'{self.name}_il_to_x': il_to_x,
-                f'{self.name}_il_to_y': il_to_y,
-
-                f'{self.name}_realized_loss_to_x': self.realized_loss_to_x,
-                f'{self.name}_realized_loss_to_y': self.realized_loss_to_y,
-                # TODO: AttributeError: 'UniV3Position' object has no attribute 'rebalance_costs_to_x'
-                # f'{self.name}_rebalance_costs_to_x': self.rebalance_costs_to_x,
-                # f'{self.name}_rebalance_costs_to_y': self.rebalance_costs_to_y,
-
-                f'{self.name}_current_liquidity': current_liquidity
+                # f'{self.name}_total_rebalance_costs': self.total_rebalance_costs,
+                # f'{self.name}_current_liquidity': self.liquidity
             }
         return snapshot

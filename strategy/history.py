@@ -1,7 +1,9 @@
 import pandas as pd
+import polars as pl
 import numpy as np
 import datetime
 from typing import Hashable
+from strategy import log
 
 
 class PortfolioHistory:
@@ -23,7 +25,6 @@ class PortfolioHistory:
         """
         if snapshot:
             self.snapshots.append(snapshot)
-        return None
 
     def to_df(self):
         """
@@ -32,11 +33,75 @@ class PortfolioHistory:
         Returns:
             Portfolio history data frame.
         """
+        log.info('Starting to construct dataframe', length=len(self.snapshots))
         df = pd.DataFrame(self.snapshots)
-        df = df.set_index('timestamp')
-        return df
+        df2 = pl.from_pandas(df)
+        return df2
 
-    def calculate_value_to(self, df: pd.DataFrame) -> pd.DataFrame:
+    def calculate_values(self, df: pl.DataFrame) -> pl.DataFrame:
+        """
+        Calculate value of portfolio in X and Y.
+
+        Args:
+            df: Portfolio history DataFrame.
+
+        Returns:
+            Portfolio values in X and Y data frame.
+        """
+        log.info('Starting to calculate values')
+        value_of_x_cols = [col for col in df.columns if 'value_x' in col]
+        value_of_y_cols = [col for col in df.columns if 'value_y' in col]
+
+        df_x = df[value_of_x_cols].sum(axis=1).alias('total_value_x')
+        df_y = df[value_of_y_cols].sum(axis=1).alias('total_value_y')
+        return pl.DataFrame([df_x, df_y])
+
+    def calculate_ils(self, df: pl.DataFrame) -> pl.DataFrame:
+        """
+        Calculate IL of portfolio in X and Y.
+
+        Args:
+            df: Portfolio history DataFrame.
+
+        Returns:
+            Portfolio ILs in X and Y data frame.
+        """
+        log.info('Starting to calculate ils')
+        il_to_x_cols = [col for col in df.columns if 'il_x' in col]
+        il_to_y_cols = [col for col in df.columns if 'il_y' in col]
+
+        if il_to_x_cols:
+            df_x = df[il_to_x_cols].fill_null('forward').sum(axis=1).alias('total_il_x')
+            df_y = df[il_to_y_cols].fill_null('forward').sum(axis=1).alias('total_il_y')
+        else:
+            data = [0] * df.shape[0]
+            df_x = pl.Series('total_il_x', data, dtype=pl.Float64)
+            df_y = pl.Series('total_il_y', data, dtype=pl.Float64)
+        return pl.DataFrame([df_x, df_y])
+
+    def calculate_fees(self, df: pl.DataFrame) -> pl.DataFrame:
+        """
+        Calculate fees of Uniswap positions in X and Y.
+
+        Args:
+            df: Portfolio history DataFrame.
+
+        Returns:
+            Portfolio fees in X and Y data frame.
+        """
+        log.info('Starting to calculate fees')
+        fees_to_x_cols = [col for col in df.columns if 'fees_x' in col]
+        fees_to_y_cols = [col for col in df.columns if 'fees_y' in col]
+        if fees_to_x_cols:
+            df_x = df[fees_to_x_cols].fill_null('forward').sum(axis=1).alias('total_fees_x')
+            df_y = df[fees_to_y_cols].fill_null('forward').sum(axis=1).alias('total_fees_y')
+        else:
+            data = [0] * df.shape[0]
+            df_x = pl.Series('total_fees_x', data, dtype=pl.Float64)
+            df_y = pl.Series('total_fees_y', data, dtype=pl.Float64)
+        return pl.DataFrame([df_x, df_y])
+
+    def calculate_value_to(self, df: pl.DataFrame) -> pl.DataFrame:
         """
         Calculate total value of portfolio denominated in X and Y.
 
@@ -44,183 +109,22 @@ class PortfolioHistory:
             df: Portfolio history DataFrame.
 
         Returns:
-            Portfolio history data frame with new columns.
+            Portfolio total value of portfolio denominated in X and Y data frame.
         """
-        value_to_x_cols = [col for col in df.columns if 'value_to_x' in col]
-        value_to_y_cols = [col for col in df.columns if 'value_to_y' in col]
+        log.info('Starting to calculate portfolio values')
+        df_to = df.select([
+            (pl.col('total_value_x') + pl.col('total_value_y') / pl.col('price')).alias('total_value_to_x'),
+            (pl.col('total_value_x') * pl.col('price') + pl.col('total_value_y')).alias('total_value_to_y'),
+            (pl.col('total_fees_x') + pl.col('total_fees_y') / pl.col('price')).alias('total_fees_to_x'),
+            (pl.col('total_fees_x') * pl.col('price') + pl.col('total_fees_y')).alias('total_fees_to_y'),
+            (pl.col('total_il_x') + pl.col('total_il_y') / pl.col('price')).alias('total_il_to_x'),
+            (pl.col('total_il_x') * pl.col('price') + pl.col('total_il_y')).alias('total_il_to_y'),
+            (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price')).alias('hold_to_x'),
+            (pl.col('total_value_x').first() * pl.col('price') + pl.col('total_value_y').first()).alias('hold_to_y'),
+        ])
+        return df_to
 
-        df[value_to_x_cols] = df[value_to_x_cols].fillna(0)
-        df[value_to_y_cols] = df[value_to_y_cols].fillna(0)
-
-        df['total_value_to_x'] = df[value_to_x_cols].sum(axis=1)
-        df['total_value_to_y'] = df[value_to_y_cols].sum(axis=1)
-        return df
-
-    def calculate_value(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Calculate total value of portfolio in X and Y.
-
-        Args:
-            df: Portfolio history DataFrame.
-
-        Returns:
-            Portfolio history data frame with new columns.
-        """
-        value_x_cols = [col for col in df.columns if 'value_x' in col]
-        value_y_cols = [col for col in df.columns if 'value_y' in col]
-
-        df[value_x_cols] = df[value_x_cols].fillna(0)
-        df[value_y_cols] = df[value_y_cols].fillna(0)
-
-        df['total_value_x'] = df[value_x_cols].sum(axis=1)
-        df['total_value_y'] = df[value_y_cols].sum(axis=1)
-        return df
-
-    def calculate_bicurr_hold(self, df: pd.DataFrame) -> pd.DataFrame:
-        df['bicurr_hold_to_x'] = df.iloc[0]['total_value_x'] + df.iloc[0]['total_value_y'] / df['price']
-        df['bicurr_hold_to_y'] = df.iloc[0]['total_value_x'] * df['price'] + df.iloc[0]['total_value_y']
-        return df
-
-    def calculate_il(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Calculate IL of portfolio denominated in X and Y.
-
-        Args:
-            df: Portfolio history DataFrame.
-
-        Returns:
-            Portfolio history data frame with new columns.
-        """
-        il_to_x_cols = [col for col in df.columns if 'il_to_x' in col]
-        il_to_y_cols = [col for col in df.columns if 'il_to_y' in col]
-        if il_to_x_cols:
-            df[il_to_x_cols] = df[il_to_x_cols].ffill().fillna(0)
-            df[il_to_y_cols] = df[il_to_y_cols].ffill().fillna(0)
-
-            df['total_il_to_x'] = df[il_to_x_cols].sum(axis=1)
-            df['total_il_to_y'] = df[il_to_y_cols].sum(axis=1)
-        else:
-            df['total_il_to_x'] = 0
-            df['total_il_to_y'] = 0
-        return df
-
-    def calculate_rl(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Calculate IL of portfolio denominated in X and Y.
-
-        Args:
-            df: Portfolio history DataFrame.
-
-        Returns:
-            Portfolio history data frame with new columns.
-        """
-        rl_to_x_cols = [col for col in df.columns if 'realized_loss_to_x' in col]
-        rl_to_y_cols = [col for col in df.columns if 'realized_loss_to_y' in col]
-
-        if rl_to_x_cols:
-            df[rl_to_x_cols] = df[rl_to_x_cols].fillna(0)
-            df[rl_to_y_cols] = df[rl_to_y_cols].fillna(0)
-
-            df['total_rl_to_x'] = df[rl_to_x_cols].sum(axis=1)
-            df['total_rl_to_y'] = df[rl_to_y_cols].sum(axis=1)
-        else:
-            df['total_rl_to_x'] = 0
-            df['total_rl_to_y'] = 0
-        return df
-
-    def calculate_costs(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Costs of portfolio management denominated in X and Y.
-
-        Args:
-            df: Portfolio history DataFrame.
-
-        Returns:
-             Portfolio history data frame with new columns.
-        """
-        costs_cols = [col for col in df.columns if 'total_rebalance_costs' in col]
-        if costs_cols:
-            df[costs_cols] = df[costs_cols].ffill()
-            df[costs_cols] = df[costs_cols].fillna(0)
-
-            df['total_rebalance_costs'] = df[costs_cols].sum(axis=1)
-        else:
-            df['total_rebalance_costs'] = 0
-        return df
-
-    def calculate_liquidity(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Calculate total liquidity of all Uniswap positions.
-
-        Args:
-            df: Portfolio history DataFrame.
-
-        Returns:
-             Portfolio history data frame with new columns.
-        """
-        liq_cols = [col for col in df.columns if 'current_liquidity' in col]
-
-        if liq_cols:
-            df[liq_cols] = df[liq_cols].fillna(0)
-            df['total_current_liquidity'] = df[liq_cols].sum(axis=1)
-        else:
-            df['total_current_liquidity'] = 0
-            df['total_current_liquidity'] = 0
-
-        return df
-
-    def calculate_actual_fees(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Calculate actual fees of Uniswap positions denominated in X and Y.
-
-        Args:
-            df: Portfolio history DataFrame.
-
-        Returns:
-            Portfolio history data frame with new columns.
-        """
-        fees_to_x_cols = [col for col in df.columns if 'current_fees_to_x' in col]
-        fees_to_y_cols = [col for col in df.columns if 'current_fees_to_y' in col]
-
-        if fees_to_x_cols:
-            df[fees_to_x_cols] = df[fees_to_x_cols].fillna(0)
-            df[fees_to_y_cols] = df[fees_to_y_cols].fillna(0)
-
-            df['total_current_fees_to_x'] = df[fees_to_x_cols].sum(axis=1)
-            df['total_current_fees_to_y'] = df[fees_to_y_cols].sum(axis=1)
-        else:
-            df['total_current_fees_to_x'] = 0
-            df['total_current_fees_to_y'] = 0
-        return df
-
-    def calculate_earned_fees(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Calculate total erned fees of Uniswap positions denominated in X and Y.
-
-        Args:
-            df: Portfolio history DataFrame.
-
-        Returns:
-            Portfolio history data frame  with new columns.
-        """
-        fees_to_x_cols = [col for col in df.columns if 'earned_fees_to_x' in col]
-        fees_to_y_cols = [col for col in df.columns if 'earned_fees_to_y' in col]
-
-        if fees_to_x_cols:
-            df[fees_to_x_cols] = df[fees_to_x_cols].ffill()
-            df[fees_to_y_cols] = df[fees_to_y_cols].ffill()
-
-            df[fees_to_x_cols] = df[fees_to_x_cols].fillna(0)
-            df[fees_to_y_cols] = df[fees_to_y_cols].fillna(0)
-
-            df['total_earned_fees_to_x'] = df[fees_to_x_cols].sum(axis=1)
-            df['total_earned_fees_to_y'] = df[fees_to_y_cols].sum(axis=1)
-        else:
-            df['total_earned_fees_to_x'] = 0
-            df['total_earned_fees_to_y'] = 0
-        return df
-
-    def calculate_porfolio_returns(self, df: pd.DataFrame) -> pd.DataFrame:
+    def calculate_returns(self, df: pl.DataFrame) -> pl.DataFrame:
         """
         Calculate portfolio returns.
 
@@ -228,81 +132,56 @@ class PortfolioHistory:
             df: Portfolio history DataFrame.
 
         Returns:
-            Portfolio history data frame with new columns.
+            Portfolio returns data frame.
         """
-        df['portfolio_returns_to_x'] = df['portfolio_value_to_x'] / df['portfolio_value_to_x'].shift()
-        df['portfolio_returns_to_y'] = df['portfolio_value_to_y'] / df['portfolio_value_to_y'].shift()
-        return df
+        log.info('Starting to calculate portfolio returns')
+        df_returns = df.select(
+            [
+                (
+                    pl.col('total_value_to_x') /
+                    pl.col('total_value_to_x')
+                    .shift_and_fill(1, pl.col('total_value_to_x').first())
+                ).alias('portfolio_returns_x'),
+                (
+                    pl.col('total_value_to_y') /
+                    pl.col('total_value_to_y')
+                    .shift_and_fill(1, pl.col('total_value_to_y').first())
+                ).alias('portfolio_returns_y'),
+                (
+                    pl.col('hold_to_x') /
+                    pl.col('hold_to_x')
+                    .shift_and_fill(1, pl.col('hold_to_x').first())
+                ).alias('hold_returns_x'),
+                (
+                    pl.col('hold_to_y') /
+                    pl.col('hold_to_y')
+                    .shift_and_fill(1, pl.col('hold_to_y').first())
+                ).alias('hold_returns_y'),
+            ]
+        )
+        return df_returns
 
-    def calculate_apy_hold(self, df: pd.DataFrame) -> pd.DataFrame:
-        def yearly_adj(_df):
-            days_gone = (_df.index[-1] - _df.index[0]).days + 1
-            out = _df.iloc[-1] ** (365 / days_gone)
-            return out
-
-        df['bicurr_returns_to_y'] = df['bicurr_hold_to_y'] / df['bicurr_hold_to_y'].shift()
-        df['bicurr_performance_to_y_apy'] = df['bicurr_returns_to_y'].cumprod().expanding().apply(yearly_adj)
-
-        df['bicurr_performance_to_y_apy'] -= 1
-        return df
-
-    def calculate_performance_adj(self, df: pd.DataFrame) -> pd.DataFrame:
+    def calculate_apy_for_col(self, df: pl.DataFrame, from_col: str, to_col: str) -> pl.DataFrame:
         """
-        Calculate portfolio performance relative to currency pair.
+        Calculate portfolio APY.
 
         Args:
             df: Portfolio history DataFrame.
 
         Returns:
-            Portfolio history data frame with new columns.
+            Portfolio APY data frame.
         """
+        log.info(f'Starting to calculate portfolio APY for {from_col}')
+        df_performance = df.select([
+            pl.col(from_col).cumprod().alias('performance'),
+            # pl.col('total_value_to_x') / pl.col('total_value_to_x').first(),
+            ((pl.col('timestamp') - pl.col('timestamp').first()).dt.days() + 1).alias('days')
+        ])
+        df_apy = df_performance.apply(lambda x: x[0] ** (365 / x[1]) - 1)
+        df_apy = df_apy.rename({"apply": to_col})
+        return df_apy
 
-        def yearly_adj(_df):
-            days_gone = (_df.index[-1] - _df.index[0]).days + 1
-            out = _df.iloc[-1] ** (365 / days_gone)
-            return out
-
-        df['price_returns_to_y'] = df['price'] / df['price'].shift()
-        df['price_returns_to_x'] = df['price'].shift() / df['price']
-
-        df['portfolio_returns_rel_to_x'] = df['portfolio_returns_to_x'] / df['price_returns_to_x']
-        df['portfolio_returns_rel_to_y'] = df['portfolio_returns_to_y'] / df['price_returns_to_y']
-
-        df['portfolio_performance_rel_to_x_apy'] = df[
-            'portfolio_returns_rel_to_x'].cumprod().expanding().apply(yearly_adj)
-        df['portfolio_performance_rel_to_y_apy'] = df[
-            'portfolio_returns_rel_to_y'].cumprod().expanding().apply(yearly_adj)
-
-        df['portfolio_performance_rel_to_x_apy'] -= 1
-        df['portfolio_performance_rel_to_y_apy'] -= 1
-        return df
-
-    def calculate_performance(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Calculate portfolio performance.
-
-        Args:
-            df: Portfolio stats DataFrame.
-
-        Returns:
-            Portfolio history data frame with new column.
-        """
-
-        def yearly_adj(_df):
-            days_gone = (_df.index[-1] - _df.index[0]).days + 1
-            out = _df.iloc[-1] ** (365 / days_gone)
-            return out
-
-        df['portfolio_performance_to_x_apy'] = df['portfolio_returns_to_x'].cumprod().expanding().apply(
-            yearly_adj)
-        df['portfolio_performance_to_y_apy'] = df['portfolio_returns_to_y'].cumprod().expanding().apply(
-            yearly_adj)
-
-        df['portfolio_performance_to_x_apy'] -= 1
-        df['portfolio_performance_to_y_apy'] -= 1
-        return df
-
-    def portfolio_stats(self) -> pd.DataFrame:
+    def calculate_stats(self) -> pl.DataFrame:
         """
         Calculate all statistics for portfolio.
 
@@ -310,43 +189,21 @@ class PortfolioHistory:
             Portfolio history data frame.
         """
         df = self.to_df()
-        df = self.calculate_value(df)
-        df = self.calculate_bicurr_hold(df)
-        df = self.calculate_value_to(df)
-        df = self.calculate_il(df)
-        df = self.calculate_rl(df)
-        df = self.calculate_liquidity(df)
-        df = self.calculate_actual_fees(df)
-        df = self.calculate_earned_fees(df)
-        df = self.calculate_costs(df)
+        values = self.calculate_values(df)
+        ils = self.calculate_ils(df)
+        fees = self.calculate_fees(df)
 
-        if 'total_current_fees_to_x' in df.columns:
-            df['portfolio_value_to_x'] = df['total_value_to_x'] + df['total_current_fees_to_x']
-            df['portfolio_value_to_y'] = df['total_value_to_y'] + df['total_current_fees_to_y']
-        else:
-            df['portfolio_value_to_x'] = df['total_value_to_x']
-            df['portfolio_value_to_y'] = df['total_value_to_y']
+        df_prep = pl.concat([df[['timestamp', 'price']], values, ils, fees], how='horizontal')
+        df_to = self.calculate_value_to(df_prep)
+        df_returns = self.calculate_returns(df_to)
 
-        if 'total_il_to_x' in df.columns:
-            if 'total_rl_to_x' in df.columns:
-                df['total_loss_to_x'] = df['total_il_to_x'] + df['total_rl_to_x']
-                df['total_loss_to_y'] = df['total_il_to_y'] + df['total_rl_to_y']
-            else:
-                df['total_loss_to_x'] = df['total_il_to_x']
-                df['total_loss_to_y'] = df['total_il_to_y']
-        else:
-            df['total_loss_to_x'] = 0
-            df['total_loss_to_y'] = 0
+        df_returns_ext = pl.concat([df[['timestamp']], df_returns], how='horizontal')
+        prt_x = self.calculate_apy_for_col(df_returns_ext, 'portfolio_returns_x', 'portfolio_apy_x')
+        prt_y = self.calculate_apy_for_col(df_returns_ext, 'portfolio_returns_y', 'portfolio_apy_y')
+        hld_x = self.calculate_apy_for_col(df_returns_ext, 'hold_returns_x', 'hold_apy_x')
+        hld_y = self.calculate_apy_for_col(df_returns_ext, 'hold_returns_y', 'hold_apy_y')
 
-        if 'total_earned_fees_to_x' not in df.columns:
-            df['total_earned_fees_to_x'] = 0
-            df['total_earned_fees_to_y'] = 0
-
-        df = self.calculate_apy_hold(df)
-        df = self.calculate_porfolio_returns(df)
-        df = self.calculate_performance(df)
-        df = self.calculate_performance_adj(df)
-        return df
+        return pl.concat([df_prep, df_to, df_returns, prt_x, prt_y, hld_x, hld_y], how='horizontal')
 
 
 class RebalanceHistory:

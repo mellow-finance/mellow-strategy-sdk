@@ -26,15 +26,15 @@ class PotrfolioViewer:
         Returns:
             Portfolio visualization.
         """
-        portfolio_df = self.portfolio_history.portfolio_stats()
+        portfolio_df = self.portfolio_history.calculate_stats()
         fig1 = self.draw_portfolio_to_x(portfolio_df)
         fig2 = self.draw_portfolio_to_y(portfolio_df)
         fig3 = self.draw_performance_x(portfolio_df)
         fig4 = self.draw_performance_y(portfolio_df)
         fig5 = self.draw_x_y(portfolio_df)
-        fig6 = self.draw_tvl_vs_hodl(portfolio_df)
-        fig7 = self.draw_apy_price_vs_portfolio(portfolio_df)
-        return fig1, fig2, fig3, fig4, fig5, fig6, fig7
+        # fig6 = self.draw_tvl_vs_hodl(portfolio_df)
+        # fig7 = self.draw_apy_price_vs_portfolio(portfolio_df)
+        return fig1, fig2, fig3, fig4, fig5
 
     def draw_portfolio_to_x(self, portfolio_df: pd.DataFrame):
         """
@@ -50,15 +50,15 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_value_to_x'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['total_value_to_x'],
                 name=f"Portfolio value in {self.pool.token0.name}",
             ), secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['total_earned_fees_to_x'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['total_fees_to_x'],
                 name=f'Earned fees in {self.pool.token0.name}',
                 yaxis='y2',
 
@@ -66,8 +66,8 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['total_loss_to_x'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['total_il_to_x'],
                 name=f"IL in {self.pool.token0.name}",
                 yaxis="y2"
             ), secondary_y=True)
@@ -75,7 +75,7 @@ class PotrfolioViewer:
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to X", secondary_y=False)
         fig.update_yaxes(title_text='Earned fees to X', secondary_y=True)
-        fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token0.name}')
+        fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token0.name}', width=900, height=500)
         return fig
 
     def draw_portfolio_to_y(self, portfolio_df: pd.DataFrame):
@@ -92,16 +92,16 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_value_to_y'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['total_value_to_y'],
                 name=f"Portfolio value in {self.pool.token1.name}",
             ),
             secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['total_earned_fees_to_y'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['total_fees_to_y'],
                 name=f'Earned fees in {self.pool.token1.name}',
                 yaxis='y2',
 
@@ -109,8 +109,8 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['total_loss_to_y'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['total_il_to_y'],
                 name=f"IL in {self.pool.token1.name}",
                 yaxis="y2"
             ),  secondary_y=True
@@ -119,7 +119,7 @@ class PotrfolioViewer:
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to Y", secondary_y=False)
         fig.update_yaxes(title_text='Earned fees to Y', secondary_y=True)
-        fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token1.name}')
+        fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token1.name}', width=900, height=500)
         return fig
 
     def draw_performance_x(self, portfolio_df: pd.DataFrame):
@@ -136,36 +136,25 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_value_to_x'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['total_value_to_x'],
                 name=f"Portfolio value in {self.pool.token0.name}",
             ),
             secondary_y=False)
         
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_performance_to_x_apy'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['portfolio_apy_x'],
                 name=f"APY in {self.pool.token0.name}",
                 yaxis="y2"
             ),
             secondary_y=True
         )
-        
-        # fig.add_trace(
-        #     go.Scatter(
-        #         x=portfolio_df.index,
-        #         y=portfolio_df['portfolio_performance_rel_to_x_apy'],
-        #         name=f"APY in {self.pool.token1.name}",
-        #         yaxis="y2"
-        #     ),
-        #     secondary_y=True
-        # )
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to X", secondary_y=False)
         fig.update_yaxes(title_text=f'APY in {self.pool.token0.name}', secondary_y=True)
-
         fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token0.name}')
         return fig
     
@@ -183,26 +172,18 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_value_to_y'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['total_value_to_y'],
                 name=f"Portfolio value in {self.pool.token1.name}",
             ), secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_performance_to_y_apy'],
+                x=portfolio_df['timestamp'],
+                y=portfolio_df['portfolio_apy_y'],
                 name=f"APY in {self.pool.token1.name}",
                 yaxis="y2"
             ), secondary_y=True)
-        
-        # fig.add_trace(
-        #     go.Scatter(
-        #         x=portfolio_df.index,
-        #         y=portfolio_df['portfolio_performance_rel_to_y_apy'],
-        #         name=f"APY relative to bicurrency in {self.pool.token1.name}",
-        #         yaxis="y2"
-        #     ), secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to Y", secondary_y=False)
@@ -216,7 +197,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
+                x=portfolio_df['timestamp'],
                 y=portfolio_df['total_value_x'],
                 name=f"Portfolio value in {self.pool.token0.name}",
             ),
@@ -224,7 +205,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df.index,
+                x=portfolio_df['timestamp'],
                 y=portfolio_df['total_value_y'],
                 name=f'Portfolio value in {self.pool.token1.name}',
                 yaxis='y2',
@@ -237,112 +218,76 @@ class PotrfolioViewer:
         fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, {self.pool.token1.name}')
         return fig
 
-    def draw_tvl_vs_hodl(self, portfolio_df: pd.DataFrame):
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # def draw_tvl_vs_hodl(self, portfolio_df: pd.DataFrame):
+    #     fig = make_subplots(specs=[[{"secondary_y": True}]])
+    #
+    #     fig.add_trace(
+    #         go.Scatter(
+    #             x=portfolio_df.index,
+    #             y=portfolio_df['portfolio_value_to_y'],
+    #             name=f"Portfolio total value in {self.pool.token1.name}",
+    #         ),
+    #         secondary_y=False)
+    #
+    #     fig.add_trace(
+    #         go.Scatter(
+    #             x=portfolio_df.index,
+    #             y=portfolio_df['bicurr_hold_to_y'],
+    #             name=f'HODL total value in {self.pool.token1.name}',
+    #         ),
+    #         secondary_y=False)
+    #
+    #     fig.add_trace(
+    #         go.Scatter(
+    #             x=portfolio_df.index,
+    #             y=portfolio_df['portfolio_value_to_y'] - portfolio_df['bicurr_hold_to_y'],
+    #             name=f'TVL - HODL in {self.pool.token1.name}',
+    #             yaxis='y2',
+    #         ),
+    #         secondary_y=False)
+    #
+    #     fig.update_xaxes(title_text="Timeline")
+    #     fig.update_yaxes(title_text="Value in Y", secondary_y=False)
+    #     fig.update_yaxes(title_text='Difference in Y', secondary_y=True)
+    #     fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, TVL VS HODL')
+    #     return fig
 
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_value_to_y'],
-                name=f"Portfolio total value in {self.pool.token1.name}",
-            ),
-            secondary_y=False)
-
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['bicurr_hold_to_y'],
-                name=f'HODL total value in {self.pool.token1.name}',
-            ),
-            secondary_y=False)
-
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_value_to_y'] - portfolio_df['bicurr_hold_to_y'],
-                name=f'TVL - HODL in {self.pool.token1.name}',
-                yaxis='y2',
-            ),
-            secondary_y=False)
-
-        fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Value in Y", secondary_y=False)
-        fig.update_yaxes(title_text='Difference in Y', secondary_y=True)
-        fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, TVL VS HODL')
-        return fig
-
-    def draw_apy_price_vs_portfolio(self, portfolio_df: pd.DataFrame):
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_performance_to_y_apy'],
-                name=f"Portfolio APY in {self.pool.token1.name}",
-                # yaxis="y2"
-            ),
-            secondary_y=False)
-
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['bicurr_performance_to_y_apy'],
-                name=f"Bicurrency APY in {self.pool.token1.name}",
-                # yaxis="y2"
-            ),
-            secondary_y=False)
-
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['portfolio_performance_to_y_apy'] - portfolio_df['bicurr_performance_to_y_apy'],
-                name=f'Portfolio APY - HODL APY in {self.pool.token1.name}',
-                # yaxis='y2',
-            ),
-            secondary_y=False)
-
-        fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text=f"APY in {self.pool.token1.name}", secondary_y=False)
-        # fig.update_yaxes(title_text=f"APY difference in {self.pool.token1.name}", secondary_y=True)
-        fig.update_layout(title=f'Portfolio APY vs Price APY in {self.pool.token1.name}')
-        return fig
-
-    def draw_liquidity(self, portfolio_df):
-        """
-        Plot portfolio liquidity in UniswapV3.
-
-        Args:
-            portfolio_df: Portfolio history data frame.
-
-        Returns:
-            Portfolio plot with liquidity.
-        """
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['price'],
-                name="Price",
-            ),
-            secondary_y=False)
-
-        fig.add_trace(
-            go.Scatter(
-                x=portfolio_df.index,
-                y=portfolio_df['total_current_liquidity'],
-                name="Current liquidity",
-                yaxis="y2"
-            ),
-            secondary_y=True
-        )
-        
-        fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Price", secondary_y=False)
-        fig.update_yaxes(title_text='Liquidity', secondary_y=True)
-        fig.update_layout(title='Portfolio Liquidity')
-        
-        return fig
+    # def draw_liquidity(self, portfolio_df):
+    #     """
+    #     Plot portfolio liquidity in UniswapV3.
+    #
+    #     Args:
+    #         portfolio_df: Portfolio history data frame.
+    #
+    #     Returns:
+    #         Portfolio plot with liquidity.
+    #     """
+    #     fig = make_subplots(specs=[[{"secondary_y": True}]])
+    #
+    #     fig.add_trace(
+    #         go.Scatter(
+    #             x=portfolio_df.index,
+    #             y=portfolio_df['price'],
+    #             name="Price",
+    #         ),
+    #         secondary_y=False)
+    #
+    #     fig.add_trace(
+    #         go.Scatter(
+    #             x=portfolio_df.index,
+    #             y=portfolio_df['total_current_liquidity'],
+    #             name="Current liquidity",
+    #             yaxis="y2"
+    #         ),
+    #         secondary_y=True
+    #     )
+    #
+    #     fig.update_xaxes(title_text="Timeline")
+    #     fig.update_yaxes(title_text="Price", secondary_y=False)
+    #     fig.update_yaxes(title_text='Liquidity', secondary_y=True)
+    #     fig.update_layout(title='Portfolio Liquidity')
+    #
+    #     return fig
 
 
 class UniswapViewer:
@@ -411,7 +356,7 @@ class UniswapViewer:
         ))
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Price")
-        fig.update_layout(title='UniV3 positions')
+        fig.update_layout(title='UniV3 positions', width=900, height=400)
         return fig
 
 
