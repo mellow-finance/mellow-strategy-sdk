@@ -1,7 +1,11 @@
+"""
+TODO write
+"""
 import sys
 import os
 import yaml
 from sqlalchemy import create_engine
+
 
 class ConfigParser:
     """
@@ -13,6 +17,7 @@ class ConfigParser:
 
         with open(self.path, 'r') as stream:
             self.config = yaml.safe_load(stream)
+
 
 def get_db_connector():
     """
@@ -32,6 +37,7 @@ def get_db_connector():
         )
     )
 
+
 def add_main_path():
     """
          add the path to the main directory ../mellow-strategy-sdk
@@ -44,6 +50,7 @@ def add_main_path():
             sys.path.append(current_path)
             break
         current_path = os.path.split(current_path)[0]
+
 
 def get_main_path():
     """

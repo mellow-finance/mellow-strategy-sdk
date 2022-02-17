@@ -1,8 +1,15 @@
-import pandas as pd
-import polars as pl
-import numpy as np
+"""
+    TODO: Write
+"""
+
+
 import datetime
 from typing import Hashable
+
+import polars as pl
+import pandas as pd
+import numpy as np
+
 from strategy import log
 
 
@@ -38,6 +45,7 @@ class PortfolioHistory:
         df2 = pl.from_pandas(df)
         return df2
 
+    # TODO: static method
     def calculate_values(self, df: pl.DataFrame) -> pl.DataFrame:
         """
         Calculate value of portfolio in X and Y.
@@ -56,6 +64,7 @@ class PortfolioHistory:
         df_y = df[value_of_y_cols].sum(axis=1).alias('total_value_y')
         return pl.DataFrame([df_x, df_y])
 
+    # TODO: static method
     def calculate_ils(self, df: pl.DataFrame) -> pl.DataFrame:
         """
         Calculate IL of portfolio in X and Y.
@@ -79,6 +88,7 @@ class PortfolioHistory:
             df_y = pl.Series('total_il_y', data, dtype=pl.Float64)
         return pl.DataFrame([df_x, df_y])
 
+    # TODO: static method
     def calculate_fees(self, df: pl.DataFrame) -> pl.DataFrame:
         """
         Calculate fees of Uniswap positions in X and Y.
@@ -101,6 +111,7 @@ class PortfolioHistory:
             df_y = pl.Series('total_fees_y', data, dtype=pl.Float64)
         return pl.DataFrame([df_x, df_y])
 
+    # TODO: static method
     def calculate_value_to(self, df: pl.DataFrame) -> pl.DataFrame:
         """
         Calculate total value of portfolio denominated in X and Y.
@@ -124,6 +135,7 @@ class PortfolioHistory:
         ])
         return df_to
 
+    # TODO: static method
     def calculate_returns(self, df: pl.DataFrame) -> pl.DataFrame:
         """
         Calculate portfolio returns.
@@ -161,12 +173,15 @@ class PortfolioHistory:
         )
         return df_returns
 
+    # TODO: static method
     def calculate_apy_for_col(self, df: pl.DataFrame, from_col: str, to_col: str) -> pl.DataFrame:
         """
         Calculate portfolio APY.
 
         Args:
             df: Portfolio history DataFrame.
+            from_col: # TODO
+            to_col: # TODO
 
         Returns:
             Portfolio APY data frame.
@@ -265,6 +280,7 @@ class UniPositionsHistory:
                 uni_positions[(name, 'upper_bound')] = position.upper_price
         if uni_positions:
             self.positions[timestamp] = uni_positions
+        # TODO: del return
         return None
 
     def to_df(self) -> pd.DataFrame:
@@ -275,7 +291,9 @@ class UniPositionsHistory:
             Uniswap positions history data frame.
         """
         intervals_df = pd.DataFrame(self.positions).T
-        intervals_df.columns = pd.MultiIndex.from_tuples(intervals_df.columns, names=["pos_name", "bound_type"])
+        intervals_df.columns = pd.MultiIndex.from_tuples(
+            intervals_df.columns, names=["pos_name", "bound_type"]
+        )
         intervals_df.index.name = 'date'
         return intervals_df
 

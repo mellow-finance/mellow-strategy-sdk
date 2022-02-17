@@ -1,5 +1,8 @@
-from strategy.strategies import AbstractStrategy
+"""
+TODO: write
+"""
 from typing import List, Hashable
+from strategy.strategies import AbstractStrategy
 
 
 class MultiStrategy(AbstractStrategy):
@@ -24,6 +27,7 @@ class MultiStrategy(AbstractStrategy):
             strategy: Any AbstractStrategy.
         """
         self.strategies[strategy.name] = strategy
+        # TODO: del return None
         return None
 
     def remove(self, name: str) -> None:
@@ -36,6 +40,7 @@ class MultiStrategy(AbstractStrategy):
         if name not in self.strategies:
             raise Exception(f'Invalid name = {name}')
         del self.strategies[name]
+        # TODO: del return None
         return None
 
     def rebalance(self, *args: list, **kwargs: dict) -> Hashable:

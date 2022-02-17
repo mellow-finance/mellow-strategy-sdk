@@ -1,9 +1,14 @@
+"""
+TODO write
+"""
+# TODO SyntheticData unused
+import warnings
+
 from strategy.data import SyntheticData, RawDataUniV3
 from strategy.backtest import Backtest
 from strategy.strategies import HStrategy
 from strategy.primitives import Pool, Token, Fee
 
-import warnings
 warnings.filterwarnings('ignore')
 
 
@@ -33,6 +38,7 @@ def evaluate():
     pool = Pool(Token.WBTC, Token.WETH, Fee.MIDDLE)
     data = RawDataUniV3(pool).load_from_folder()
     strat = init_strat(data, pool)
+    # TODO rebalance_history unused
     portfolio_history, rebalance_history, uni_history = Backtest(strat).backtest(data.swaps)
     metrics = portfolio_history.calculate_stats()
     print('Uni Coverage = ', uni_history.get_coverage(data.swaps))

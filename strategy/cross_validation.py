@@ -1,6 +1,10 @@
+"""
+    TODO: write
+"""
+
+from multiprocessing import Pool
 import numpy as np
 import pandas as pd
-from multiprocessing import Pool
 
 from strategy.backtest import Backtest
 
@@ -12,10 +16,7 @@ class FolderSimple:
     Attributes:
         n_folds: Number of folds.
    """
-    def __init__(self,
-                 n_folds: int = 5,
-                 ):
-
+    def __init__(self, n_folds: int = 5):
         self.n_folds = n_folds
         self.folds = None
         self.fold_names = None
@@ -41,7 +42,6 @@ class FolderSimple:
 
         self.folds = folds
         self.fold_names = list(folds.keys())
-        return None
 
     def get_fold(self, data, fold_name):
         """
@@ -111,6 +111,7 @@ class CrossValidation:
         #    folds_result[fold_name] = res
         return folds_result
 
+    # TODO: static method
     def aggregate(self, folds_result):
         """
         Aggregate backtesting results from folds
@@ -128,7 +129,6 @@ class CrossValidation:
 
         res_df = pd.DataFrame([res], index=['y_apy']).T
         return res_df
-
 
 # class FolderByTime:
 #     def __init__(self,

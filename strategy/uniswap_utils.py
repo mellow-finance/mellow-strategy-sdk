@@ -1,3 +1,6 @@
+"""
+TODO write
+"""
 import numpy as np
 
 
@@ -13,7 +16,7 @@ class UniswapLiquidityAligner:
     def __init__(self, lower_price, upper_price):
         self.lower_price = lower_price
         self.upper_price = upper_price
-        
+
     def real_price(self, price: float) -> float:
         """
         Args:
@@ -59,8 +62,8 @@ class UniswapLiquidityAligner:
             x_new = v_y / (price + price_real)
             y_new = price_real * x_new
         return x_new, y_new
-    
-    
+
+
 class UniswapV3Utils:
     """
     ``UniV3Utils`` is a class for creating UniswapV3 position in correct proportions.
@@ -157,6 +160,7 @@ class UniswapV2Utils:
             print(f'Warning fraction Uni = {res}')
         return res
 
+    # TODO static
     def calc_fraction_to_x(self, price, upper_price):
         """
         TODO:
@@ -167,7 +171,7 @@ class UniswapV2Utils:
         Returns:
 
         """
-        numer = np.sqrt(price) 
+        numer = np.sqrt(price)
         denom = 2 * np.sqrt(upper_price)
         res = numer / denom
         if res > 1:
@@ -176,6 +180,7 @@ class UniswapV2Utils:
             print(f'Warning fraction X = {res}')
         return res
 
+    # TODO static
     def calc_fraction_to_y(self, price, lower_price):
         """
         TODO:

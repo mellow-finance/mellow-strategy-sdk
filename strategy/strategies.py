@@ -1,10 +1,15 @@
+"""
+TODO: write
+"""
+from abc import ABC, abstractmethod
+import math
+
+import numpy as np
+
+# TODO: UniswapV2Utils unused
 from strategy.uniswap_utils import UniswapV3Utils, UniswapV2Utils, UniswapLiquidityAligner
 from strategy.positions import UniV3Position, BiCurrencyPosition
 from strategy.primitives import Pool
-
-from abc import ABC, abstractmethod
-import math
-import numpy as np
 
 
 class AbstractStrategy(ABC):
@@ -37,11 +42,14 @@ class AbstractStrategy(ABC):
 
 class HStrategy(AbstractStrategy):
     """
-    ``HUStrategy`` is the strategy for asset pair and UniswapV3 position. Strategy rebalances asset weights over time, and
-    Weights are calculated by the formula. Rebalancing occurs by a trigger.
+    ``HUStrategy`` is the strategy for asset pair and UniswapV3 position.
+    TODO вроде следущая строчка написана криво
+    Strategy rebalances asset weights over time, and weights are calculated by the formula.
+    Rebalancing occurs by a trigger.
 
     Attributes:
         mint_tolerance: The width of the interval of the small neighborhood of the tickspacing.
+        # TODO line to long
         burn_tolerance: Amount of ticks which it is necessary deviate from previous position to trigger rebalancing.
         grid_width: The width of tickspacing grid.
         width_num: The width of position interval.
@@ -88,7 +96,17 @@ class HStrategy(AbstractStrategy):
         self.prev_swap_tick = None
         self.prev_gain_date = None
 
+    # TODO args unused
     def prepare_data(self, *args, **kwargs):
+        """
+        TODO: write
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
         row = kwargs['row']
 
         price_before, price, price_next = row['price_before'], row['price'], row['price_next']
@@ -112,6 +130,15 @@ class HStrategy(AbstractStrategy):
         return output
 
     def rebalance(self, *args, **kwargs):
+        """
+        TODO write
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
         timestamp = kwargs['timestamp']
         portfolio = kwargs['portfolio']
         # prepare data for strategy
@@ -154,8 +181,13 @@ class HStrategy(AbstractStrategy):
         # if you could mint the position - mint uni position
         if len(portfolio.positions) < 2:
             if abs(params['current_tick'] - params['center_tick']) <= self.mint_tolerance:
-                self.create_uni_position(f'UniV3_{timestamp}', portfolio,
-                                         params['lower_price'], params['upper_price'], params['price'])
+                self.create_uni_position(
+                    f'UniV3_{timestamp}',
+                    portfolio,
+                    params['lower_price'],
+                    params['upper_price'],
+                    params['price']
+                )
                 self.previous_uni_tick = params['current_tick']
                 is_rebalanced = 'mint'
 
@@ -173,15 +205,37 @@ class HStrategy(AbstractStrategy):
             self.prev_gain_date = timestamp.normalize()
 
         return is_rebalanced
-
+    # TODO static
     def remove_last_uni_position(self, portfolio, price) -> None:
+        """
+        TODO write
+        Args:
+            portfolio:
+            price:
+
+        Returns:
+
+        """
         last_pos = portfolio.get_last_position()
         x_out, y_out = last_pos.withdraw(price)
         portfolio.remove(last_pos.name)
         portfolio.get_position('Vault').deposit(x_out, y_out)
+        # TODO del return None
         return None
 
     def create_uni_position(self, name, portfolio, lower_price, upper_price, price):
+        """
+        TODO write
+        Args:
+            name:
+            portfolio:
+            lower_price:
+            upper_price:
+            price:
+
+        Returns:
+
+        """
         uni_utils = UniswapV3Utils(self.lower_0, self.upper_0)
         fraction_uni = uni_utils.calc_fraction_to_uni(price, lower_price, upper_price)
 
@@ -190,21 +244,31 @@ class HStrategy(AbstractStrategy):
 
         uni_aligner = UniswapLiquidityAligner(lower_price, upper_price)
         x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(x_uni, y_uni,  price)
-        
+
         univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent, self.rebalance_cost)
         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
         portfolio.append(univ3_pos)
+        # TODO: del return None
         return None
-
+    # TODO вроде дубликат того что есть
     def _tick_to_price_(self, tick):
         price = np.power(1.0001, tick) / 10 ** self.decimal_diff
         return price
 
+    # TODO вроде дубликат того что есть
     def _price_to_tick_(self, price):
         tick = math.log(price, 1.0001) + self.decimal_diff * math.log(10, 1.0001)
         return int(round(tick))
 
     def _get_bounds_(self, current_tick):
+        """
+        TODO write
+        Args:
+            current_tick:
+
+        Returns:
+
+        """
         center_num = int(round(current_tick / self.grid_width))
         center_tick = self.grid_width * center_num
         tick_lower_bound = self.grid_width * (center_num - self.width_num)
@@ -240,6 +304,7 @@ class MStrategy(AbstractStrategy):
                  ):
         super().__init__(name)
         self.bicur_tolerance = bicur_tolerance
+        # TODO window_width выпилить из всех мест в функции
         # self.window_width = window_width
         self.lower_0 = lower_0
         self.upper_0 = upper_0
@@ -255,10 +320,12 @@ class MStrategy(AbstractStrategy):
         self.prev_gain_date = None
 
     def prepare_data(self, *args, **kwargs):
+        # TODO: посмотреть эту функцию чет здесь совсем грязно
         timestamp = kwargs['timestamp']
         row = kwargs['row']
+        # TODO  df_swaps_prev unused
         df_swaps_prev = kwargs['prev_data']
-
+        # TODO: price_next unused
         price, price_next = row['price'], row['price_next']
         current_tick = self._price_to_tick_(price)
 
@@ -277,6 +344,15 @@ class MStrategy(AbstractStrategy):
         return output
 
     def rebalance(self, *args, **kwargs):
+        """
+        TODO write
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
         timestamp = kwargs['timestamp']
         portfolio = kwargs['portfolio']
         # prepare data for strategy
@@ -302,7 +378,12 @@ class MStrategy(AbstractStrategy):
         if abs(self.prev_rebalance_tick - params['current_tick']) >= self.bicur_tolerance:
             fraction_x = self.calc_fraction_to_x(params['price'])
             fraction_y = 1 - fraction_x
-            if (0 <= fraction_x <= 1) and (0 <= fraction_y <= 1) and (abs(fraction_x + fraction_y - 1) <= 1e-6):
+            # TODO написать красиво, но не длинно
+            if (
+                    (0 <= fraction_x <= 1)
+                    and (0 <= fraction_y <= 1)
+                    and (abs(fraction_x + fraction_y - 1) <= 1e-6)
+            ):
                 vault = portfolio.get_position('Vault')
                 vault.rebalance(fraction_x, fraction_y, params['price'])
                 self.prev_rebalance_tick = params['current_tick']
@@ -325,6 +406,15 @@ class MStrategy(AbstractStrategy):
         return int(round(tick))
 
     def calc_fraction_to_x(self, price):
+        """
+        TODO: write
+        Args:
+            price:
+
+        Returns:
+
+        """
+        # TODO: del comments
         # numer = np.sqrt(price) - np.sqrt(self.upper_0)
         # denom = np.sqrt(self.lower_0) - np.sqrt(self.upper_0)
         # res = numer / denom
@@ -340,7 +430,8 @@ class MStrategy(AbstractStrategy):
 
 class LidoStrategy(AbstractStrategy):
     """
-    ``LidoStrategy`` is the strategy for wEth/stEth pair on UniswapV3. Strategy rebalances LP positions on UniswapV3.
+    ``LidoStrategy`` is the strategy for wEth/stEth pair on UniswapV3.
+    Strategy rebalances LP positions on UniswapV3.
      Rebalancing occurs by a trigger.
 
      Attributes:
@@ -367,7 +458,17 @@ class LidoStrategy(AbstractStrategy):
         self.previous_uni_left = None
         self.previous_uni_right = None
 
+    # TODO: args unused
     def prepare_data(self, *args, **kwargs):
+        """
+        TODO: write
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
         row = kwargs['row']
         # df_swaps_prev = kwargs['prev_data']
 
@@ -394,6 +495,15 @@ class LidoStrategy(AbstractStrategy):
         return output
 
     def rebalance(self, *args, **kwargs):
+        """
+        TODO write
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
         # prepare data for strategy
         timestamp = kwargs['timestamp']
         portfolio = kwargs['portfolio']
@@ -413,10 +523,20 @@ class LidoStrategy(AbstractStrategy):
                                             None)
             portfolio.append(bicurrency)
 
-            uni_left = self.create_uni_position(f'Uni_left_{timestamp}', eth_value, steth_value,
-                                                params['nearest_right_price'], params['upper_price'], params['price'])
+            uni_left = self.create_uni_position(
+                f'Uni_left_{timestamp}',
+                eth_value,
+                steth_value,
+                params['nearest_right_price'],
+                params['upper_price'],
+                params['price']
+            )
             portfolio.append(uni_left)
-            self.previous_uni_left = [params['nearest_tick_spacing'], params['tick_mid'], params['tick_upper_bound']]
+            self.previous_uni_left = [
+                params['nearest_tick_spacing'],
+                params['tick_mid'],
+                params['tick_upper_bound']
+            ]
 
         for name, pos in portfolio.positions.items():
             if 'Uni' in name:
@@ -427,10 +547,20 @@ class LidoStrategy(AbstractStrategy):
             if params['current_tick'] >= self.previous_uni_left[1]:
                 vault = portfolio.get_position('Vault')
                 x_uni, y_uni = vault.withdraw_fraction(1)
-                uni_right = self.create_uni_position(f'Uni_right_{timestamp}', x_uni, y_uni,
-                                                     params['nearest_right_price'], params['upper_price'], params['price'])
+                uni_right = self.create_uni_position(
+                    f'Uni_right_{timestamp}',
+                    x_uni,
+                    y_uni,
+                    params['nearest_right_price'],
+                    params['upper_price'],
+                    params['price']
+                )
                 portfolio.append(uni_right)
-                self.previous_uni_right = [params['nearest_tick_spacing'], params['tick_mid'], params['tick_upper_bound']]
+                self.previous_uni_right = [
+                    params['nearest_tick_spacing'],
+                    params['tick_mid'],
+                    params['tick_upper_bound']
+                ]
                 is_rebalanced = 'mint'
 
         # if  price deviated too much from previous uni position - burn uni position
@@ -443,8 +573,18 @@ class LidoStrategy(AbstractStrategy):
                 is_rebalanced = 'burn'
 
         return is_rebalanced
-
+    # TODO: static
     def remove_left_uni_position(self, portfolio, timestamp, price) -> tuple:
+        """
+        TODO: write
+        Args:
+            portfolio:
+            timestamp:
+            price:
+
+        Returns:
+
+        """
         position_names_list = portfolio.position_names()
 
         left_pos_name = [name for name in position_names_list if name.startswith('Uni_left')][0]
@@ -459,6 +599,19 @@ class LidoStrategy(AbstractStrategy):
         return x_out, y_out
 
     def create_uni_position(self, name, x_uni, y_uni, lower_price, upper_price, price):
+        """
+        TODO: write
+        Args:
+            name:
+            x_uni:
+            y_uni:
+            lower_price:
+            upper_price:
+            price:
+
+        Returns:
+
+        """
         uni_aligner = UniswapLiquidityAligner(lower_price, upper_price)
         x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(x_uni, y_uni, price)
 
@@ -466,10 +619,11 @@ class LidoStrategy(AbstractStrategy):
         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
         return univ3_pos
 
+    # TODO: static
     def _tick_to_price_(self, tick):
         price = np.power(1.0001, tick)
         return price
-
+    # TODO: static
     def _price_to_tick_(self, price):
         tick = math.log(price, 1.0001)
         return int(round(tick))
@@ -485,6 +639,15 @@ class LidoStrategy(AbstractStrategy):
         return left_bound, right_bound
 
     def _get_grid_(self, current_tick):
+        """
+        TODO: write
+        Args:
+            current_tick:
+
+        Returns:
+
+        """
+        # TODO left_bound unused
         left_bound, right_bound = self._tick_to_grid_(current_tick)
         # step = int(self.grid_width * self.interval_width_num / 2)
         upper_bound = right_bound + self.grid_width * self.interval_width_num
@@ -517,6 +680,16 @@ class UniV3Passive(AbstractStrategy):
         self.rebalance_cost = rebalance_cost
 
     def rebalance(self, *args, **kwargs) -> str:
+        """
+        TODO: write
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+
+        """
+        # TODO: timestamp unused
         timestamp = kwargs['timestamp']
         row = kwargs['row']
         portfolio = kwargs['portfolio']
@@ -536,9 +709,22 @@ class UniV3Passive(AbstractStrategy):
         return is_rebalanced
 
     def create_uni_position(self, price):
+        """
+        TODO: write
+        Args:
+            price:
+
+        Returns:
+
+        """
         uni_aligner = UniswapLiquidityAligner(self.lower_price, self.upper_price)
         x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(1 / price, 1, price)
-        univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
+        univ3_pos = UniV3Position(
+            'UniV3Passive',
+            self.lower_price,
+            self.upper_price,
+            self.fee_percent,
+            self.rebalance_cost
+        )
         univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
         return univ3_pos
-

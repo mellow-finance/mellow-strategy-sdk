@@ -1,3 +1,6 @@
+"""
+    TODO write
+"""
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -75,7 +78,11 @@ class PotrfolioViewer:
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to X", secondary_y=False)
         fig.update_yaxes(title_text='Earned fees to X', secondary_y=True)
-        fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token0.name}', width=900, height=500)
+        fig.update_layout(
+            title=f'Portfolio Value, Fees and IL in {self.pool.token0.name}',
+            width=900,
+            height=500
+        )
         return fig
 
     def draw_portfolio_to_y(self, portfolio_df: pd.DataFrame):
@@ -119,7 +126,11 @@ class PotrfolioViewer:
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="Value to Y", secondary_y=False)
         fig.update_yaxes(title_text='Earned fees to Y', secondary_y=True)
-        fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token1.name}', width=900, height=500)
+        fig.update_layout(
+            title=f'Portfolio Value, Fees and IL in {self.pool.token1.name}',
+            width=900,
+            height=500
+        )
         return fig
 
     def draw_performance_x(self, portfolio_df: pd.DataFrame):
@@ -141,7 +152,7 @@ class PotrfolioViewer:
                 name=f"Portfolio value in {self.pool.token0.name}",
             ),
             secondary_y=False)
-        
+
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'],
@@ -157,7 +168,7 @@ class PotrfolioViewer:
         fig.update_yaxes(title_text=f'APY in {self.pool.token0.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token0.name}')
         return fig
-    
+
     def draw_performance_y(self, portfolio_df: pd.DataFrame):
         """
         Plot portfolio performance in Y.
@@ -193,6 +204,14 @@ class PotrfolioViewer:
         return fig
 
     def draw_x_y(self, portfolio_df: pd.DataFrame):
+        """
+        TODO write
+        Args:
+            portfolio_df:
+
+        Returns:
+
+        """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
@@ -323,13 +342,14 @@ class UniswapViewer:
             up = pos_clear[(col_0, 'upper_bound')].to_numpy()
 
             batch = [go.Scatter(
-                name='Lower Bound ', # + str(col_0),
+                name='Lower Bound ',  # + str(col_0),
                 x=pos_clear.index,
                 y=up,
                 mode='lines',
                 marker=dict(color='blue'),
                 line=dict(width=1),
                 legendgroup='Interval',
+                # TODO i == positions_num lol
                 showlegend=(False if i != positions_num else True)
 
             ),
@@ -343,6 +363,7 @@ class UniswapViewer:
                     fillcolor='rgba(0, 0, 200, 0.1)',
                     fill='tonexty',
                     legendgroup='Interval',
+                    # TODO i == positions_num lol
                     showlegend=(False if i != positions_num else True)
                 )]
             fig.add_traces(batch)
@@ -395,6 +416,7 @@ class RebalanceViewer:
 
         events = rebalance_df['rebalanced'].unique()
         for event in events:
+            # TODO line too long
             rebalance_df_slice = swaps_df_slice.loc[rebalance_df.loc[rebalance_df['rebalanced'] == event].index]
 
             fig.add_trace(

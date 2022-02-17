@@ -1,10 +1,14 @@
+"""
+    TODO: write
+"""
 from enum import Enum
 from functools import total_ordering
 
 
 class Fee(Enum):
     """
-    ``Fee`` defines available fees for UniV3 pools. Currently 3 values are available: 0.05%, 0.3%, 1%.
+    ``Fee`` defines available fees for UniV3 pools.
+    Currently 3 values are available: 0.05%, 0.3%, 1%.
     The actual enum values are fee * 100_000, i.e. 0.05% enum value is integer 500.
     """
 
@@ -36,7 +40,8 @@ class Fee(Enum):
 @total_ordering
 class Token(Enum):
     """
-    ``Token`` represents one of mainnet tokens and contains some additional data line address and decimals.
+    ``Token`` represents one of mainnet tokens and contains some
+    additional data line address and decimals.
     This class is ordered according to token address. E.g. :code:`Token.WBTC < Token.USDC`.
     """
 
@@ -65,7 +70,7 @@ class Token(Enum):
             Decimals of the token.
         """
         return TOKEN_DETAILS[self.value]["decimals"]
-
+    # TODO: static
     def _is_valid_operand(self, other: 'Token') -> bool:
         """
         Checks if Token is valid.
@@ -133,8 +138,10 @@ class Pool:
 
     @property
     def decimals_diff(self) -> int:
+        # TODO: Difference between decimal places ``token0`` and ``token1``??
         """
-        Difference between ``token0`` and ``token1`` decimals. Used for conversion of price from `wei` to `eth`.
+        Difference between ``token0`` and ``token1`` decimals.
+        Used for conversion of price from `wei` to `eth`.
 
         Returns:
             Decimal difference between Tokens.

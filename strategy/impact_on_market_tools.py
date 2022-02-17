@@ -1,5 +1,8 @@
-import numpy as np
+"""
+ TODO: write
+"""
 from decimal import Decimal
+import numpy as np
 
 
 def price_after_swap_y_to_x(dy: float, liq: float, p_0: float) -> float:

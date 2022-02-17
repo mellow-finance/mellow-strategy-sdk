@@ -1,7 +1,11 @@
+"""
+TODO: write
+"""
 from typing import Tuple
 from abc import ABC, abstractmethod
-import numpy as np
 from datetime import datetime
+
+import numpy as np
 
 
 class AbstractPosition(ABC):
@@ -13,7 +17,7 @@ class AbstractPosition(ABC):
     """
     def __init__(self, name: str) -> None:
         self.name = name
-    
+
     def rename(self, new_name: str) -> None:
         """
         Rename position.
@@ -25,18 +29,51 @@ class AbstractPosition(ABC):
 
     @abstractmethod
     def to_x(self, price: float) -> float:
+        """
+        TODO: write
+        Args:
+            price:
+
+        Returns:
+
+        """
         raise Exception(NotImplemented)
 
     @abstractmethod
     def to_y(self, price: float) -> float:
+        """
+        TODO: write
+        Args:
+            price:
+
+        Returns:
+
+        """
         raise Exception(NotImplemented)
 
     @abstractmethod
     def to_xy(self, price: float) -> Tuple[float, float]:
+        """
+        TODO: write
+        Args:
+            price:
+
+        Returns:
+
+        """
         raise Exception(NotImplemented)
 
     @abstractmethod
     def snapshot(self, timestamp: datetime, price: float) -> dict:
+        """
+        TODO: write
+        Args:
+            timestamp:
+            price:
+
+        Returns:
+
+        """
         raise Exception(NotImplemented)
 
 
@@ -132,7 +169,8 @@ class BiCurrencyPosition(AbstractPosition):
         """
         assert 0 <= x_fraction <= 1, f'Incorrect Fraction X = {x_fraction}'
         assert 0 <= y_fraction <= 1, f'Incorrect Fraction Y = {y_fraction}'
-        assert abs(x_fraction + y_fraction - 1) <= 1e-6, f'Incorrect fractions {x_fraction}, {y_fraction}'
+        assert abs(x_fraction + y_fraction - 1) <= 1e-6, \
+            f'Incorrect fractions {x_fraction}, {y_fraction}'
 
         d_v = y_fraction * price * self.x - x_fraction * self.y
         if d_v > 0:
@@ -159,6 +197,7 @@ class BiCurrencyPosition(AbstractPosition):
         self.x *= (1 + self.x_interest) ** multiplier
         self.y *= (1 + self.x_interest) ** multiplier
         self.previous_gain = date
+        # TODO: del return None
         return None
 
     def to_x(self, price: float) -> float:
@@ -215,7 +254,7 @@ class BiCurrencyPosition(AbstractPosition):
         self.x -= dx
         self.y += price * (1 - self.swap_fee) * dx
         self.total_rebalance_costs += self.rebalance_cost
-
+        # TODO: del return None
         return None
 
     def swap_y_to_x(self, dy: float, price: float) -> None:
@@ -232,6 +271,8 @@ class BiCurrencyPosition(AbstractPosition):
         self.y -= dy
         self.x += (1 - self.swap_fee) * dy / price
         self.total_rebalance_costs += self.rebalance_cost
+
+        # TODO: del return None
         return None
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
@@ -255,7 +296,8 @@ class BiCurrencyPosition(AbstractPosition):
 class UniV3Position(AbstractPosition):
     """
     ``UniV3Position`` is a class corresponding to one investment into UniswapV3 interval.
-    It's defined by lower and upper bounds ``lower_price``, ``upper_price`` and  pool fee percent ``fee_percent``.
+    It's defined by lower and upper bounds ``lower_price``, ``upper_price``
+    and  pool fee percent ``fee_percent``.
 
     Attributes:
         name: Unique name for the position
@@ -305,6 +347,7 @@ class UniV3Position(AbstractPosition):
             price: Current price of X in Y currency.
         """
         self.mint(x, y, price)
+        # TODO: del return None
         return None
 
     def withdraw(self, price: float) -> Tuple[float, float]:

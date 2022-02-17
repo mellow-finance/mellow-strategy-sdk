@@ -1,7 +1,10 @@
-import numpy as np
-import pandas as pd
+"""
+    TODO: write
+"""
 from pathlib import Path
 from decimal import Decimal
+import numpy as np
+import pandas as pd
 
 from strategy.primitives import Pool, POOLS
 from utilities import get_db_connector, get_main_path
@@ -59,7 +62,9 @@ class RawDataUniV3:
             "amount0": int,
             "amount1": int,
         }
-        df_mint = pd.read_csv(f'{self.folder}mint_{self.pool.name}.csv', converters=mints_converters)
+        df_mint = pd.read_csv(
+            f'{self.folder}mint_{self.pool.name}.csv', converters=mints_converters
+        )
 
         burns_converts = {
             "block_time": int,
@@ -207,7 +212,6 @@ class DownloaderRawDataUniV3:
     def __init__(self):
         self.db_connection = get_db_connector()
         self.root = get_main_path()
-
 
     def _get_event(self, event: str, pool_address: str, file_name: Path):
         """
