@@ -50,14 +50,14 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_value_to_x'],
                 name=f"Portfolio value in {self.pool.token0.name}",
             ), secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_fees_to_x'],
                 name=f'Earned fees in {self.pool.token0.name}',
                 yaxis='y2',
@@ -66,7 +66,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_il_to_x'],
                 name=f"IL in {self.pool.token0.name}",
                 yaxis="y2"
@@ -92,7 +92,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_value_to_y'],
                 name=f"Portfolio value in {self.pool.token1.name}",
             ),
@@ -100,7 +100,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_fees_to_y'],
                 name=f'Earned fees in {self.pool.token1.name}',
                 yaxis='y2',
@@ -109,7 +109,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_il_to_y'],
                 name=f"IL in {self.pool.token1.name}",
                 yaxis="y2"
@@ -136,7 +136,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_value_to_x'],
                 name=f"Portfolio value in {self.pool.token0.name}",
             ),
@@ -144,7 +144,7 @@ class PotrfolioViewer:
         
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['portfolio_apy_x'],
                 name=f"APY in {self.pool.token0.name}",
                 yaxis="y2"
@@ -172,14 +172,14 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_value_to_y'],
                 name=f"Portfolio value in {self.pool.token1.name}",
             ), secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['portfolio_apy_y'],
                 name=f"APY in {self.pool.token1.name}",
                 yaxis="y2"
@@ -197,7 +197,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_value_x'],
                 name=f"Portfolio value in {self.pool.token0.name}",
             ),
@@ -205,7 +205,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=portfolio_df['timestamp'],
+                x=pd.to_datetime(portfolio_df['timestamp']),
                 y=portfolio_df['total_value_y'],
                 name=f'Portfolio value in {self.pool.token1.name}',
                 yaxis='y2',
