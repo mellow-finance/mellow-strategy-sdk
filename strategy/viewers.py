@@ -32,9 +32,9 @@ class PotrfolioViewer:
         fig3 = self.draw_performance_x(portfolio_df)
         fig4 = self.draw_performance_y(portfolio_df)
         fig5 = self.draw_x_y(portfolio_df)
-        # fig6 = self.draw_tvl_vs_hodl(portfolio_df)
+        fig6 = self.draw_value_vs_hold_y(portfolio_df)
         # fig7 = self.draw_apy_price_vs_portfolio(portfolio_df)
-        return fig1, fig2, fig3, fig4, fig5
+        return fig1, fig2, fig3, fig4, fig5, fig6
 
     def draw_portfolio_to_x(self, portfolio_df: pd.DataFrame):
         """
@@ -218,39 +218,39 @@ class PotrfolioViewer:
         fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, {self.pool.token1.name}')
         return fig
 
-    # def draw_tvl_vs_hodl(self, portfolio_df: pd.DataFrame):
-    #     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    #
-    #     fig.add_trace(
-    #         go.Scatter(
-    #             x=portfolio_df.index,
-    #             y=portfolio_df['portfolio_value_to_y'],
-    #             name=f"Portfolio total value in {self.pool.token1.name}",
-    #         ),
-    #         secondary_y=False)
-    #
-    #     fig.add_trace(
-    #         go.Scatter(
-    #             x=portfolio_df.index,
-    #             y=portfolio_df['bicurr_hold_to_y'],
-    #             name=f'HODL total value in {self.pool.token1.name}',
-    #         ),
-    #         secondary_y=False)
-    #
-    #     fig.add_trace(
-    #         go.Scatter(
-    #             x=portfolio_df.index,
-    #             y=portfolio_df['portfolio_value_to_y'] - portfolio_df['bicurr_hold_to_y'],
-    #             name=f'TVL - HODL in {self.pool.token1.name}',
-    #             yaxis='y2',
-    #         ),
-    #         secondary_y=False)
-    #
-    #     fig.update_xaxes(title_text="Timeline")
-    #     fig.update_yaxes(title_text="Value in Y", secondary_y=False)
-    #     fig.update_yaxes(title_text='Difference in Y', secondary_y=True)
-    #     fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, TVL VS HODL')
-    #     return fig
+    def draw_value_vs_hold_y(self, portfolio_df: pd.DataFrame):
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+
+        fig.add_trace(
+            go.Scatter(
+                x=pd.to_datetime(portfolio_df['timestamp']),
+                y=portfolio_df['total_value_to_y'],
+                name=f"Portfolio total value in {self.pool.token1.name}",
+            ),
+            secondary_y=False)
+
+        fig.add_trace(
+            go.Scatter(
+                x=pd.to_datetime(portfolio_df['timestamp']),
+                y=portfolio_df['hold_to_y'],
+                name=f'Hold total value in {self.pool.token1.name}',
+            ),
+            secondary_y=False)
+
+        fig.add_trace(
+            go.Scatter(
+                x=pd.to_datetime(portfolio_df['timestamp']),
+                y=portfolio_df['total_value_to_y'] - portfolio_df['hold_to_y'],
+                name=f'Value - Hold in {self.pool.token1.name}',
+                yaxis='y2',
+            ),
+            secondary_y=False)
+
+        fig.update_xaxes(title_text="Timeline")
+        fig.update_yaxes(title_text="Value in Y", secondary_y=False)
+        fig.update_yaxes(title_text='Difference in Y', secondary_y=True)
+        fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, Value VS Hold')
+        return fig
 
     # def draw_liquidity(self, portfolio_df):
     #     """

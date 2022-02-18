@@ -35,7 +35,7 @@ class PortfolioHistory:
         """
         log.info('Starting to construct dataframe', length=len(self.snapshots))
         df = pd.DataFrame(self.snapshots)
-        df2 = pl.from_pandas(df)
+        df2 = pl.from_pandas(df).sort(by=['timestamp'])
         return df2
 
     def calculate_values(self, df: pl.DataFrame) -> pl.DataFrame:
@@ -121,6 +121,8 @@ class PortfolioHistory:
             (pl.col('total_il_x') * pl.col('price') + pl.col('total_il_y')).alias('total_il_to_y'),
             (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price')).alias('hold_to_x'),
             (pl.col('total_value_x').first() * pl.col('price') + pl.col('total_value_y').first()).alias('hold_to_y'),
+            (pl.col('total_value_x') + pl.col('total_value_y') / pl.col('price').first()).alias('p0_value_to_x'),
+            (pl.col('total_value_x') * pl.col('price').first() + pl.col('total_value_y')).alias('p0_value_to_y'),
         ])
         return df_to
 
@@ -135,8 +137,7 @@ class PortfolioHistory:
             Portfolio returns data frame.
         """
         log.info('Starting to calculate portfolio returns')
-        df_returns = df.select(
-            [
+        df_returns = df.select([
                 (
                     pl.col('total_value_to_x') /
                     pl.col('total_value_to_x')
@@ -157,8 +158,17 @@ class PortfolioHistory:
                     pl.col('hold_to_y')
                     .shift_and_fill(1, pl.col('hold_to_y').first())
                 ).alias('hold_returns_y'),
-            ]
-        )
+                (
+                    pl.col('p0_value_to_x') /
+                    pl.col('p0_value_to_x')
+                    .shift_and_fill(1, pl.col('p0_value_to_x').first())
+                ).alias('vp0_returns_x'),
+                (
+                    pl.col('p0_value_to_y') /
+                    pl.col('p0_value_to_y')
+                    .shift_and_fill(1, pl.col('p0_value_to_y').first())
+                ).alias('vp0_returns_y'),
+        ])
         return df_returns
 
     def calculate_apy_for_col(self, df: pl.DataFrame, from_col: str, to_col: str) -> pl.DataFrame:
@@ -202,8 +212,10 @@ class PortfolioHistory:
         prt_y = self.calculate_apy_for_col(df_returns_ext, 'portfolio_returns_y', 'portfolio_apy_y')
         hld_x = self.calculate_apy_for_col(df_returns_ext, 'hold_returns_x', 'hold_apy_x')
         hld_y = self.calculate_apy_for_col(df_returns_ext, 'hold_returns_y', 'hold_apy_y')
+        vp0_x = self.calculate_apy_for_col(df_returns_ext, 'vp0_returns_x', 'vp0_apy_x')
+        vp0_y = self.calculate_apy_for_col(df_returns_ext, 'vp0_returns_y', 'vp0_apy_y')
 
-        return pl.concat([df_prep, df_to, df_returns, prt_x, prt_y, hld_x, hld_y], how='horizontal')
+        return pl.concat([df_prep, df_to, df_returns, prt_x, prt_y, hld_x, hld_y, vp0_x, vp0_y], how='horizontal')
 
 
 class RebalanceHistory:

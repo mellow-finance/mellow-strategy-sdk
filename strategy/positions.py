@@ -670,8 +670,8 @@ class UniV3Position(AbstractPosition):
         il_x, il_y = self.impermanent_loss(price)
 
         snapshot = {
-                f'{self.name}_value_x': x,
-                f'{self.name}_value_y': y,
+                f'{self.name}_value_x': x + self.fees_x,
+                f'{self.name}_value_y': y + self.fees_y,
 
                 f'{self.name}_fees_x': self.fees_x,
                 f'{self.name}_fees_y': self.fees_y,

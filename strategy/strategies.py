@@ -294,6 +294,7 @@ class MStrategy(AbstractStrategy):
                                             self.y_interest)
             portfolio.append(bicurrency)
             self.prev_rebalance_tick = params['current_tick']
+            is_rebalanced = 'init'
 
         if self.prev_rebalance_tick is None:
             vault = portfolio.get_position('Vault')
@@ -325,12 +326,12 @@ class MStrategy(AbstractStrategy):
         return int(round(tick))
 
     def calc_fraction_to_x(self, price):
-        # numer = np.sqrt(price) - np.sqrt(self.upper_0)
-        # denom = np.sqrt(self.lower_0) - np.sqrt(self.upper_0)
-        # res = numer / denom
-        numer = price - self.upper_0
-        denom = self.lower_0 - self.upper_0
+        numer = np.sqrt(price) - np.sqrt(self.upper_0)
+        denom = np.sqrt(self.lower_0) - np.sqrt(self.upper_0)
         res = numer / denom
+        # numer = price - self.upper_0
+        # denom = self.lower_0 - self.upper_0
+        # res = numer / denom
         if res > 1:
             print(f'Warning fraction Y = {res}')
         elif res < 0:
