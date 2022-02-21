@@ -44,15 +44,12 @@ class Backtest:
         rebalance_history = RebalanceHistory()
         uni_history = UniPositionsHistory()
 
-        for idx, row in df_swaps.iterrows():
+        for record in df_swaps.to_dicts():
             # df_swaps_prev = df_swaps[['price']][:idx]
-            '''FAST'''
-            df_swaps_prev = None
-
-            is_rebalanced = self.strategy.rebalance(timestamp=idx, row=row, prev_data=df_swaps_prev, portfolio=self.portfolio)
-            portfolio_snapshot = self.portfolio.snapshot(idx, row['price'])
+            is_rebalanced = self.strategy.rebalance(timestamp=record['timestamp'], row=record, prev_data=None, portfolio=self.portfolio)
+            portfolio_snapshot = self.portfolio.snapshot(record['timestamp'], record['price'])
             portfolio_history.add_snapshot(portfolio_snapshot)
-            rebalance_history.add_snapshot(idx, is_rebalanced)
-            uni_history.add_snapshot(idx, copy.copy(self.portfolio.positions))
+            rebalance_history.add_snapshot(record['timestamp'], is_rebalanced)
+            uni_history.add_snapshot(record['timestamp'], copy.copy(self.portfolio.positions))
 
         return portfolio_history, rebalance_history, uni_history

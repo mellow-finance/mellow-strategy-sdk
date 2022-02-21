@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+import polars as pl
 from pathlib import Path
 from decimal import Decimal
-
+from datetime import datetime
 from strategy.primitives import Pool, POOLS
 from utilities import get_db_connector, get_main_path
 
@@ -31,123 +32,233 @@ class PoolDataUniV3:
 
 
 class RawDataUniV3:
-    """
-     ``RawDataUniV3`` preprocess UniswapV3 data.
-
-     Attributes:
-        pool: UniswapV3 pool meta data.
-        folder: Path to data.
-     """
-    def __init__(self, pool: Pool, folder: Path = '../data/'):
+    def __init__(self, pool: Pool, dir: Path = '../data/'):
         self.pool = pool
-        self.folder = folder
+        self.dir = dir
+
+    def load_mints(self):
+        mints_converters = {
+            'pool': pl.Utf8,
+            'block_hash': pl.Utf8,
+            'tx_hash': pl.Utf8,
+            'sender': pl.Utf8,
+            'owner': pl.Utf8,
+            "block_time": pl.Int64,
+            "block_number": pl.Int64,
+            'log_index': pl.Int64,
+            "tick_lower": pl.Int64,
+            "tick_upper": pl.Int64,
+            "amount": pl.Float64,
+            "amount0": pl.Float64,
+            "amount1": pl.Float64,
+        }
+        df_mints = pl.read_csv(f'{self.dir}mint_{self.pool.name}.csv', dtypes=mints_converters)
+        df_prep = df_mints.select([
+            pl.col('tx_hash'),
+            pl.col('owner'),
+            pl.col('block_number'),
+            pl.col('log_index'),
+            (pl.col('block_time') * 1000 + pl.col('log_index')).alias('timestamp'),
+            pl.col('tick_lower'),
+            pl.col('tick_upper'),
+            pl.col('amount0') / 10 ** self.pool.token0.decimals,
+            pl.col('amount1') / 10 ** self.pool.token1.decimals,
+            (pl.col('amount') * 10 ** self.pool.decimals_diff).alias('liquidity'),
+        ]).sort(by=['block_number', 'log_index'])
+        return df_prep
+
+    def load_burns(self):
+        burns_converters = {
+            'pool': pl.Utf8,
+            'block_hash': pl.Utf8,
+            'tx_hash': pl.Utf8,
+            'owner': pl.Utf8,
+            "block_time": pl.Int64,
+            "block_number": pl.Int64,
+            'log_index': pl.Int64,
+            "tick_lower": pl.Int64,
+            "tick_upper": pl.Int64,
+            "amount": pl.Float64,
+            "amount0": pl.Float64,
+            "amount1": pl.Float64,
+        }
+        df_burns = pl.read_csv('../data/burn_WBTC_WETH_3000.csv', dtypes=burns_converters)
+        df_prep = df_burns.select([
+            pl.col('tx_hash'),
+            pl.col('owner'),
+            pl.col('block_number'),
+            pl.col('log_index'),
+            (pl.col('block_time') * 1000 + pl.col('log_index')).alias('timestamp'),
+            pl.col('tick_lower'),
+            pl.col('tick_upper'),
+            pl.col('amount0') / 10 ** self.pool.token0.decimals,
+            pl.col('amount1') / 10 ** self.pool.token1.decimals,
+            (pl.col('amount') * 10 ** self.pool.decimals_diff).alias('liquidity'),
+        ]).sort(by=['block_number', 'log_index'])
+        return df_prep
+
+    def load_swaps(self):
+        swaps_converters = {
+            'pool': pl.Utf8,
+            'block_hash': pl.Utf8,
+            'tx_hash': pl.Utf8,
+            'sender': pl.Utf8,
+            'recipient': pl.Utf8,
+            "block_time": pl.Int64,
+            "block_number": pl.Int64,
+            'log_index': pl.Int64,
+            "tick": pl.Int64,
+            "liquidity": pl.Float64,
+            "amount0": pl.Float64,
+            "amount1": pl.Float64,
+            'sqrt_price_x96': pl.Float64,
+        }
+        df_swaps = pl.read_csv('../data/swap_WBTC_WETH_3000.csv', dtypes=swaps_converters)
+        df_prep = df_swaps.select([
+            pl.col('tx_hash'),
+            pl.col('sender'),
+            pl.col('recipient'),
+            pl.col('block_number'),
+            pl.col('log_index'),
+            ((pl.col('block_time') * 1e3 + pl.col('log_index')) * 1e3).cast(pl.Datetime).alias('timestamp'),
+            pl.col('amount0') / 10 ** self.pool.token0.decimals,
+            pl.col('amount1') / 10 ** self.pool.token1.decimals,
+            (pl.col('liquidity') * 10 ** self.pool.decimals_diff),
+            pl.col('tick'),
+            pl.col('sqrt_price_x96')
+        ]).with_column(
+            pl.col("sqrt_price_x96").apply(
+                lambda x: float((Decimal(x) * Decimal(x)) / (Decimal(2 ** 192) / Decimal(10 ** self.pool.decimals_diff)))).alias('price')
+        ).with_column(
+            pl.col('price').shift_and_fill(1, pl.col('price').first()).alias('price_before')
+        ).sort(by=['block_number', 'log_index'])
+
+        return df_prep
 
     def load_from_folder(self) -> PoolDataUniV3:
-        """
-        Loads data: swaps, mint, burns from predefined folder.
-
-        Returns:
-            PoolDataUniV3 instance with loaded data.
-        """
-
-        mints_converters = {
-            "block_time": int,
-            "block_number": int,
-            "tick_lower": int,
-            "tick_upper": int,
-            "amount": int,
-            "amount0": int,
-            "amount1": int,
-        }
-        df_mint = pd.read_csv(f'{self.folder}mint_{self.pool.name}.csv', converters=mints_converters)
-
-        burns_converts = {
-            "block_time": int,
-            "block_number": int,
-            "tick_lower": int,
-            "tick_upper": int,
-            "amount": int,
-            "amount0": int,
-            "amount1": int,
-        }
-        df_burn = pd.read_csv(f'{self.folder}burn_{self.pool.name}.csv', converters=burns_converts)
-
-        swap_converters = {
-            "block_time": int,
-            "block_number": int,
-            "sqrt_price_x96": int,
-            "amount0": int,
-            "amount1": int,
-            "liquidity": int,
-        }
-        df_swap = pd.read_csv(f'{self.folder}swap_{self.pool.name}.csv', converters=swap_converters)
-
-        mints = self.preprocess_mints(df_mint)
-        burns = self.preprocess_burns(df_burn)
-        swaps = self.preprocess_swaps(df_swap)
+        mints = self.load_mints()
+        burns = self.load_burns()
+        swaps = self.load_swaps()
         return PoolDataUniV3(self.pool, mints, burns, swaps)
 
-    def preprocess_mints(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Preprocess UniswapV3 mints data.
-
-        Args:
-            df: Mints data frame.
-
-        Returns:
-            Preprocessed mints data frame.
-        """
-        df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
-        df = df.set_index('timestamp')
-        df = df.sort_values(by=['timestamp'])
-        df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
-        df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
-        df['amount'] = df['amount'] / 10**(-self.pool.decimals_diff)
-        return df
-
-    def preprocess_burns(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Preprocess UniswapV3 burns data.
-
-        Args:
-            df: Burns data frame.
-
-        Returns:
-            Preprocessed burns data frame.
-        """
-        df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
-        df = df.set_index('timestamp')
-        df = df.sort_values(by=['timestamp'])
-        df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
-        df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
-        df['amount'] = df['amount'] / 10**(-self.pool.decimals_diff)
-        return df
-
-    def preprocess_swaps(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Preprocess UniswapV3 swap data.
-
-        Args:
-            df: Swaps data frame.
-
-        Returns:
-            Preprocessed swap data frame.
-        """
-
-        df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
-        df['timestamp'] = df['timestamp'] + pd.to_timedelta(df['log_index'], unit='ns')
-        df = df.sort_values(by='timestamp', ascending=True)
-        df = df.set_index('timestamp')
-        df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
-        df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
-        df['liquidity'] = df['liquidity'] / 10**(-self.pool.decimals_diff)
-
-        df["price"] = df["sqrt_price_x96"].transform(
-                lambda x: float(Decimal(x) * Decimal(x) / (Decimal(2 ** 192) * Decimal(10 ** (-self.pool.decimals_diff))))
-                        )
-        df["price_before"] = df["price"].shift(1).bfill()
-        df["price_next"] = df["price"].shift(-1).ffill()
-        return df
+# class RawDataUniV:
+#     """
+#      ``RawDataUniV3`` preprocess UniswapV3 data.
+#
+#      Attributes:
+#         pool: UniswapV3 pool meta data.
+#         folder: Path to data.
+#      """
+#     def __init__(self, pool: Pool, folder: Path = '../data/'):
+#         self.pool = pool
+#         self.folder = folder
+#
+#     def load_from_folder(self) -> PoolDataUniV3:
+#         """
+#         Loads data: swaps, mint, burns from predefined folder.
+#
+#         Returns:
+#             PoolDataUniV3 instance with loaded data.
+#         """
+#
+#         mints_converters = {
+#             "block_time": int,
+#             "block_number": int,
+#             "tick_lower": int,
+#             "tick_upper": int,
+#             "amount": int,
+#             "amount0": int,
+#             "amount1": int,
+#         }
+#         df_mint = pd.read_csv(f'{self.folder}mint_{self.pool.name}.csv', converters=mints_converters)
+#
+#         burns_converts = {
+#             "block_time": int,
+#             "block_number": int,
+#             "tick_lower": int,
+#             "tick_upper": int,
+#             "amount": int,
+#             "amount0": int,
+#             "amount1": int,
+#         }
+#         df_burn = pd.read_csv(f'{self.folder}burn_{self.pool.name}.csv', converters=burns_converts)
+#
+#         swap_converters = {
+#             "block_time": int,
+#             "block_number": int,
+#             "sqrt_price_x96": int,
+#             "amount0": int,
+#             "amount1": int,
+#             "liquidity": int,
+#         }
+#         df_swap = pd.read_csv(f'{self.folder}swap_{self.pool.name}.csv', converters=swap_converters)
+#
+#         mints = self.preprocess_mints(df_mint)
+#         burns = self.preprocess_burns(df_burn)
+#         swaps = self.preprocess_swaps(df_swap)
+#         return PoolDataUniV3(self.pool, mints, burns, swaps)
+#
+#     def preprocess_mints(self, df: pd.DataFrame) -> pd.DataFrame:
+#         """
+#         Preprocess UniswapV3 mints data.
+#
+#         Args:
+#             df: Mints data frame.
+#
+#         Returns:
+#             Preprocessed mints data frame.
+#         """
+#         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
+#         df = df.set_index('timestamp')
+#         df = df.sort_values(by=['timestamp'])
+#         df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
+#         df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
+#         df['amount'] = df['amount'] / 10**(-self.pool.decimals_diff)
+#         return df
+#
+#     def preprocess_burns(self, df: pd.DataFrame) -> pd.DataFrame:
+#         """
+#         Preprocess UniswapV3 burns data.
+#
+#         Args:
+#             df: Burns data frame.
+#
+#         Returns:
+#             Preprocessed burns data frame.
+#         """
+#         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
+#         df = df.set_index('timestamp')
+#         df = df.sort_values(by=['timestamp'])
+#         df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
+#         df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
+#         df['amount'] = df['amount'] / 10**(-self.pool.decimals_diff)
+#         return df
+#
+#     def preprocess_swaps(self, df: pd.DataFrame) -> pd.DataFrame:
+#         """
+#         Preprocess UniswapV3 swap data.
+#
+#         Args:
+#             df: Swaps data frame.
+#
+#         Returns:
+#             Preprocessed swap data frame.
+#         """
+#
+#         df['timestamp'] = pd.to_datetime(df["block_time"], unit="s")
+#         df['timestamp'] = df['timestamp'] + pd.to_timedelta(df['log_index'], unit='ns')
+#         df = df.sort_values(by='timestamp', ascending=True)
+#         df = df.set_index('timestamp')
+#         df['amount0'] = df['amount0'] / 10**self.pool.token0.decimals
+#         df['amount1'] = df['amount1'] / 10**self.pool.token1.decimals
+#         df['liquidity'] = df['liquidity'] / 10**(-self.pool.decimals_diff)
+#
+#         df["price"] = df["sqrt_price_x96"].transform(
+#                 lambda x: float(Decimal(x) * Decimal(x) / (Decimal(2 ** 192) * Decimal(10 ** (-self.pool.decimals_diff))))
+#                         )
+#         df["price_before"] = df["price"].shift(1).bfill()
+#         df["price_next"] = df["price"].shift(-1).ffill()
+#         return df
 
 
 class SyntheticData:

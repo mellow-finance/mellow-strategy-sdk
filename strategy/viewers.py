@@ -1,4 +1,5 @@
 import pandas as pd
+import polars as pl
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -380,33 +381,31 @@ class RebalanceViewer:
         Returns: Plot with portfolio rabalances
         """
         rebalance_df = self.rebalance_history.to_df()
-        swaps_df_slice = swaps_df.loc[rebalance_df.index]
-
-        rebalance_df = rebalance_df.dropna()
+        swaps_df_slice = swaps_df[['timestamp', 'price']].join(rebalance_df, on='timestamp')
 
         fig = go.Figure()
         fig.add_trace(
                     go.Scatter(
-                        x=swaps_df_slice.index,
-                        y=swaps_df_slice['price'],
+                        x=swaps_df['timestamp'].to_list(),
+                        y=swaps_df['price'],
                         name="Price",
                         )
                     )
 
-        events = rebalance_df['rebalanced'].unique()
+        events = rebalance_df['rebalance'].unique()
         for event in events:
-            rebalance_df_slice = swaps_df_slice.loc[rebalance_df.loc[rebalance_df['rebalanced'] == event].index]
+            rebalance_df_slice = swaps_df_slice.filter(pl.col('rebalance') == event)
 
             fig.add_trace(
                         go.Scatter(
-                            x=rebalance_df_slice.index,
+                            x=rebalance_df_slice['timestamp'].to_list(),
                             y=rebalance_df_slice['price'],
                             mode='markers',
                             # marker_color='red',
                             marker_size=7,
                             marker_symbol='circle-open',
                             marker_line_width=2,
-                            name=f"Rebalances {event}",
+                            name=f"{event}",
                             )
                         )
         fig.update_xaxes(title_text="Timeline")

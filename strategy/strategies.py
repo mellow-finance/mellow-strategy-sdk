@@ -91,7 +91,7 @@ class HStrategy(AbstractStrategy):
     def prepare_data(self, *args, **kwargs):
         row = kwargs['row']
 
-        price_before, price, price_next = row['price_before'], row['price'], row['price_next']
+        price_before, price = row['price_before'], row['price']
         current_tick = self._price_to_tick_(price)
 
         lower_tick, center_tick, upper_tick = self._get_bounds_(current_tick)
@@ -102,7 +102,7 @@ class HStrategy(AbstractStrategy):
         output = {
             'price': price,
             'price_before': price_before,
-            'price_next': price_next,
+            # 'price_next': price_next,
             'center_tick': center_tick,
             'center_price': center_price,
             'lower_price': lower_price,
@@ -165,12 +165,12 @@ class HStrategy(AbstractStrategy):
                 pos.charge_fees(params['price_before'], params['price'])
 
         if self.prev_gain_date is None:
-            self.prev_gain_date = timestamp.normalize()
+            self.prev_gain_date = timestamp.date()
 
-        if timestamp.normalize() > self.prev_gain_date:
+        if timestamp.date() > self.prev_gain_date:
             vault = portfolio.get_position('Vault')
-            vault.interest_gain(timestamp.normalize())
-            self.prev_gain_date = timestamp.normalize()
+            vault.interest_gain(timestamp.date())
+            self.prev_gain_date = timestamp.date()
 
         return is_rebalanced
 
@@ -259,7 +259,7 @@ class MStrategy(AbstractStrategy):
         row = kwargs['row']
         df_swaps_prev = kwargs['prev_data']
 
-        price, price_next = row['price'], row['price_next']
+        price = row['price']
         current_tick = self._price_to_tick_(price)
 
         # mean_price_df = df_swaps_prev[-5 * self.window_width:].resample(f'{self.window_width}min')['price'].mean().ffill()
@@ -312,12 +312,12 @@ class MStrategy(AbstractStrategy):
             #     print(f'Incorrect rebalance weights x={fraction_x}, y={fraction_y}')
 
         if self.prev_gain_date is None:
-            self.prev_gain_date = timestamp.normalize()
+            self.prev_gain_date = timestamp.date()
 
-        if timestamp.normalize() > self.prev_gain_date:
+        if timestamp.date() > self.prev_gain_date:
             vault = portfolio.get_position('Vault')
-            vault.interest_gain(timestamp.normalize())
-            self.prev_gain_date = timestamp.normalize()
+            vault.interest_gain(timestamp.date())
+            self.prev_gain_date = timestamp.date()
 
         return is_rebalanced
 
