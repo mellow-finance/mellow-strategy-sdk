@@ -58,13 +58,15 @@ class RawDataUniV3:
             pl.col('owner'),
             pl.col('block_number'),
             pl.col('log_index'),
-            (pl.col('block_time') * 1000 + pl.col('log_index')).alias('timestamp'),
+            ((pl.col('block_time') * 1e3 + pl.col('log_index')) * 1e3).cast(pl.Datetime).alias('timestamp'),
             pl.col('tick_lower'),
             pl.col('tick_upper'),
             pl.col('amount0') / 10 ** self.pool.token0.decimals,
             pl.col('amount1') / 10 ** self.pool.token1.decimals,
             (pl.col('amount') * 10 ** self.pool.decimals_diff).alias('liquidity'),
-        ]).sort(by=['block_number', 'log_index'])
+        ]).with_column(
+            pl.col('timestamp').dt.truncate("1d").alias('date')
+        ).sort(by=['block_number', 'log_index'])
         return df_prep
 
     def load_burns(self):
@@ -82,19 +84,21 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        df_burns = pl.read_csv('../data/burn_WBTC_WETH_3000.csv', dtypes=burns_converters)
+        df_burns = pl.read_csv(f'{self.dir}burn_{self.pool.name}.csv', dtypes=burns_converters)
         df_prep = df_burns.select([
             pl.col('tx_hash'),
             pl.col('owner'),
             pl.col('block_number'),
             pl.col('log_index'),
-            (pl.col('block_time') * 1000 + pl.col('log_index')).alias('timestamp'),
+            ((pl.col('block_time') * 1e3 + pl.col('log_index')) * 1e3).cast(pl.Datetime).alias('timestamp'),
             pl.col('tick_lower'),
             pl.col('tick_upper'),
             pl.col('amount0') / 10 ** self.pool.token0.decimals,
             pl.col('amount1') / 10 ** self.pool.token1.decimals,
             (pl.col('amount') * 10 ** self.pool.decimals_diff).alias('liquidity'),
-        ]).sort(by=['block_number', 'log_index'])
+        ]).with_column(
+            pl.col('timestamp').dt.truncate("1d").alias('date')
+        ).sort(by=['block_number', 'log_index'])
         return df_prep
 
     def load_swaps(self):
@@ -113,7 +117,7 @@ class RawDataUniV3:
             "amount1": pl.Float64,
             'sqrt_price_x96': pl.Float64,
         }
-        df_swaps = pl.read_csv('../data/swap_WBTC_WETH_3000.csv', dtypes=swaps_converters)
+        df_swaps = pl.read_csv(f'{self.dir}swap_{self.pool.name}.csv', dtypes=swaps_converters)
         df_prep = df_swaps.select([
             pl.col('tx_hash'),
             pl.col('sender'),
@@ -127,6 +131,8 @@ class RawDataUniV3:
             pl.col('tick'),
             pl.col('sqrt_price_x96')
         ]).with_column(
+            pl.col('timestamp').dt.truncate("1d").alias('date')
+        ).with_column(
             pl.col("sqrt_price_x96").apply(
                 lambda x: float((Decimal(x) * Decimal(x)) / (Decimal(2 ** 192) / Decimal(10 ** self.pool.decimals_diff)))).alias('price')
         ).with_column(

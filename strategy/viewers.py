@@ -1,5 +1,6 @@
 import pandas as pd
 import polars as pl
+import datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -16,9 +17,10 @@ class PotrfolioViewer:
         portfolio_history: Portfolio history instance.
         pool: UniV3 pool meta information.
     """
-    def __init__(self, portfolio_history: PortfolioHistory, pool: Pool):
+    def __init__(self, portfolio_history: PortfolioHistory, pool: Pool, offset: int = 30):
         self.portfolio_history = portfolio_history
         self.pool = pool
+        self.offset = offset
 
     def draw_portfolio(self):
         """
@@ -28,12 +30,16 @@ class PotrfolioViewer:
             Portfolio visualization.
         """
         portfolio_df = self.portfolio_history.calculate_stats()
-        fig1 = self.draw_portfolio_to_x(portfolio_df)
-        fig2 = self.draw_portfolio_to_y(portfolio_df)
-        fig3 = self.draw_performance_x(portfolio_df)
-        fig4 = self.draw_performance_y(portfolio_df)
-        fig5 = self.draw_x_y(portfolio_df)
-        fig6 = self.draw_value_vs_hold_y(portfolio_df)
+        delta = datetime.timedelta(days=self.offset)
+        start_date = portfolio_df['timestamp'][0] + delta
+        portfolio_df_offset = portfolio_df.filter(pl.col('timestamp') >= start_date)
+
+        fig1 = self.draw_portfolio_to_x(portfolio_df_offset)
+        fig2 = self.draw_portfolio_to_y(portfolio_df_offset)
+        fig3 = self.draw_performance_x(portfolio_df_offset)
+        fig4 = self.draw_performance_y(portfolio_df_offset)
+        fig5 = self.draw_x_y(portfolio_df_offset)
+        fig6 = self.draw_value_vs_hold_y(portfolio_df_offset)
         # fig7 = self.draw_apy_price_vs_portfolio(portfolio_df)
         return fig1, fig2, fig3, fig4, fig5, fig6
 
@@ -51,14 +57,14 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_x'],
                 name=f"Portfolio value in {self.pool.token0.name}",
             ), secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_fees_to_x'],
                 name=f'Earned fees in {self.pool.token0.name}',
                 yaxis='y2',
@@ -67,7 +73,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_il_to_x'],
                 name=f"IL in {self.pool.token0.name}",
                 yaxis="y2"
@@ -93,7 +99,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_y'],
                 name=f"Portfolio value in {self.pool.token1.name}",
             ),
@@ -101,7 +107,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_fees_to_y'],
                 name=f'Earned fees in {self.pool.token1.name}',
                 yaxis='y2',
@@ -110,7 +116,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_il_to_y'],
                 name=f"IL in {self.pool.token1.name}",
                 yaxis="y2"
@@ -134,10 +140,9 @@ class PotrfolioViewer:
             Portfolio plot with value and apy.
         """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
-
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_x'],
                 name=f"Portfolio value in {self.pool.token0.name}",
             ),
@@ -145,7 +150,7 @@ class PotrfolioViewer:
         
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['portfolio_apy_x'],
                 name=f"APY in {self.pool.token0.name}",
                 yaxis="y2"
@@ -173,14 +178,14 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_y'],
                 name=f"Portfolio value in {self.pool.token1.name}",
             ), secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['portfolio_apy_y'],
                 name=f"APY in {self.pool.token1.name}",
                 yaxis="y2"
@@ -198,7 +203,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_x'],
                 name=f"Portfolio value in {self.pool.token0.name}",
             ),
@@ -206,7 +211,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_y'],
                 name=f'Portfolio value in {self.pool.token1.name}',
                 yaxis='y2',
@@ -224,7 +229,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_y'],
                 name=f"Portfolio total value in {self.pool.token1.name}",
             ),
@@ -232,7 +237,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['hold_to_y'],
                 name=f'Hold total value in {self.pool.token1.name}',
             ),
@@ -240,7 +245,7 @@ class PotrfolioViewer:
 
         fig.add_trace(
             go.Scatter(
-                x=pd.to_datetime(portfolio_df['timestamp']),
+                x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_y'] - portfolio_df['hold_to_y'],
                 name=f'Value - Hold in {self.pool.token1.name}',
                 yaxis='y2',
@@ -427,26 +432,38 @@ class LiquidityViewer:
         Returns:
             Plot with Pool liquidity.
         """
-        spot_prices = self.pool.swaps[['price']].resample('D').mean()
-        daily_mints = self.pool.mints[['amount']].resample('D').sum()
-        daily_burns = self.pool.burns[['amount']].resample('D').sum()
-        daily_liq = daily_mints - daily_burns
-        total_liq = daily_liq.cumsum()
+        spot_prices = self.pool.swaps.groupby('date').agg([
+            pl.col('price').mean().alias('price')
+        ]).sort(by='date')
+
+        daily_mints = self.pool.mints.groupby('date').agg([
+            pl.col('liquidity').sum().alias('mint')
+        ]).sort(by='date')
+
+        daily_burns = self.pool.burns.groupby('date').agg([
+            pl.col('liquidity').sum().alias('burn')
+        ]).sort(by='date')
+
+        df1 = daily_mints.join(daily_burns, on=['date'], how='outer').fill_null(0)
+        df2 = spot_prices.join(df1, on=['date'], how='outer').fill_null(0)
+        df3 = df2.with_column(
+            (pl.col('mint') - pl.col('burn')).cumsum().alias('liq')
+        )
 
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
             go.Scatter(
-                x=spot_prices.index,
-                y=spot_prices['price'],
+                x=df3['timestamp'],
+                y=df3['price'],
                 name="Price",
             ),
             secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
-                x=total_liq.index,
-                y=total_liq['amount'],
+                x=df3[''],
+                y=df3['amount'],
                 name='Liquidity',
                 yaxis='y2',
 
