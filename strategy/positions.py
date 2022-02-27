@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 from datetime import datetime
 
+from strategy.uniswap_utils import UniswapLiquidityAligner
+
 
 class AbstractPosition(ABC):
     """
@@ -295,6 +297,8 @@ class UniV3Position(AbstractPosition):
         self.fees_y = 0
         self._fees_y_earned_ = 0
 
+        self.aligner = UniswapLiquidityAligner(self.lower_price, self.upper_price)
+
     def deposit(self, x: float, y: float, price: float) -> None:
         """
         Deposit X and Y to position.
@@ -489,10 +493,8 @@ class UniV3Position(AbstractPosition):
     def to_x(self, price: float) -> float:
         """
         Get value of UniswapV3 position expessed in X.
-
         Args:
             price: Current price of X in Y currency.
-
         Returns:
             Total value of uniswapV3 position expessed in X.
         """
@@ -505,10 +507,8 @@ class UniV3Position(AbstractPosition):
     def to_y(self, price: float) -> float:
         """
         Get value of UniswapV3 position expessed in Y.
-
         Args:
             price: Current price of X in Y currency.
-
         Returns:
             Total value of UniswapV3 position expessed in Y.
         """
@@ -521,10 +521,8 @@ class UniV3Position(AbstractPosition):
     def to_xy(self, price) -> Tuple[float, float]:
         """
         Get values of position in X and Y.
-
         Args:
             price: Current price of X in Y currency.
-
         Returns:
             Position value to X and Y.
         """
@@ -536,10 +534,8 @@ class UniV3Position(AbstractPosition):
     def _adj_price_(self, price: float) -> float:
         """
         Get adjusted price of current price and UniswapV3 interval boundaries.
-
         Args:
             price: current price of X in Y currency.
-
         Returns:
             Adjusted price.
         """
@@ -548,111 +544,37 @@ class UniV3Position(AbstractPosition):
         adj_price = min(max(self.lower_price, price), self.upper_price)
         return adj_price
 
-    def _x_to_liq_(self, x: float, price: float) -> float:
-        """
-        Transform X to liquidity.
-
-        Args:
-            x: Value of X.
-            price: Current price of X in Y currency.
-
-        Returns:
-            Resulting liquidity.
-        """
-        if self.upper_price <= price:
-            return np.inf
-        sqrt_price = np.sqrt(price)
-        l_x = (x * sqrt_price * self.sqrt_upper) / (self.sqrt_upper - sqrt_price)
-        return l_x
-
-    def _y_to_liq_(self, y: float, price: float) -> float:
-        """
-        Transform Y to liquidity.
-
-        Args:
-            y: Value of Y.
-            price: Current price of X in Y currency.
-
-        Returns:
-            Resulting liquidity.
-        """
-        if self.lower_price >= price:
-            return np.inf
-        sqrt_price = np.sqrt(price)
-        l_y = y / (sqrt_price - self.sqrt_lower)
-        return l_y
-
     def _xy_to_liq_(self, x: float, y: float, price: float) -> float:
         """
         Transform X and Y to liquidity.
-
         Args:
             x: Value of X.
             y: Value of Y.
             price: Current price of X in Y currency.
-
         Returns:
             Resulting liquidity.
         """
-        adj_price = self._adj_price_(price)
-        x_liq = self._x_to_liq_(x, adj_price)
-        y_liq = self._y_to_liq_(y, adj_price)
-        assert (x_liq >= 0) & (y_liq >= 0), f'Lx or Ly less then 0: Lx={x_liq}, Ly={y_liq}'
-        if np.isinf(x_liq):
-            return y_liq
-        elif np.isinf(y_liq):
-            return x_liq
+        # TODO: раньше в этой функции была то ли бага то ли фича, если x>0, y>0 и price вне [price_lower, price_upper]
+        #  никакого assert не вылетало хотя по логике должно вылетать, щас будет вылетать
+
+        is_optimal, x_liq, y_liq = self.aligner.check_xy_is_optimal(x=x, y=y, price=price)
+
         assert abs(x_liq - y_liq) < 1e-6, f'Lx != Ly: Lx={x_liq}, Ly={y_liq}'
-        liq = min(x_liq, y_liq)
+
+        liq = self.aligner.xy_to_optimal_liq(x=x, y=y, price=price)
+
         return liq
-
-    def _liq_to_x_(self, liq: float, price: float) -> float:
-        """
-        Transform liquidity to X.
-
-        Args:
-            liq: Value of liq.
-            price: Current price of X in Y currency.
-
-        Returns:
-            Value of X.
-        """
-        adj_price = self._adj_price_(price)
-        sqrt_price = np.sqrt(adj_price)
-        numer = self.sqrt_upper - sqrt_price
-        denom = self.sqrt_upper * sqrt_price
-        x = liq * numer / denom
-        return x
-
-    def _liq_to_y_(self, liq: float, price: float) -> float:
-        """
-        Transform liquidity to Y.
-
-        Args:
-            liq: Value of liq.
-            price: Current price of X in Y currency.
-
-        Returns:
-            Value of Y.
-        """
-        adj_price = self._adj_price_(price)
-        sqrt_price = np.sqrt(adj_price)
-        y = liq * (sqrt_price - self.sqrt_lower)
-        return y
 
     def _liq_to_xy_(self, liq: float, price: float) -> Tuple[float, float]:
         """
-        Transform liquidity to X, Y pair.
-
+        Transform liquidity to optimal X, Y pair.
         Args:
-            liq: Value of liq.
+            liq: amount of liquidity.
             price: Current price of X in Y currency.
-
         Returns:
-            Value of X and Y.
+            amount of X and Y.
         """
-        x = self._liq_to_x_(liq, price)
-        y = self._liq_to_y_(liq, price)
+        x, y = self.aligner.liq_to_optimal_xy(price=price, liquidity=liq)
         return x, y
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:

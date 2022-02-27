@@ -1,7 +1,11 @@
+import sys
+sys.path.append('..')
+
 from strategy.data import SyntheticData, RawDataUniV3
 from strategy.backtest import Backtest
 from strategy.strategies import HStrategy
 from strategy.primitives import Pool, Token, Fee
+
 
 import warnings
 warnings.filterwarnings('ignore')

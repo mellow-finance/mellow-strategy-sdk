@@ -6,6 +6,7 @@ from decimal import Decimal
 from datetime import datetime
 from strategy.primitives import Pool, POOLS
 from utilities import get_db_connector, get_main_path
+import polars as pl
 
 
 class PoolDataUniV3:
@@ -313,7 +314,9 @@ class SyntheticData:
 
         df["price_next"] = df["price"].shift(-1)
         df["price_next"] = df["price_next"].ffill()
-        
+
+        df = pl.from_pandas(df.reset_index())
+
         return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df)
 
 
