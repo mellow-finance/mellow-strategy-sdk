@@ -42,7 +42,7 @@ class PortfolioHistory:
         """
         log.info('Starting to construct dataframe', length=len(self.snapshots))
         df = pd.DataFrame(self.snapshots)
-        df2 = pl.from_pandas(df)
+        df2 = pl.from_pandas(df).sort(by=['timestamp'])
         return df2
 
     # TODO: static method
@@ -132,6 +132,10 @@ class PortfolioHistory:
             (pl.col('total_il_x') * pl.col('price') + pl.col('total_il_y')).alias('total_il_to_y'),
             (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price')).alias('hold_to_x'),
             (pl.col('total_value_x').first() * pl.col('price') + pl.col('total_value_y').first()).alias('hold_to_y'),
+            (pl.col('total_value_x') + pl.col('total_value_y') / pl.col('price').first()).alias('vp0_value_to_x'),
+            (pl.col('total_value_x') * pl.col('price').first() + pl.col('total_value_y')).alias('vp0_value_to_y'),
+            (pl.col('total_value_x') + pl.col('total_value_y') / pl.col('price').last()).alias('vpn_value_to_x'),
+            (pl.col('total_value_x') * pl.col('price').last() + pl.col('total_value_y')).alias('vpn_value_to_y'),
         ])
         return df_to
 
@@ -147,30 +151,32 @@ class PortfolioHistory:
             Portfolio returns data frame.
         """
         log.info('Starting to calculate portfolio returns')
-        df_returns = df.select(
-            [
+        df_returns = df.select([
                 (
                     pl.col('total_value_to_x') /
-                    pl.col('total_value_to_x')
-                    .shift_and_fill(1, pl.col('total_value_to_x').first())
+                    pl.col('total_value_to_x').shift_and_fill(1, pl.col('total_value_to_x').first())
                 ).alias('portfolio_returns_x'),
                 (
                     pl.col('total_value_to_y') /
-                    pl.col('total_value_to_y')
-                    .shift_and_fill(1, pl.col('total_value_to_y').first())
+                    pl.col('total_value_to_y').shift_and_fill(1, pl.col('total_value_to_y').first())
                 ).alias('portfolio_returns_y'),
                 (
                     pl.col('hold_to_x') /
-                    pl.col('hold_to_x')
-                    .shift_and_fill(1, pl.col('hold_to_x').first())
+                    pl.col('hold_to_x').shift_and_fill(1, pl.col('hold_to_x').first())
                 ).alias('hold_returns_x'),
                 (
                     pl.col('hold_to_y') /
-                    pl.col('hold_to_y')
-                    .shift_and_fill(1, pl.col('hold_to_y').first())
+                    pl.col('hold_to_y').shift_and_fill(1, pl.col('hold_to_y').first())
                 ).alias('hold_returns_y'),
-            ]
-        )
+                (
+                    pl.col('vpn_value_to_x') /
+                    pl.col('vpn_value_to_x').shift_and_fill(1, pl.col('vpn_value_to_x').first())
+                ).alias('vpn_returns_x'),
+                (
+                    pl.col('vpn_value_to_y') /
+                    pl.col('vpn_value_to_y').shift_and_fill(1, pl.col('vpn_value_to_y').first())
+                ).alias('vpn_returns_y'),
+        ])
         return df_returns
 
     # TODO: static method
@@ -188,11 +194,10 @@ class PortfolioHistory:
         """
         log.info(f'Starting to calculate portfolio APY for {from_col}')
         df_performance = df.select([
-            pl.col(from_col).cumprod().alias('performance'),
-            # pl.col('total_value_to_x') / pl.col('total_value_to_x').first(),
+            (pl.col(from_col) / pl.col(from_col).first()).alias('performance'),
             ((pl.col('timestamp') - pl.col('timestamp').first()).dt.days() + 1).alias('days')
         ])
-        df_apy = df_performance.apply(lambda x: x[0] ** (365 / x[1]) - 1)
+        df_apy = df_performance.apply(lambda x: 100 * (x[0] ** (365 / x[1]) - 1))
         df_apy = df_apy.rename({"apply": to_col})
         return df_apy
 
@@ -210,15 +215,19 @@ class PortfolioHistory:
 
         df_prep = pl.concat([df[['timestamp', 'price']], values, ils, fees], how='horizontal')
         df_to = self.calculate_value_to(df_prep)
-        df_returns = self.calculate_returns(df_to)
+        # df_returns = self.calculate_returns(df_to)
+        df_to_ext = pl.concat([df[['timestamp']], df_to], how='horizontal')
 
-        df_returns_ext = pl.concat([df[['timestamp']], df_returns], how='horizontal')
-        prt_x = self.calculate_apy_for_col(df_returns_ext, 'portfolio_returns_x', 'portfolio_apy_x')
-        prt_y = self.calculate_apy_for_col(df_returns_ext, 'portfolio_returns_y', 'portfolio_apy_y')
-        hld_x = self.calculate_apy_for_col(df_returns_ext, 'hold_returns_x', 'hold_apy_x')
-        hld_y = self.calculate_apy_for_col(df_returns_ext, 'hold_returns_y', 'hold_apy_y')
+        prt_x = self.calculate_apy_for_col(df_to_ext, 'total_value_to_x', 'portfolio_apy_x')
+        prt_y = self.calculate_apy_for_col(df_to_ext, 'total_value_to_y', 'portfolio_apy_y')
+        hld_x = self.calculate_apy_for_col(df_to_ext, 'hold_to_x', 'hold_apy_x')
+        hld_y = self.calculate_apy_for_col(df_to_ext, 'hold_to_y', 'hold_apy_y')
+        vp0_x = self.calculate_apy_for_col(df_to_ext, 'vp0_value_to_x', 'vp0_apy_x')
+        vp0_y = self.calculate_apy_for_col(df_to_ext, 'vp0_value_to_y', 'vp0_apy_y')
+        vpn_x = self.calculate_apy_for_col(df_to_ext, 'vpn_value_to_x', 'vpn_apy_x')
+        vpn_y = self.calculate_apy_for_col(df_to_ext, 'vpn_value_to_y', 'vpn_apy_y')
 
-        return pl.concat([df_prep, df_to, df_returns, prt_x, prt_y, hld_x, hld_y], how='horizontal')
+        return pl.concat([df_prep, df_to, prt_x, prt_y, hld_x, hld_y, vp0_x, vp0_y, vpn_x, vpn_y], how='horizontal')
 
 
 class RebalanceHistory:
@@ -230,7 +239,7 @@ class RebalanceHistory:
     """
 
     def __init__(self):
-        self.rebalances = {}
+        self.rebalances = []
 
     def add_snapshot(self, timestamp: datetime.datetime, snapshot: Hashable):
         """
@@ -240,7 +249,7 @@ class RebalanceHistory:
             timestamp: Timestamp of snapshot.
             snapshot: Dict of portfolio rebalances.
         """
-        self.rebalances[timestamp] = snapshot
+        self.rebalances += [{'timestamp': timestamp, 'rebalance': snapshot}]
         return None
 
     def to_df(self) -> pd.DataFrame:
@@ -250,8 +259,14 @@ class RebalanceHistory:
         Returns:
             Portfolio rebalance history data frame.
         """
-        df = pd.DataFrame([self.rebalances], index=['rebalanced']).T
-        df.index.name = 'timestamp'
+        df = (
+            pl.DataFrame(self.rebalances)
+            .drop_nulls()
+            .with_column(
+                pl.col('timestamp')
+                .cast(pl.Datetime)
+            )
+        )
         return df
 
 

@@ -3,11 +3,14 @@ TODO write
 """
 # TODO SyntheticData unused
 import warnings
+import sys
+sys.path.append('..')
 
 from strategy.data import SyntheticData, RawDataUniV3
 from strategy.backtest import Backtest
 from strategy.strategies import HStrategy
 from strategy.primitives import Pool, Token, Fee
+
 
 warnings.filterwarnings('ignore')
 
