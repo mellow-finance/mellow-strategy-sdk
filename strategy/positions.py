@@ -1,6 +1,7 @@
 """
 TODO: write
 """
+# TODO - надо в целом разобраться с комиссиями в этом коде
 from typing import Tuple
 from abc import ABC, abstractmethod
 from datetime import datetime
@@ -170,6 +171,7 @@ class BiCurrencyPosition(AbstractPosition):
         """
         assert 0 <= x_fraction <= 1, f'Incorrect Fraction X = {x_fraction}'
         assert 0 <= y_fraction <= 1, f'Incorrect Fraction Y = {y_fraction}'
+        assert self.x > 1e-6 or self.y > 1e-6, f'Cant rebalance empty portfolio x={self.x}, y={self.y}'
         assert abs(x_fraction + y_fraction - 1) <= 1e-6, \
             f'Incorrect fractions {x_fraction}, {y_fraction}'
 
@@ -180,7 +182,7 @@ class BiCurrencyPosition(AbstractPosition):
         elif d_v < 0:
             dy = abs(d_v)
             self.swap_y_to_x(dy, price)
-
+        # TODO ДВА раза прибавляется total_rebalance_costs, один раз в swap, второй здесь - этот удалить
         self.total_rebalance_costs += self.rebalance_cost
 
     def interest_gain(self, date: datetime) -> None:
@@ -198,8 +200,6 @@ class BiCurrencyPosition(AbstractPosition):
         self.x *= (1 + self.x_interest) ** multiplier
         self.y *= (1 + self.x_interest) ** multiplier
         self.previous_gain = date
-        # TODO: del return None
-        return None
 
     def to_x(self, price: float) -> float:
         """
@@ -350,8 +350,6 @@ class UniV3Position(AbstractPosition):
             price: Current price of X in Y currency.
         """
         self.mint(x, y, price)
-        # TODO: del return None
-        return None
 
     def withdraw(self, price: float) -> Tuple[float, float]:
         """
@@ -384,7 +382,25 @@ class UniV3Position(AbstractPosition):
         assert y >= 0, f'Can not deposit negative Y = {y}'
         assert price > 1e-16, f'Incorrect Price = {price}'
 
-        d_liq = self._xy_to_liq_(x, y, price)
+        # TODO: раньше в этой функции была то ли бага то ли фича, если x>0, y>0 и price вне [price_lower, price_upper]
+        #  никакого assert не вылетало хотя по логике должно вылетать, теперь будет вылетать царь assert
+        # TODO: раньше это было функцией _xy_to_liq_
+
+        is_optimal, x_liq, y_liq = self.aligner.check_xy_is_optimal(x=x, y=y, price=price)
+
+        assert is_optimal, f"""
+                    x={x}, y={y},Lx={x_liq}, Ly={y_liq}, lower_price={self.lower_price}, 
+                    upper_price={self.lower_price}, price={price}
+                        if price <= lower_price:
+                            must be y=0
+                        if price >= upper_price:
+                            must be x=0
+                        if lower_price < price <  upper_price:
+                            must be Lx=Ly
+                """
+
+        d_liq = self.aligner.xy_to_optimal_liq(x=x, y=y, price=price)
+
         self.liquidity += d_liq
         self.bi_currency.deposit(x, y)
         self.total_rebalance_costs += self.rebalance_cost
@@ -406,7 +422,7 @@ class UniV3Position(AbstractPosition):
         il_x_0 = self.impermanent_loss_to_x(price)
         il_y_0 = self.impermanent_loss_to_y(price)
 
-        x_out, y_out = self._liq_to_xy_(liq, price)
+        x_out, y_out = self.aligner.liq_to_xy(price=price, liq=liq)
 
         self.bi_currency.withdraw_fraction(liq / self.liquidity)
         self.liquidity -= liq
@@ -416,6 +432,9 @@ class UniV3Position(AbstractPosition):
 
         self.realized_loss_to_x += (il_x_0 - il_x_1)
         self.realized_loss_to_y += (il_y_0 - il_y_1)
+
+        # TODO - поч сдесь делает rebalance_cost?
+        # TODO - надо в целом разобраться с комиссиями в этом коде
         self.total_rebalance_costs += self.rebalance_cost
         return x_out, y_out
 
@@ -570,7 +589,8 @@ class UniV3Position(AbstractPosition):
         """
         assert price > 1e-16, f'Incorrect Price = {price}'
 
-        x, y = self._liq_to_xy_(self.liquidity, price)
+        x, y = self.aligner.liq_to_xy(price=price, liq=self.liquidity)
+
         return x, y
 
     def _adj_price_(self, price: float) -> float:
@@ -586,38 +606,6 @@ class UniV3Position(AbstractPosition):
         adj_price = min(max(self.lower_price, price), self.upper_price)
         return adj_price
 
-    def _xy_to_liq_(self, x: float, y: float, price: float) -> float:
-        """
-        Transform X and Y to liquidity.
-        Args:
-            x: Value of X.
-            y: Value of Y.
-            price: Current price of X in Y currency.
-        Returns:
-            Resulting liquidity.
-        """
-        # TODO: раньше в этой функции была то ли бага то ли фича, если x>0, y>0 и price вне [price_lower, price_upper]
-        #  никакого assert не вылетало хотя по логике должно вылетать, щас будет вылетать
-
-        is_optimal, x_liq, y_liq = self.aligner.check_xy_is_optimal(x=x, y=y, price=price)
-
-        assert abs(x_liq - y_liq) < 1e-6, f'Lx != Ly: Lx={x_liq}, Ly={y_liq}'
-
-        liq = self.aligner.xy_to_optimal_liq(x=x, y=y, price=price)
-
-        return liq
-
-    def _liq_to_xy_(self, liq: float, price: float) -> Tuple[float, float]:
-        """
-        Transform liquidity to optimal X, Y pair.
-        Args:
-            liq: amount of liquidity.
-            price: Current price of X in Y currency.
-        Returns:
-            amount of X and Y.
-        """
-        x, y = self.aligner.liq_to_optimal_xy(price=price, liquidity=liq)
-        return x, y
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
         """

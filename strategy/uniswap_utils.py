@@ -36,7 +36,7 @@ class UniswapLiquidityAligner:
         if sqrt_upper <= sqrt_price:
             return np.inf
         elif sqrt_lower >= sqrt_price:
-            return 0
+            return 0.
         # TODO: откуда формулы?
         numer = (sqrt_price - sqrt_lower) * sqrt_upper * sqrt_price
         denom = sqrt_upper - sqrt_price
@@ -67,28 +67,34 @@ class UniswapLiquidityAligner:
             y_new = price_real * x_new
         return x_new, y_new
 
-    @staticmethod
-    def _x_to_liq(sqrt_lower, sqrt_upper, x):
+    def _x_to_liq(self, price, x):
         """
             Correct only when price <= price_lower
         Args:
-            sqrt_lower: sqrt of lower_price of interval
-            sqrt_upper: sqrt of upper_price of interval
+            price: current market price
             x: amount of X tokens
 
         Returns:
             The amount of liquidity for the given price range and amount of tokens X
             at situation price <= price_lower
         """
-        return x * (sqrt_upper * sqrt_lower) / (sqrt_upper - sqrt_lower)
 
-    @staticmethod
-    def _y_to_liq(sqrt_lower, sqrt_upper, y):
+        sqrt_lower = np.sqrt(self.lower_price)
+        sqrt_upper = np.sqrt(self.upper_price)
+        sqrt_price = np.sqrt(price)
+
+        if sqrt_price >= sqrt_upper:
+            return 0.
+
+        left_bound = max(sqrt_lower, sqrt_price)
+
+        return x * (sqrt_upper * left_bound) / (sqrt_upper - left_bound)
+
+    def _y_to_liq(self, price, y):
         """
             Correct only when price >=  price_upper
         Args:
-            sqrt_lower: sqrt of lower_price of interval
-            sqrt_upper: sqrt of upper_price of interval
+            price: current market price
             y: amount of Y tokens
 
         Returns:
@@ -96,7 +102,16 @@ class UniswapLiquidityAligner:
             at situation price >= price_upper
         """
 
-        return y / (sqrt_upper - sqrt_lower)
+        sqrt_lower = np.sqrt(self.lower_price)
+        sqrt_upper = np.sqrt(self.upper_price)
+        sqrt_price = np.sqrt(price)
+
+        if sqrt_price <= sqrt_lower:
+            return 0.
+
+        right_bound = min(sqrt_price, sqrt_upper)
+
+        return y / (right_bound - sqrt_lower)
 
     def xy_to_optimal_liq(self, price, x, y):
         """
@@ -112,25 +127,19 @@ class UniswapLiquidityAligner:
         assert x >= 0,  f'Incorrect x = {x}'
         assert y >= 0, f'Incorrect y = {y}'
 
-        sqrt_lower = np.sqrt(self.lower_price)
-        sqrt_upper = np.sqrt(self.upper_price)
-        sqrt_price = np.sqrt(price)
+        liq_x = self._x_to_liq(price=price, x=x)
+        liq_y = self._y_to_liq(price=price, y=y)
 
-        if sqrt_price <= sqrt_lower:
-            return self._x_to_liq(sqrt_lower, sqrt_upper, x)
+        if price >= self.upper_price:
+            return liq_y
 
-        if sqrt_price >= sqrt_upper:
-            return self._y_to_liq(sqrt_lower, sqrt_upper, y)
-
-        liq_x = self._x_to_liq(sqrt_price, sqrt_upper, x)
-        liq_y = self._y_to_liq(sqrt_lower, sqrt_price, y)
+        if price <= self.lower_price:
+            return liq_x
 
         return min(liq_x, liq_y)
 
-    @staticmethod
-    def _liq_to_x(sqrt_lower, sqrt_upper, liq):
+    def liq_to_x(self, price, liq):
         """
-           Correct only when price <= price_lower
         Args:
             sqrt_lower: sqrt of lower_price of interval
             sqrt_upper: sqrt of upper_price of interval
@@ -138,27 +147,39 @@ class UniswapLiquidityAligner:
 
         Returns:
             The amount of token X for a given amount of liquidity and a price range
-            at situation price <= price_lower
         """
+        sqrt_lower = np.sqrt(self.lower_price)
+        sqrt_upper = np.sqrt(self.upper_price)
+        sqrt_price = np.sqrt(price)
 
-        return liq * (sqrt_upper - sqrt_lower) / (sqrt_lower * sqrt_upper)
+        if sqrt_price >= sqrt_upper:
+            return 0.
 
-    @staticmethod
-    def _liq_to_y(sqrt_lower, sqrt_upper, liq):
+        left_bound = max(sqrt_lower, sqrt_price)
+
+        return liq * (sqrt_upper - left_bound) / (left_bound * sqrt_upper)
+
+    def liq_to_y(self, price, liq):
         """
-            Correct only when price >= price_upper
         Args:
             sqrt_lower: sqrt of lower_price of interval
             sqrt_upper: sqrt of upper_price of interval
+            sqrt_price: sqrt of current price
             liq: given amount of liquidity
 
         Returns:
             The amount of token Y for a given amount of liquidity and a price range
-            at situation price >= price_upper
         """
-        return liq * (sqrt_upper - sqrt_lower)
+        sqrt_lower = np.sqrt(self.lower_price)
+        sqrt_upper = np.sqrt(self.upper_price)
+        sqrt_price = np.sqrt(price)
 
-    def liq_to_optimal_xy(self, price, liq):
+        if sqrt_price <= sqrt_lower:
+            return 0.
+        right_bound = min(sqrt_price, sqrt_upper)
+        return liq * (right_bound - sqrt_lower)
+
+    def liq_to_xy(self, price, liq):
         """
 
         Args:
@@ -170,21 +191,8 @@ class UniswapLiquidityAligner:
         """
         assert liq >= 0, f'Incorrect liquidity {liq}'
         assert price > 1e-16, f'Incorrect price = {price}'
-        sqrt_lower = np.sqrt(self.lower_price)
-        sqrt_upper = np.sqrt(self.upper_price)
-        sqrt_price = np.sqrt(price)
-
-        amount_x = 0
-        amount_y = 0
-        if sqrt_price <= sqrt_lower:
-            amount_x = self._liq_to_x(sqrt_lower, sqrt_upper, liq)
-            return amount_x, amount_y
-        if sqrt_price < sqrt_upper:
-            amount_x = self._liq_to_x(sqrt_price, sqrt_upper, liq)
-            amount_y = self._liq_to_y(sqrt_lower, sqrt_price, liq)
-            return amount_x, amount_y
-
-        amount_y = self._liq_to_y(sqrt_lower, sqrt_upper, liq)
+        amount_x = self.liq_to_x(price, liq)
+        amount_y = self.liq_to_y(price, liq)
         return amount_x, amount_y
 
     def check_xy_is_optimal(self, price, x, y):
@@ -213,16 +221,14 @@ class UniswapLiquidityAligner:
         sqrt_upper = np.sqrt(self.upper_price)
         sqrt_price = np.sqrt(price)
 
+        liq_x = self._x_to_liq(price=price, x=x)
+        liq_y = self._y_to_liq(price=price, y=y)
+
         if sqrt_price <= sqrt_lower:
-            liq_x = self._x_to_liq(sqrt_lower, sqrt_upper, x)
-            return y < 1e-6, liq_x, 0.0
+            return y < 1e-6, liq_x, liq_y
 
         if sqrt_price >= sqrt_upper:
-            liq_y = self._x_to_liq(sqrt_lower, sqrt_upper, x)
-            return x < 1e-6, 0.0, liq_y
-
-        liq_x = self._x_to_liq(sqrt_price, sqrt_upper, x)
-        liq_y = self._y_to_liq(sqrt_lower, sqrt_price, y)
+            return x < 1e-6, liq_x, liq_y
 
         return abs(liq_x - liq_y) < 1e-6, liq_x, liq_y
 
