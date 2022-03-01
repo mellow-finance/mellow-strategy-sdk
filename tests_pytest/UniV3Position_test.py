@@ -4,11 +4,12 @@
         mint TODO
         burn
         charge_fees
-        impermanent_loss - ?
-        impermanent_loss_to_x
-        impermanent_loss_to_y
+        impermanent_loss -
+        impermanent_loss_to_x -
+        impermanent_loss_to_y -
+        swap_to_optimal -
 
-    cd tests_pytest and python -m unittest UniV3Position_test.py
+    cd tests_pytest && python -m unittest UniV3Position_test.py
 """
 
 import sys
@@ -38,23 +39,23 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
         # работает, оставляю на всякий
         # sys.stdout.write('\n\n\nssssss\n\n\n')
 
-        ans = self.aligner.xy_to_optimal_liq(**input_val)
+        ans = self.aligner.xy_to_liq(**input_val)
 
         self.assertAlmostEqual(ans, expected, 8)
 
     def test_xy_to_optimal_liq_assert_price(self):
         with self.assertRaises(Exception) as context:
-            self.aligner.xy_to_optimal_liq(x=1, y=1, price=-1)
+            self.aligner.xy_to_liq(x=1, y=1, price=-1)
         self.assertTrue('Incorrect price' in str(context.exception))
 
     def test_xy_to_optimal_liq_assert_x(self):
         with self.assertRaises(Exception) as context:
-            self.aligner.xy_to_optimal_liq(x=-1, y=1, price=1)
+            self.aligner.xy_to_liq(x=-1, y=1, price=1)
         self.assertTrue('Incorrect x' in str(context.exception))
 
     def test_xy_to_optimal_liq_assert_y(self):
         with self.assertRaises(Exception) as context:
-            self.aligner.xy_to_optimal_liq(x=1, y=-1, price=1)
+            self.aligner.xy_to_liq(x=1, y=-1, price=1)
         self.assertTrue('Incorrect y' in str(context.exception))
 
     @parameterized.expand(test_liq_to_optimal_xy_arr)
@@ -101,7 +102,7 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
 
     def test_check_xy_is_optimal_assert_price(self):
         with self.assertRaises(Exception) as context:
-            self.aligner.xy_to_optimal_liq(price=1, x=1, y=-1)
+            self.aligner.xy_to_liq(price=1, x=1, y=-1)
         self.assertTrue('Incorrect y' in str(context.exception))
 
 

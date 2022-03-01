@@ -1,9 +1,7 @@
 """
     Test  UniswapLiquidityAligner
     functions:
-        real_price # TODO
-        align_to_liq # TODO
-        xy_to_optimal_liq - Yes
+        xy_to_liq - Yes
         liq_to_optimal_xy - Yes
         check_xy_is_optimal - Yes
 
@@ -21,6 +19,7 @@ from parameterized import parameterized
 from strategy.uniswap_utils import UniswapLiquidityAligner
 
 
+# TODO - сделать так чтобы можно было вызывать один тест
 test_xy_to_optimal_liq_arr = [
     ({'x': 0, 'y': 0, 'price': 9}, 0.0),
     ({'x': 0, 'y': 0, 'price': 10}, 0.0),
@@ -159,23 +158,23 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
         # работает, оставляю на всякий
         # sys.stdout.write('\n\n\nssssss\n\n\n')
 
-        ans = self.aligner.xy_to_optimal_liq(**input_val)
+        ans = self.aligner.xy_to_liq(**input_val)
 
         self.assertTrue(np.allclose(ans, expected, atol=1e-08, rtol=0))
 
     def test_xy_to_optimal_liq_assert_price(self):
         with self.assertRaises(Exception) as context:
-            self.aligner.xy_to_optimal_liq(x=1, y=1, price=-1)
+            self.aligner.xy_to_liq(x=1, y=1, price=-1)
         self.assertTrue('Incorrect price' in str(context.exception))
 
     def test_xy_to_optimal_liq_assert_x(self):
         with self.assertRaises(Exception) as context:
-            self.aligner.xy_to_optimal_liq(x=-1, y=1, price=1)
+            self.aligner.xy_to_liq(x=-1, y=1, price=1)
         self.assertTrue('Incorrect x' in str(context.exception))
 
     def test_xy_to_optimal_liq_assert_y(self):
         with self.assertRaises(Exception) as context:
-            self.aligner.xy_to_optimal_liq(x=1, y=-1, price=1)
+            self.aligner.xy_to_liq(x=1, y=-1, price=1)
         self.assertTrue('Incorrect y' in str(context.exception))
 
     @parameterized.expand(test_liq_to_optimal_xy_arr)
@@ -215,14 +214,14 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
             self.aligner.check_xy_is_optimal(price=-1, x=1, y=1)
         self.assertTrue('Incorrect price' in str(context.exception))
 
-    def test_check_xy_is_optimal_assert_price(self):
+    def test_check_xy_is_optimal_assert_x(self):
         with self.assertRaises(Exception) as context:
             self.aligner.check_xy_is_optimal(price=1, x=-1, y=1)
         self.assertTrue('Incorrect x' in str(context.exception))
 
-    def test_check_xy_is_optimal_assert_price(self):
+    def test_check_xy_is_optimal_assert_y(self):
         with self.assertRaises(Exception) as context:
-            self.aligner.xy_to_optimal_liq(price=1, x=1, y=-1)
+            self.aligner.xy_to_liq(price=1, x=1, y=-1)
         self.assertTrue('Incorrect y' in str(context.exception))
 
 

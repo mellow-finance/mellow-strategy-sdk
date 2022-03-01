@@ -174,7 +174,6 @@ class BiCurrencyPosition(AbstractPosition):
         assert self.x > 1e-6 or self.y > 1e-6, f'Cant rebalance empty portfolio x={self.x}, y={self.y}'
         assert abs(x_fraction + y_fraction - 1) <= 1e-6, \
             f'Incorrect fractions {x_fraction}, {y_fraction}'
-
         d_v = y_fraction * price * self.x - x_fraction * self.y
         if d_v > 0:
             dx = d_v / price
@@ -182,8 +181,6 @@ class BiCurrencyPosition(AbstractPosition):
         elif d_v < 0:
             dy = abs(d_v)
             self.swap_y_to_x(dy, price)
-        # TODO ДВА раза прибавляется total_rebalance_costs, один раз в swap, второй здесь - этот удалить
-        self.total_rebalance_costs += self.rebalance_cost
 
     def interest_gain(self, date: datetime) -> None:
         """
@@ -198,7 +195,7 @@ class BiCurrencyPosition(AbstractPosition):
             self.previous_gain = date
         multiplier = (date - self.previous_gain).days
         self.x *= (1 + self.x_interest) ** multiplier
-        self.y *= (1 + self.x_interest) ** multiplier
+        self.y *= (1 + self.y_interest) ** multiplier
         self.previous_gain = date
 
     def to_x(self, price: float) -> float:
@@ -241,40 +238,46 @@ class BiCurrencyPosition(AbstractPosition):
         """
         return self.x, self.y
 
-    def swap_x_to_y(self, dx: float, price: float) -> None:
+    def swap_x_to_y(self, dx: float, price: float) -> float:
         """
         Swap X currency to Y.
 
         Args:
             dx: Amount of X to be swapped.
             price: Current price of X in Y currency.
+        Returns:
+            dy: Amount of Y was getted
         """
         assert price > 1e-16, f'Incorrect price = {price}'
         assert dx >= 0, f'Incorrect dX = {dx}'
 
         self.x -= dx
-        self.y += price * (1 - self.swap_fee) * dx
+        dy = price * (1 - self.swap_fee) * dx
+        self.y += dy
         self.total_rebalance_costs += self.rebalance_cost
-        # TODO: del return None
-        return None
+        print('1', self.total_rebalance_costs)
 
-    def swap_y_to_x(self, dy: float, price: float) -> None:
+        return dy
+
+    def swap_y_to_x(self, dy: float, price: float) -> float:
         """
         Swap Y currency to X.
 
         Args:
             dy: Amount of X to be swapped.
             price: Current price of X in Y currency.
+        Returns:
+            dx: Amount of Y was getted
         """
         assert price > 1e-16, f'Incorrect price = {price}'
-        assert dy >= 0, f'Incorrect dX = {dy}'
+        assert dy >= 0, f'Incorrect dY = {dy}'
 
         self.y -= dy
-        self.x += (1 - self.swap_fee) * dy / price
+        dx = (1 - self.swap_fee) * dy / price
+        self.x += dx
         self.total_rebalance_costs += self.rebalance_cost
-
-        # TODO: del return None
-        return None
+        print('3', self.total_rebalance_costs)
+        return dx
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
         """
@@ -368,6 +371,76 @@ class UniV3Position(AbstractPosition):
         x_res, y_res = x_out + x_fees, y_out + y_fees
         return x_res, y_res
 
+    def swap_to_optimal_xy(self, x, y, price):
+        """
+            It is necessary to make a swap in order to receive tokens in a proportion suitable for mint
+        Args:
+            price: current market price
+        Returns:
+
+        """
+        self.aligner.align_to_liq(self.bi_currency, price)
+
+    def swap_to_optimal(self, x: float, y: float, price: float):
+        """
+        Args:
+            x:
+            y:
+            price:
+        Returns:
+        """
+        sqrt_price = np.sqrt(price)
+        sqrt_lower = np.sqrt(self.lower_price)
+        sqrt_upper = np.sqrt(self.upper_price)
+
+        if self.aligner.check_xy_is_optimal(x=x, y=y, price=price)[0]:
+            return x, y
+
+        if price <= self.lower_price:
+            dx = self.swap_y_to_x(dy=y, price=price)
+            return x + dx, 0
+
+        if price >= self.upper_price:
+            dy = self.swap_x_to_y(dx=x, price=price)
+            return 0, y + dy
+
+        price_real = (sqrt_price - sqrt_lower) * sqrt_upper * sqrt_price / (sqrt_upper - sqrt_price)
+
+        v_y = price * x + y
+        x_new = v_y / (price + price_real)
+        y_new = price_real * x_new
+
+        if x_new < x:
+            self.swap_x_to_y(dx=x - x_new, price=price)
+        else:
+            self.swap_y_to_x(dy=y - y_new, price=price)
+        return x_new, y_new
+
+    def swap_x_to_y(self, dx, price):
+        """
+        Args:
+            dx:
+            price:
+        Returns:
+        """
+        self.bi_currency.deposit(x=dx, y=0)
+        dy = self.bi_currency.swap_x_to_y(dx=dx, price=price)
+        self.bi_currency.y -= dy
+        return dy
+
+    def swap_y_to_x(self, dy, price):
+        """
+        Args:
+            dy:
+            price:
+        Returns:
+
+        """
+        self.bi_currency.deposit(x=0, y=dy)
+        dx = self.bi_currency.swap_y_to_x(dy=dy, price=price)
+        self.bi_currency.x -= dx
+        return dx
+
     def mint(self, x: float, y: float, price: float):
         """
         Mint X and Y to uniswapV3 interval.
@@ -382,14 +455,10 @@ class UniV3Position(AbstractPosition):
         assert y >= 0, f'Can not deposit negative Y = {y}'
         assert price > 1e-16, f'Incorrect Price = {price}'
 
-        # TODO: раньше в этой функции была то ли бага то ли фича, если x>0, y>0 и price вне [price_lower, price_upper]
-        #  никакого assert не вылетало хотя по логике должно вылетать, теперь будет вылетать царь assert
-        # TODO: раньше это было функцией _xy_to_liq_
-
         is_optimal, x_liq, y_liq = self.aligner.check_xy_is_optimal(x=x, y=y, price=price)
 
         assert is_optimal, f"""
-                    x={x}, y={y},Lx={x_liq}, Ly={y_liq}, lower_price={self.lower_price}, 
+                    x={x}, y={y}, Lx={x_liq}, Ly={y_liq}, lower_price={self.lower_price},
                     upper_price={self.lower_price}, price={price}
                         if price <= lower_price:
                             must be y=0
@@ -399,11 +468,12 @@ class UniV3Position(AbstractPosition):
                             must be Lx=Ly
                 """
 
-        d_liq = self.aligner.xy_to_optimal_liq(x=x, y=y, price=price)
+        d_liq = self.aligner.xy_to_liq(x=x, y=y, price=price)
 
         self.liquidity += d_liq
         self.bi_currency.deposit(x, y)
         self.total_rebalance_costs += self.rebalance_cost
+        print('4', self.total_rebalance_costs)
 
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
         """
@@ -436,6 +506,7 @@ class UniV3Position(AbstractPosition):
         # TODO - поч сдесь делает rebalance_cost?
         # TODO - надо в целом разобраться с комиссиями в этом коде
         self.total_rebalance_costs += self.rebalance_cost
+        print('5', self.total_rebalance_costs)
         return x_out, y_out
 
     def charge_fees(self, price_0: float, price_1: float):

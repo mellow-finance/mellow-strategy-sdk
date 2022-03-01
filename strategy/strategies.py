@@ -7,7 +7,7 @@ import math
 import numpy as np
 
 # TODO: UniswapV2Utils unused
-from strategy.uniswap_utils import UniswapV3Utils, UniswapV2Utils, UniswapLiquidityAligner
+from strategy.uniswap_utils import UniswapV3Utils
 from strategy.positions import UniV3Position, BiCurrencyPosition
 from strategy.primitives import Pool
 
@@ -242,11 +242,10 @@ class HStrategy(AbstractStrategy):
         vault = portfolio.get_position('Vault')
         x_uni, y_uni = vault.withdraw_fraction(fraction_uni)
 
-        uni_aligner = UniswapLiquidityAligner(lower_price, upper_price)
-        x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(x_uni, y_uni,  price)
-
         univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent, self.rebalance_cost)
-        univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
+        x_uni_aligned, y_uni_aligned = univ3_pos.swap_to_optimal(x=x_uni, y=y_uni, price=price)
+        univ3_pos.deposit(x=x_uni_aligned, y=y_uni_aligned, price=price)
+
         portfolio.append(univ3_pos)
         # TODO: del return None
         return None
@@ -304,7 +303,6 @@ class MStrategy(AbstractStrategy):
                  ):
         super().__init__(name)
         self.bicur_tolerance = bicur_tolerance
-        # TODO window_width выпилить из всех мест в функции
         # self.window_width = window_width
         self.lower_0 = lower_0
         self.upper_0 = upper_0
@@ -372,13 +370,13 @@ class MStrategy(AbstractStrategy):
             is_rebalanced = 'init'
 
         if self.prev_rebalance_tick is None:
+            # TODO а сюда когда-то заходит?
             vault = portfolio.get_position('Vault')
             self.prev_rebalance_tick = self._price_to_tick_(vault.y / vault.x)
 
         if abs(self.prev_rebalance_tick - params['current_tick']) >= self.bicur_tolerance:
             fraction_x = self.calc_fraction_to_x(params['price'])
             fraction_y = 1 - fraction_x
-            # TODO написать красиво, но не длинно
             if (
                     (0 <= fraction_x <= 1)
                     and (0 <= fraction_y <= 1)
@@ -481,7 +479,7 @@ class LidoStrategy(AbstractStrategy):
                   'nearest_right_price': nearest_price_spacing,
                   'mid_price': mid_price_spacing,
                   'upper_price': upper_price_spacing
-                   }
+                  }
 
         return output
 
@@ -599,15 +597,12 @@ class LidoStrategy(AbstractStrategy):
             lower_price:
             upper_price:
             price:
-
         Returns:
 
         """
-        uni_aligner = UniswapLiquidityAligner(lower_price, upper_price)
-        x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(x_uni, y_uni, price)
-
         univ3_pos = UniV3Position(name, lower_price, upper_price, self.fee_percent, 0)
-        univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
+        x_uni_aligned, y_uni_aligned = univ3_pos.swap_to_optimal(x=x_uni, y=y_uni, price=price)
+        univ3_pos.deposit(x=x_uni_aligned, y=y_uni_aligned, price=price)
         return univ3_pos
 
     # TODO: static
@@ -708,14 +703,7 @@ class UniV3Passive(AbstractStrategy):
         Returns:
 
         """
-        uni_aligner = UniswapLiquidityAligner(self.lower_price, self.upper_price)
-        x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(1 / price, 1, price)
-        univ3_pos = UniV3Position(
-            'UniV3Passive',
-            self.lower_price,
-            self.upper_price,
-            self.fee_percent,
-            self.rebalance_cost
-        )
-        univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
+        univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
+        x_uni_aligned, y_uni_aligned = univ3_pos.swap_to_optimal(x=1 / price, y=1, price=price)
+        univ3_pos.deposit(x=x_uni_aligned, y=y_uni_aligned, price=price)
         return univ3_pos
