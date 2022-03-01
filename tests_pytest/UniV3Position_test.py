@@ -3,7 +3,7 @@
     functions:
         mint - YES
         burn - YES
-        charge_fees TODO
+        charge_fees - YES
         swap_to_optimal - YES
 
     cd tests_pytest && python -m unittest UniV3Position_test.py
@@ -87,7 +87,7 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
             name='TestPos',
             lower_price=10,
             upper_price=30,
-            fee_percent=0,
+            fee_percent=0.,
             rebalance_cost=1,
         )
 
@@ -269,6 +269,50 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
         )
 
         self.assertAlmostEqual(self.pos.total_rebalance_costs, self.pos.rebalance_cost + self.pos.rebalance_cost, 8)
+
+    test_charge_fees_arr = [
+        ({'price_0': 9, 'price_1': 9}, (0.0, 0)),
+        ({'price_0': 9, 'price_1': 10}, (0.0, 0)),
+        ({'price_0': 9, 'price_1': 11}, (0, 57.741487350018005)),
+        ({'price_0': 9, 'price_1': 30}, (0, 866.0254037844387)),
+        ({'price_0': 9, 'price_1': 31}, (0, 866.0254037844387)),
+        ({'price_0': 10, 'price_1': 9}, (0.0, 0)),
+        ({'price_0': 10, 'price_1': 10}, (0.0, 0)),
+        ({'price_0': 10, 'price_1': 11}, (0, 57.741487350018005)),
+        ({'price_0': 10, 'price_1': 30}, (0, 866.0254037844387)),
+        ({'price_0': 10, 'price_1': 31}, (0, 866.0254037844387)),
+        ({'price_0': 11, 'price_1': 9}, (5.505434803563979, 0)),
+        ({'price_0': 11, 'price_1': 10}, (5.505434803563979, 0)),
+        ({'price_0': 11, 'price_1': 11}, (0.0, 0)),
+        ({'price_0': 11, 'price_1': 30}, (0, 808.2839164344207)),
+        ({'price_0': 11, 'price_1': 31}, (0, 808.2839164344207)),
+        ({'price_0': 30, 'price_1': 9}, (50.0, 0)),
+        ({'price_0': 30, 'price_1': 10}, (50.0, 0)),
+        ({'price_0': 30, 'price_1': 11}, (44.49456519643602, 0)),
+        ({'price_0': 30, 'price_1': 30}, (0.0, 0)),
+        ({'price_0': 30, 'price_1': 31}, (0.0, 0)),
+        ({'price_0': 31, 'price_1': 9}, (50.0, 0)),
+        ({'price_0': 31, 'price_1': 10}, (50.0, 0)),
+        ({'price_0': 31, 'price_1': 11}, (44.49456519643602, 0)),
+        ({'price_0': 31, 'price_1': 30}, (0.0, 0)),
+        ({'price_0': 31, 'price_1': 31}, (0.0, 0))
+    ]
+
+    @parameterized.expand(test_charge_fees_arr)
+    def test_charge_fees(self, input_val, expected):
+        self.pos = UniV3Position(
+            name='TestPos',
+            lower_price=10,
+            upper_price=30,
+            fee_percent=0.5,
+            rebalance_cost=1,
+        )
+
+        self.pos.mint(x=100, y=0, price=10)
+        self.pos.charge_fees(**input_val)
+
+        self.assertAlmostEqual(self.pos._fees_x_earned_, expected[0])
+        self.assertAlmostEqual(self.pos._fees_y_earned_, expected[1])
 
 
 if __name__ == "__main__":

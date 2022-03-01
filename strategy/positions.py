@@ -510,11 +510,8 @@ class UniV3Position(AbstractPosition):
         assert price_0 > 1e-16, f'Incorrect Price = {price_0}'
         assert price_1 > 1e-16, f'Incorrect Price = {price_1}'
 
-        price_0_adj = self._adj_price_(price_0)
-        price_1_adj = self._adj_price_(price_1)
-
-        x_0, y_0 = self.to_xy(price_0_adj)
-        x_1, y_1 = self.to_xy(price_1_adj)
+        x_0, y_0 = self.to_xy(price_0)
+        x_1, y_1 = self.to_xy(price_1)
 
         fee_x, fee_y = 0, 0
         if y_0 >= y_1:
@@ -651,20 +648,6 @@ class UniV3Position(AbstractPosition):
         x, y = self.aligner.liq_to_xy(price=price, liq=self.liquidity)
 
         return x, y
-
-    def _adj_price_(self, price: float) -> float:
-        """
-        Get adjusted price of current price and UniswapV3 interval boundaries.
-        Args:
-            price: current price of X in Y currency.
-        Returns:
-            Adjusted price.
-        """
-        assert price > 1e-16, f'Incorrect Price = {price}'
-
-        adj_price = min(max(self.lower_price, price), self.upper_price)
-        return adj_price
-
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
         """
