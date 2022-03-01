@@ -255,7 +255,7 @@ class BiCurrencyPosition(AbstractPosition):
         dy = price * (1 - self.swap_fee) * dx
         self.y += dy
         self.total_rebalance_costs += self.rebalance_cost
-        print('1', self.total_rebalance_costs)
+        # print('1', self.total_rebalance_costs)
 
         return dy
 
@@ -276,7 +276,7 @@ class BiCurrencyPosition(AbstractPosition):
         dx = (1 - self.swap_fee) * dy / price
         self.x += dx
         self.total_rebalance_costs += self.rebalance_cost
-        print('3', self.total_rebalance_costs)
+        # print('3', self.total_rebalance_costs)
         return dx
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
@@ -371,16 +371,6 @@ class UniV3Position(AbstractPosition):
         x_res, y_res = x_out + x_fees, y_out + y_fees
         return x_res, y_res
 
-    def swap_to_optimal_xy(self, x, y, price):
-        """
-            It is necessary to make a swap in order to receive tokens in a proportion suitable for mint
-        Args:
-            price: current market price
-        Returns:
-
-        """
-        self.aligner.align_to_liq(self.bi_currency, price)
-
     def swap_to_optimal(self, x: float, y: float, price: float):
         """
         Args:
@@ -414,6 +404,7 @@ class UniV3Position(AbstractPosition):
             self.swap_x_to_y(dx=x - x_new, price=price)
         else:
             self.swap_y_to_x(dy=y - y_new, price=price)
+
         return x_new, y_new
 
     def swap_x_to_y(self, dx, price):
@@ -473,7 +464,6 @@ class UniV3Position(AbstractPosition):
         self.liquidity += d_liq
         self.bi_currency.deposit(x, y)
         self.total_rebalance_costs += self.rebalance_cost
-        print('4', self.total_rebalance_costs)
 
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
         """
@@ -503,10 +493,8 @@ class UniV3Position(AbstractPosition):
         self.realized_loss_to_x += (il_x_0 - il_x_1)
         self.realized_loss_to_y += (il_y_0 - il_y_1)
 
-        # TODO - поч сдесь делает rebalance_cost?
-        # TODO - надо в целом разобраться с комиссиями в этом коде
         self.total_rebalance_costs += self.rebalance_cost
-        print('5', self.total_rebalance_costs)
+
         return x_out, y_out
 
     def charge_fees(self, price_0: float, price_1: float):
