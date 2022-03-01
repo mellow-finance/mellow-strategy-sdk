@@ -8,7 +8,6 @@ sys.path.append('..')
 
 import polars as pl
 
-# TODO RawDataUniV3 unused
 from strategy.data import SyntheticData, RawDataUniV3
 from strategy.backtest import Backtest
 from strategy.strategies import MStrategy
@@ -42,8 +41,8 @@ def evaluate() -> pl.DataFrame:
     data = SyntheticData(pool, init_price=10, mu=0.005).generate_data()
     # data = RawDataUniV3(pool, folder=f'{path}/data/').load_from_folder()
     m_strat = init_strat(data, pool)
-    # TODO unused rebalance_history, uni_history
-    portfolio_history, rebalance_history, uni_history = Backtest(m_strat).backtest(data.swaps)
+
+    portfolio_history, _, _ = Backtest(m_strat).backtest(data.swaps)
     metrics = portfolio_history.calculate_stats()
     return metrics.tail()
 

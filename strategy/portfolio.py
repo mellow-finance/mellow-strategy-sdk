@@ -35,8 +35,6 @@ class Portfolio(AbstractPosition):
         """
         self.positions[current_name].rename(new_name)
         self.positions[new_name] = self.positions.pop(current_name)
-        # TODO: del return None
-        return None
 
     def append(self, position: AbstractPosition) -> None:
         """
@@ -46,8 +44,6 @@ class Portfolio(AbstractPosition):
             position: Any ``AbstractPosition`` instance.
         """
         self.positions[position.name] = position
-        # TODO: del return None
-        return None
 
     def remove(self, name: str) -> None:
         """
@@ -59,8 +55,6 @@ class Portfolio(AbstractPosition):
         if name not in self.positions:
             raise Exception(f'Invalid name = {name}')
         del self.positions[name]
-        # TODO: del return None
-        return None
 
     def get_position(self, name: str) -> AbstractPosition:
         """
@@ -86,8 +80,7 @@ class Portfolio(AbstractPosition):
             pos = self.get_position(last_key)
             return pos
         else:
-            # TODO: Using an f-string that does not have any interpolated variables
-            raise Exception(f'Position not found')
+            raise Exception('Position not found')
 
     def positions_list(self) -> List[AbstractPosition]:
         """
@@ -118,8 +111,7 @@ class Portfolio(AbstractPosition):
             Total value of portfolio denominated in X
         """
         total_x = 0
-        # TODO: name unused variable name
-        for name, pos in self.positions.items():
+        for _, pos in self.positions.items():
             total_x += pos.to_x(price)
         return total_x
 
@@ -134,7 +126,7 @@ class Portfolio(AbstractPosition):
             Total value of portfolio denominated in Y
         """
         total_y = 0
-        for name, pos in self.positions.items():
+        for _, pos in self.positions.items():
             total_y += pos.to_y(price)
         return total_y
 
@@ -150,7 +142,7 @@ class Portfolio(AbstractPosition):
         """
         total_x = 0
         total_y = 0
-        for name, pos in self.positions.items():
+        for _, pos in self.positions.items():
             x, y = pos.to_xy(price)
             total_x += x
             total_y += y
@@ -167,7 +159,6 @@ class Portfolio(AbstractPosition):
         Returns: Portfolio snapshot.
         """
         snapshot = {'timestamp': timestamp, 'price': price}
-        # TODO: name unused variable name
-        for name, pos in self.positions.items():
+        for _, pos in self.positions.items():
             snapshot.update(pos.snapshot(timestamp, price))
         return snapshot
