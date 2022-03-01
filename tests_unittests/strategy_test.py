@@ -1,7 +1,7 @@
 """
     End-to-end test of primitive strategies.
-    H_strategy - TODO
-    M_strategy - TODO
+    H_strategy - TODO bug fails
+    M_strategy - YES
 """
 
 import sys
