@@ -1,0 +1,9 @@
+.venv
+.env
+*.yaml
+*.yml
+__pycache__/
+**/*.ipynb_checkpoints
+**/*.idea
+**/*.csv
+**/.DS_Store
