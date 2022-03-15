@@ -238,7 +238,7 @@ class PotrfolioViewer:
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['vpn_value'],
-                name=f'Portfolio V*p_n value APY',
+                name=f'Portfolio V*p_n value',
             ),
             secondary_y=True)
 

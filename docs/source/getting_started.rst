@@ -1,6 +1,8 @@
 Getting Started
 ===============
 
+TODO: install libs
+
 The easiest way to get started is to clone SDK and use examples in the `Github repo <https://github.com/mellow-finance/mellow-strategy-sdk/tree/main/examples>`_.
 It will also be useful to look at the tests  `Github repo <https://github.com/mellow-finance/mellow-strategy-sdk/tree/main/tests>`_.
 

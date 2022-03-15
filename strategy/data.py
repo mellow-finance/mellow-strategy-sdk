@@ -10,7 +10,6 @@ from strategy.primitives import Pool, POOLS
 from utilities.utilities import get_db_connector, get_main_path
 
 
-
 class PoolDataUniV3:
     """
     ``PoolDataUniV3`` contains data for backtesting.
@@ -35,9 +34,14 @@ class PoolDataUniV3:
 
 
 class RawDataUniV3:
-    def __init__(self, pool: Pool, dir: Path = '../data/'):
+    def __init__(self, pool: Pool, data_dir: Path = None):
         self.pool = pool
-        self.dir = dir
+
+        if not data_dir:
+            root = get_main_path()
+            self.data_dir = os.path.join(root, 'data')
+        else:
+            self.data_dir = data_dir
 
     def load_mints(self):
         mints_converters = {
@@ -55,7 +59,8 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        df_mints = pl.read_csv(f'{self.dir}mint_{self.pool.name}.csv', dtypes=mints_converters)
+        print()
+        df_mints = pl.read_csv(f'{self.data_dir}/mint_{self.pool.name}.csv', dtypes=mints_converters)
         df_prep = df_mints.select([
             pl.col('tx_hash'),
             pl.col('owner'),
@@ -87,7 +92,7 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        df_burns = pl.read_csv(f'{self.dir}burn_{self.pool.name}.csv', dtypes=burns_converters)
+        df_burns = pl.read_csv(f'{self.data_dir}/burn_{self.pool.name}.csv', dtypes=burns_converters)
         df_prep = df_burns.select([
             pl.col('tx_hash'),
             pl.col('owner'),
@@ -122,7 +127,7 @@ class RawDataUniV3:
             "amount1": pl.Float64,
             'sqrt_price_x96': pl.Float64,
         }
-        df_swaps = pl.read_csv(f'{self.dir}swap_{self.pool.name}.csv', dtypes=swaps_converters)
+        df_swaps = pl.read_csv(f'{self.data_dir}/swap_{self.pool.name}.csv', dtypes=swaps_converters)
         df_prep = df_swaps.select([
             pl.col('tx_hash'),
             pl.col('sender'),
@@ -230,7 +235,6 @@ class DownloaderRawDataUniV3:
 
         try:
             if event == 'burn':
-                print()
                 query = f"""
                     select
                         pool,

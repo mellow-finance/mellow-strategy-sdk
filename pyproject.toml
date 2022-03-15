@@ -16,6 +16,8 @@ pyarrow = "^7.0.0"
 PyYAML = "^6.0"
 SQLAlchemy = "^1.4.31"
 parameterized = "^0.8.1"
+sphinx-rtd-theme = "^1.0.0"
+python-binance = "^1.0.15"
 
 [tool.poetry.dev-dependencies]
 

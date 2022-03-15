@@ -112,8 +112,8 @@ def get_data_from_binance(pair_name, interval, start_str, end_str):
 
     # binance api client
     client = Client(
-        ConfigParser().config['aenik97_binance']['api_key'],
-        ConfigParser().config['aenik97_binance']['api_secret']
+        ConfigParser().config['binance']['api_key'],
+        ConfigParser().config['binance']['api_secret']
     )
 
     # download candles
@@ -142,17 +142,13 @@ def get_data_from_binance(pair_name, interval, start_str, end_str):
     df = pd.DataFrame({'price': [np.nan]}, index=index_col)
     df.index.name = 'timestamp'
 
-    print('mismatch timestamp rows: ', len(set(ts) - set(index_col)))
+    mismatch_rows = list(set(ts) - set(index_col))
+    print('mismatch timestamp rows: ', len(mismatch_rows))
 
-    ts_correct = []
-    price_col_correct = []
+    data = np.array([ts, price_col])
+    data = data[:, np.isin(data[0, :], mismatch_rows, invert=True)]
 
-    for i in range(len(ts)):
-        if ts[i] in index_col:
-            ts_correct.append(ts[i])
-            price_col_correct.append(price_col[i])
-
-    df.loc[ts_correct, 'price'] = price_col_correct
+    df.loc[data[0, :], 'price'] = data[1, :]
     df.index = pd.to_datetime(df.index, unit='us')
 
     df['price'] = df['price'].shift(1)
