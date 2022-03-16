@@ -1,10 +1,11 @@
-from strategy.uniswap_utils import UniswapV3Utils, UniswapV2Utils, UniswapLiquidityAligner
+from strategy.uniswap_utils import UniswapLiquidityAligner
 from strategy.positions import UniV3Position, BiCurrencyPosition
 from strategy.primitives import Pool
 
 from abc import ABC, abstractmethod
 import math
 import numpy as np
+import typing as tp
 
 
 class AbstractStrategy(ABC):
@@ -21,21 +22,22 @@ class AbstractStrategy(ABC):
             self.name = name
 
     @abstractmethod
-    def rebalance(self, *args, **kwargs) -> str:
+    def rebalance(self, *args, **kwargs) -> tp.Optional[str]:
         """
         Rebalance implementation.
-
         Args:
             args: Any args.
             kwargs: Any kwargs.
-
         Returns:
-            Name of event.
+            Name of event or None if there was no event.
         """
         raise Exception(NotImplemented)
 
 
 class Hold(AbstractStrategy):
+    """
+        ``Hold`` is the passive strategy buy and hold.
+    """
     def __init__(self, name: str = None):
         super().__init__(name)
         self.prev_gain_date = None
@@ -56,6 +58,7 @@ class Hold(AbstractStrategy):
 class UniV3Passive(AbstractStrategy):
     """
     ``UniV3Passive`` is the passive strategy on UniswapV3 without rebalances.
+        i.e. mint interval and wait.
         lower_price: Lower bound of the interval
         upper_price: Upper bound of the interval
         rebalance_cost: Rebalancing cost, expressed in currency

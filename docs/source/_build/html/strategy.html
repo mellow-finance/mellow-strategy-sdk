@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>strategy &mdash; mellow_strategy_sdk 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> mellow_strategy_sdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">strategy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#backtest">Backtest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#crossvalidation">CrossValidation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#history">History</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#portfolio">Portfolio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#positions">Positions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#primitives">Primitives</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#strategies">Strategies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#uniswaputils">UniswapUtils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#viewers">Viewers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mellow_strategy_sdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>strategy</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/strategy.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-strategy.backtest">
+<span id="strategy"></span><h1>strategy<a class="headerlink" href="#module-strategy.backtest" title="Permalink to this headline">¶</a></h1>
+<p>TODO: write</p>
+<section id="backtest">
+<h2>Backtest<a class="headerlink" href="#backtest" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.backtest.Backtest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.backtest.</span></span><span class="sig-name descname"><span class="pre">Backtest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.strategies.AbstractStrategy" title="strategy.strategies.AbstractStrategy"><span class="pre">strategy.strategies.AbstractStrategy</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">portfolio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#strategy.portfolio.Portfolio" title="strategy.portfolio.Portfolio"><span class="pre">strategy.portfolio.Portfolio</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.backtest.Backtest" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">Backtest</span></code> is used for backtesting strategy on pool data.</p>
+<p>It contains the logic of running strategy on the market data and tracks results.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.backtest.Backtest.strategy">
+<span class="sig-name descname"><span class="pre">strategy</span></span><a class="headerlink" href="#strategy.backtest.Backtest.strategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Strategy to backtest.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.backtest.Backtest.portfolio">
+<span class="sig-name descname"><span class="pre">portfolio</span></span><a class="headerlink" href="#strategy.backtest.Backtest.portfolio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Portfolio to manage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.backtest.Backtest.backtest">
+<span class="sig-name descname"><span class="pre">backtest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_swaps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#strategy.history.PortfolioHistory" title="strategy.history.PortfolioHistory"><span class="pre">strategy.history.PortfolioHistory</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#strategy.history.RebalanceHistory" title="strategy.history.RebalanceHistory"><span class="pre">strategy.history.RebalanceHistory</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#strategy.history.UniPositionsHistory" title="strategy.history.UniPositionsHistory"><span class="pre">strategy.history.UniPositionsHistory</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.backtest.Backtest.backtest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run backtest on data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df_swaps</strong> – UniswapV3 exchanges data frame.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio statistics on historical data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.cross_validation"></span><p>TODO: write</p>
+</section>
+<section id="crossvalidation">
+<h2>CrossValidation<a class="headerlink" href="#crossvalidation" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.cross_validation.FolderSimple">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.cross_validation.</span></span><span class="sig-name descname"><span class="pre">FolderSimple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.cross_validation.FolderSimple" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">FolderSimple</span></code> makes the splitting into equal folds.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.cross_validation.FolderSimple.n_folds">
+<span class="sig-name descname"><span class="pre">n_folds</span></span><a class="headerlink" href="#strategy.cross_validation.FolderSimple.n_folds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of folds.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.cross_validation.FolderSimple.generate_folds_by_index">
+<span class="sig-name descname"><span class="pre">generate_folds_by_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.cross_validation.FolderSimple.generate_folds_by_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split data into folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – Uniswap exchancge data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.cross_validation.FolderSimple.get_fold">
+<span class="sig-name descname"><span class="pre">get_fold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fold_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.cross_validation.FolderSimple.get_fold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get fold by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Uniswap exchancge data</p></li>
+<li><p><strong>fold_name</strong> – Folds name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Fold data as PoolDataUniV3</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.cross_validation.CrossValidation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.cross_validation.</span></span><span class="sig-name descname"><span class="pre">CrossValidation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.cross_validation.CrossValidation" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">CrossValidation</span></code> backtests strategy on folds.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.cross_validation.CrossValidation.folder">
+<span class="sig-name descname"><span class="pre">folder</span></span><a class="headerlink" href="#strategy.cross_validation.CrossValidation.folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Folder class that splits data on folds</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.cross_validation.CrossValidation.strategy">
+<span class="sig-name descname"><span class="pre">strategy</span></span><a class="headerlink" href="#strategy.cross_validation.CrossValidation.strategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Strategy to backtest</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.cross_validation.CrossValidation.aggregate">
+<span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folds_result</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.cross_validation.CrossValidation.aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregate backtesting results from folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>folds_result</strong> – History from folds</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dict of APY’s by folds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.cross_validation.CrossValidation.backtest">
+<span class="sig-name descname"><span class="pre">backtest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.cross_validation.CrossValidation.backtest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parallel backtesting on folded data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – Uniswap exchancge data</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of history dicts by folds</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.data"></span></section>
+<section id="data">
+<h2>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.data.PoolDataUniV3">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.data.</span></span><span class="sig-name descname"><span class="pre">PoolDataUniV3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.primitives.Pool" title="strategy.primitives.Pool"><span class="pre">strategy.primitives.Pool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swaps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.DataFrame</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.data.PoolDataUniV3" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">PoolDataUniV3</span></code> contains data for backtesting.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.PoolDataUniV3.pool">
+<span class="sig-name descname"><span class="pre">pool</span></span><a class="headerlink" href="#strategy.data.PoolDataUniV3.pool" title="Permalink to this definition">¶</a></dt>
+<dd><p>UniswapV3 <code class="docutils literal notranslate"><span class="pre">Pool</span></code> data</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.PoolDataUniV3.mints">
+<span class="sig-name descname"><span class="pre">mints</span></span><a class="headerlink" href="#strategy.data.PoolDataUniV3.mints" title="Permalink to this definition">¶</a></dt>
+<dd><p>UniswapV3 mints data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.PoolDataUniV3.burns">
+<span class="sig-name descname"><span class="pre">burns</span></span><a class="headerlink" href="#strategy.data.PoolDataUniV3.burns" title="Permalink to this definition">¶</a></dt>
+<dd><p>UniswapV3 burns data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.PoolDataUniV3.swaps">
+<span class="sig-name descname"><span class="pre">swaps</span></span><a class="headerlink" href="#strategy.data.PoolDataUniV3.swaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>UniswapV3 swaps data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.data.RawDataUniV3">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.data.</span></span><span class="sig-name descname"><span class="pre">RawDataUniV3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.primitives.Pool" title="strategy.primitives.Pool"><span class="pre">strategy.primitives.Pool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.data.RawDataUniV3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.data.SyntheticData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.data.</span></span><span class="sig-name descname"><span class="pre">SyntheticData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1-1-2022'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">365</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_price</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.data.SyntheticData" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">SyntheticData</span></code> generates UniswapV3 synthetic exchange data.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.SyntheticData.pool">
+<span class="sig-name descname"><span class="pre">pool</span></span><a class="headerlink" href="#strategy.data.SyntheticData.pool" title="Permalink to this definition">¶</a></dt>
+<dd><p>UniswapV3 <code class="docutils literal notranslate"><span class="pre">Pool</span></code> instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.SyntheticData.start_date">
+<span class="sig-name descname"><span class="pre">start_date</span></span><a class="headerlink" href="#strategy.data.SyntheticData.start_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generating starting date.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.SyntheticData.n_points">
+<span class="sig-name descname"><span class="pre">n_points</span></span><a class="headerlink" href="#strategy.data.SyntheticData.n_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Amount samples to generate.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.SyntheticData.init_price">
+<span class="sig-name descname"><span class="pre">init_price</span></span><a class="headerlink" href="#strategy.data.SyntheticData.init_price" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initial price.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.SyntheticData.mu">
+<span class="sig-name descname"><span class="pre">mu</span></span><a class="headerlink" href="#strategy.data.SyntheticData.mu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expectation of normal distribution.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.SyntheticData.sigma">
+<span class="sig-name descname"><span class="pre">sigma</span></span><a class="headerlink" href="#strategy.data.SyntheticData.sigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Variance of normal distributio.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.data.SyntheticData.seed">
+<span class="sig-name descname"><span class="pre">seed</span></span><a class="headerlink" href="#strategy.data.SyntheticData.seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seed for random generator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.data.SyntheticData.generate_data">
+<span class="sig-name descname"><span class="pre">generate_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#strategy.data.SyntheticData.generate_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate synthetic UniswapV3 exchange data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>PoolDataUniV3 instance with synthetic data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.history"></span></section>
+<section id="history">
+<h2>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.history.</span></span><span class="sig-name descname"><span class="pre">PortfolioHistory</span></span><a class="headerlink" href="#strategy.history.PortfolioHistory" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">PortfolioHistory</span></code> tracks position stats over time.</p>
+<p>Each time <code class="docutils literal notranslate"><span class="pre">add_snapshot</span></code> method is called it remembers current state in time.
+All tracked values then can be accessed via <code class="docutils literal notranslate"><span class="pre">to_df</span></code> method that will return a <code class="docutils literal notranslate"><span class="pre">pd.Dataframe</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory.add_snapshot">
+<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.history.PortfolioHistory.add_snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add portfolio snapshot to history.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>snapshot</strong> – Dict of portfolio params.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory.calculate_apy_for_col">
+<span class="sig-name descname"><span class="pre">calculate_apy_for_col</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.internals.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calculate_full</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.internals.frame.DataFrame</span></span></span><a class="headerlink" href="#strategy.history.PortfolioHistory.calculate_apy_for_col" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate portfolio APY.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> – Portfolio history DataFrame.</p></li>
+<li><p><strong>from_col</strong> – # TODO</p></li>
+<li><p><strong>to_col</strong> – # TODO</p></li>
+<li><p><strong>calculate_full</strong> – # TODO</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio APY data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory.calculate_fees">
+<span class="sig-name descname"><span class="pre">calculate_fees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.internals.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.internals.frame.DataFrame</span></span></span><a class="headerlink" href="#strategy.history.PortfolioHistory.calculate_fees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate fees of Uniswap positions in X and Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – Portfolio history DataFrame.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio fees in X and Y data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory.calculate_ils">
+<span class="sig-name descname"><span class="pre">calculate_ils</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.internals.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.internals.frame.DataFrame</span></span></span><a class="headerlink" href="#strategy.history.PortfolioHistory.calculate_ils" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate IL of portfolio in X and Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – Portfolio history DataFrame.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio ILs in X and Y data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory.calculate_returns">
+<span class="sig-name descname"><span class="pre">calculate_returns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.internals.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.internals.frame.DataFrame</span></span></span><a class="headerlink" href="#strategy.history.PortfolioHistory.calculate_returns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate portfolio returns.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – Portfolio history DataFrame.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio returns data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory.calculate_stats">
+<span class="sig-name descname"><span class="pre">calculate_stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.internals.frame.DataFrame</span></span></span><a class="headerlink" href="#strategy.history.PortfolioHistory.calculate_stats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate all statistics for portfolio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Portfolio history data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory.calculate_value_to">
+<span class="sig-name descname"><span class="pre">calculate_value_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.internals.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.internals.frame.DataFrame</span></span></span><a class="headerlink" href="#strategy.history.PortfolioHistory.calculate_value_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate total value of portfolio denominated in X and Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – Portfolio history DataFrame.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio total value of portfolio denominated in X and Y data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory.calculate_values">
+<span class="sig-name descname"><span class="pre">calculate_values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">polars.internals.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.internals.frame.DataFrame</span></span></span><a class="headerlink" href="#strategy.history.PortfolioHistory.calculate_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate value of portfolio in X and Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – Portfolio history DataFrame.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio values in X and Y data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.PortfolioHistory.to_df">
+<span class="sig-name descname"><span class="pre">to_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#strategy.history.PortfolioHistory.to_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform list of portfolio snapshots to data frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Portfolio history data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.history.RebalanceHistory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.history.</span></span><span class="sig-name descname"><span class="pre">RebalanceHistory</span></span><a class="headerlink" href="#strategy.history.RebalanceHistory" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">RebalanceHistory</span></code> tracks rebalances over time.</p>
+<p>Each time <code class="docutils literal notranslate"><span class="pre">add_snapshot</span></code> method is called it remembers rebalance.
+All tracked values then can be accessed via <code class="docutils literal notranslate"><span class="pre">to_df</span></code> method that will return a <code class="docutils literal notranslate"><span class="pre">pd.Dataframe</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.RebalanceHistory.add_snapshot">
+<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapshot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Hashable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.history.RebalanceHistory.add_snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add portfolio rebalance snapshot to history</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> – Timestamp of snapshot.</p></li>
+<li><p><strong>snapshot</strong> – Dict of portfolio rebalances.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.RebalanceHistory.to_df">
+<span class="sig-name descname"><span class="pre">to_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="headerlink" href="#strategy.history.RebalanceHistory.to_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform list of portfolio rebalance snapshots to data frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Portfolio rebalance history data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.history.UniPositionsHistory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.history.</span></span><span class="sig-name descname"><span class="pre">UniPositionsHistory</span></span><a class="headerlink" href="#strategy.history.UniPositionsHistory" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">UniPositionsHistory</span></code> tracks Uniswap positions over time.
+Each time <code class="docutils literal notranslate"><span class="pre">add_snapshot</span></code> method is called it remembers all Uniswap positions at current time.
+All tracked values then can be accessed via <code class="docutils literal notranslate"><span class="pre">to_df</span></code> method that will return a <code class="docutils literal notranslate"><span class="pre">pd.Dataframe</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.UniPositionsHistory.add_snapshot">
+<span class="sig-name descname"><span class="pre">add_snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.history.UniPositionsHistory.add_snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add Uniswap position snapshot to history.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> – Timestamp of snapshot.</p></li>
+<li><p><strong>positions</strong> – List of Uniswap positions.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.history.UniPositionsHistory.to_df">
+<span class="sig-name descname"><span class="pre">to_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">polars.internals.frame.DataFrame</span></span></span><a class="headerlink" href="#strategy.history.UniPositionsHistory.to_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform list of Uniswap positions snapshots to data frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Uniswap positions history data frame.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.multi_strategy"></span><p>TODO: write</p>
+</section>
+<section id="id1">
+<h2>Data<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.multi_strategy.MultiStrategy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.multi_strategy.</span></span><span class="sig-name descname"><span class="pre">MultiStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategies</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#strategy.strategies.AbstractStrategy" title="strategy.strategies.AbstractStrategy"><span class="pre">strategy.strategies.AbstractStrategy</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.multi_strategy.MultiStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">MultiStrategy</span></code> is used for making composition of several strategies.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.multi_strategy.MultiStrategy.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#strategy.multi_strategy.MultiStrategy.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique name for the instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.multi_strategy.MultiStrategy.strategies">
+<span class="sig-name descname"><span class="pre">strategies</span></span><a class="headerlink" href="#strategy.multi_strategy.MultiStrategy.strategies" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of strategies.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.multi_strategy.MultiStrategy.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.strategies.AbstractStrategy" title="strategy.strategies.AbstractStrategy"><span class="pre">strategy.strategies.AbstractStrategy</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#strategy.multi_strategy.MultiStrategy.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add strategy to composition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>strategy</strong> – Any AbstractStrategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.multi_strategy.MultiStrategy.rebalance">
+<span class="sig-name descname"><span class="pre">rebalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Hashable</span></span></span><a class="headerlink" href="#strategy.multi_strategy.MultiStrategy.rebalance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebalance implementation for strategy composition.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – Any args.</p></li>
+<li><p><strong>kwargs</strong> – Any kwargs.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: Rebalnaces status of each strategy in composition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.multi_strategy.MultiStrategy.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#strategy.multi_strategy.MultiStrategy.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove strategy from composition by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – Strategy name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.portfolio"></span><p>TODO: write</p>
+</section>
+<section id="portfolio">
+<h2>Portfolio<a class="headerlink" href="#portfolio" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.portfolio.</span></span><span class="sig-name descname"><span class="pre">Portfolio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">strategy.positions.AbstractPosition</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.portfolio.Portfolio" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">Portfolio</span></code> is a container for several open positions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique name for the position.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.positions">
+<span class="sig-name descname"><span class="pre">positions</span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.positions" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of initial positions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">strategy.positions.AbstractPosition</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add position to portfolio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>position</strong> – Any <code class="docutils literal notranslate"><span class="pre">AbstractPosition</span></code> instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.get_last_position">
+<span class="sig-name descname"><span class="pre">get_last_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">strategy.positions.AbstractPosition</span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.get_last_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get last position from portfolio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Last position in portfolio.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.get_position">
+<span class="sig-name descname"><span class="pre">get_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">strategy.positions.AbstractPosition</span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.get_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get position from portfolio by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – Position name.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">AbstractPosition</span></code> instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.position_names">
+<span class="sig-name descname"><span class="pre">position_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.position_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of position names in portfolio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of all position names in portfolio.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.positions_list">
+<span class="sig-name descname"><span class="pre">positions_list</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">strategy.positions.AbstractPosition</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.positions_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of all positions in portfolio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of all positions in portfolio.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove position from portfolio by its name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> – Position name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.rename_position">
+<span class="sig-name descname"><span class="pre">rename_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">current_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.rename_position" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename position in portfolio by its name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_name</strong> – Current name of position.</p></li>
+<li><p><strong>new_name</strong> – New name for position.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.snapshot">
+<span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get portfolio snapshot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> – Timestamp of snapshot.</p></li>
+<li><p><strong>price</strong> – Current price of X in Y currency.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: Portfolio snapshot.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.to_x">
+<span class="sig-name descname"><span class="pre">to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.to_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get total value of portfolio denominated to X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Current price of X in Y currency</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total value of portfolio denominated in X</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.to_xy">
+<span class="sig-name descname"><span class="pre">to_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.to_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get bicurrency equivalence of portfolio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Сurrent price of X in Y currency.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio value to X and Y.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.portfolio.Portfolio.to_y">
+<span class="sig-name descname"><span class="pre">to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.portfolio.Portfolio.to_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get total value of portfolio expressed in Y</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Current price of X in Y currency</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total value of portfolio denominated in Y</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.positions"></span><p>TODO: write</p>
+</section>
+<section id="positions">
+<h2>Positions<a class="headerlink" href="#positions" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.positions.</span></span><span class="sig-name descname"><span class="pre">BiCurrencyPosition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">swap_fee</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebalance_cost</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_interest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_interest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">BiCurrencyPosition</span></code> is a class corresponding to currency pair.
+.. attribute:: name</p>
+<blockquote>
+<div><p>Unique name for the position.</p>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.swap_fee">
+<span class="sig-name descname"><span class="pre">swap_fee</span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.swap_fee" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exchange fee expressed as a percentage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.rebalance_cost">
+<span class="sig-name descname"><span class="pre">rebalance_cost</span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.rebalance_cost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebalancing cost, expressed in Y currency.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.x">
+<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Amount of asset X.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.y">
+<span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Amount of asset Y.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.x_interest">
+<span class="sig-name descname"><span class="pre">x_interest</span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.x_interest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interest on currency X deposit expressed as a daily percentage yield.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.y_interest">
+<span class="sig-name descname"><span class="pre">y_interest</span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.y_interest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interest on currency Y deposit expressed as a daily percentage yield.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.deposit">
+<span class="sig-name descname"><span class="pre">deposit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.deposit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deposit X currency and Y currency to position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Value of X currency</p></li>
+<li><p><strong>y</strong> – Value of Y currency</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.interest_gain">
+<span class="sig-name descname"><span class="pre">interest_gain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.interest_gain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gain deposit interest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>date</strong> – Gaining date.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.rebalance">
+<span class="sig-name descname"><span class="pre">rebalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.rebalance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebalance bicurrency pair with respect to their proportion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_fraction</strong> – Fraction of X after rebalance from 0 to 1.</p></li>
+<li><p><strong>y_fraction</strong> – Fraction of Y after rebalance from 0 to 1.</p></li>
+<li><p><strong>price</strong> – Current price of X in Y currency.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.snapshot">
+<span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get position snapshot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> – Timestamp of snapshot</p></li>
+<li><p><strong>price</strong> – Current price of X in Y currency</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: Position snapshot</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.swap_x_to_y">
+<span class="sig-name descname"><span class="pre">swap_x_to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.swap_x_to_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swap X currency to Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dx</strong> – Amount of X to be swapped.</p></li>
+<li><p><strong>price</strong> – Current price of X in Y currency.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Amount of Y was getted</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.swap_y_to_x">
+<span class="sig-name descname"><span class="pre">swap_y_to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.swap_y_to_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swap Y currency to X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dy</strong> – Amount of X to be swapped.</p></li>
+<li><p><strong>price</strong> – Current price of X in Y currency.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Amount of Y was getted</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dx</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.to_x">
+<span class="sig-name descname"><span class="pre">to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.to_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get total value of position expessed in X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Current price of X in Y currency</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total value of position expessed in X</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.to_xy">
+<span class="sig-name descname"><span class="pre">to_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.to_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get values of bicurrency pair.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Current price of X in Y currency.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Position value to X and Y.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.to_y">
+<span class="sig-name descname"><span class="pre">to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.to_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get total value of position expessed in Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Current price of X in Y currency.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Total value of position expessed in Y.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.withdraw">
+<span class="sig-name descname"><span class="pre">withdraw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.withdraw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Withdraw X currency and Y currency from position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Value of X currency</p></li>
+<li><p><strong>y</strong> – Value of Y currency</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value of X, value of Y</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.BiCurrencyPosition.withdraw_fraction">
+<span class="sig-name descname"><span class="pre">withdraw_fraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.positions.BiCurrencyPosition.withdraw_fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Withdraw percent of X currency and percent of Y currency from position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fraction</strong> – Fraction from 0 to 1.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Fraction of current X and Y.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.positions.</span></span><span class="sig-name descname"><span class="pre">UniV3Position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fee_percent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rebalance_cost</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.positions.UniV3Position" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">UniV3Position</span></code> is a class corresponding to one investment into UniswapV3 interval.
+It’s defined by lower and upper bounds <code class="docutils literal notranslate"><span class="pre">lower_price</span></code>, <code class="docutils literal notranslate"><span class="pre">upper_price</span></code>
+and  pool fee percent <code class="docutils literal notranslate"><span class="pre">fee_percent</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#strategy.positions.UniV3Position.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique name for the position</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.lower_price">
+<span class="sig-name descname"><span class="pre">lower_price</span></span><a class="headerlink" href="#strategy.positions.UniV3Position.lower_price" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lower bound of the interval (price)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.upper_price">
+<span class="sig-name descname"><span class="pre">upper_price</span></span><a class="headerlink" href="#strategy.positions.UniV3Position.upper_price" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upper bound of the interval (price)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.fee_percent">
+<span class="sig-name descname"><span class="pre">fee_percent</span></span><a class="headerlink" href="#strategy.positions.UniV3Position.fee_percent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Amount of fee expressed as a percentage</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.rebalance_cost">
+<span class="sig-name descname"><span class="pre">rebalance_cost</span></span><a class="headerlink" href="#strategy.positions.UniV3Position.rebalance_cost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebalancing cost, expressed in currency</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.burn">
+<span class="sig-name descname"><span class="pre">burn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">liq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.burn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Burn some liquidity from UniswapV3 position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>liq</strong> – Value of liquidity.</p></li>
+<li><p><strong>price</strong> – Current price of X in Y currency.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: Value of X, value of Y.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.charge_fees">
+<span class="sig-name descname"><span class="pre">charge_fees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price_0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.positions.UniV3Position.charge_fees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Charge exchange fees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>price_0</strong> – Price before exchange.</p></li>
+<li><p><strong>price_1</strong> – Price after exchange.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.collect_fees">
+<span class="sig-name descname"><span class="pre">collect_fees</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.collect_fees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect all gained fees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Value of X fees, value of Y fees.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.deposit">
+<span class="sig-name descname"><span class="pre">deposit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.deposit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deposit X and Y to position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Value of X currency.</p></li>
+<li><p><strong>y</strong> – Value of Y currency.</p></li>
+<li><p><strong>price</strong> – Current price of X in Y currency.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.impermanent_loss">
+<span class="sig-name descname"><span class="pre">impermanent_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.impermanent_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate impermanent loss separately in X and Y currencies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Current price of X in Y currency.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value of X il, value of Y il.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.impermanent_loss_to_x">
+<span class="sig-name descname"><span class="pre">impermanent_loss_to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.impermanent_loss_to_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate impermanent loss denominated in X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Current price of X in Y currency.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value of X il.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.impermanent_loss_to_y">
+<span class="sig-name descname"><span class="pre">impermanent_loss_to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.impermanent_loss_to_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate impermanent loss denominated in Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Current price of X in Y currency.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value of Y il.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.mint">
+<span class="sig-name descname"><span class="pre">mint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.positions.UniV3Position.mint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mint X and Y to uniswapV3 interval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Value of X currency.</p></li>
+<li><p><strong>y</strong> – Value of Y currency.</p></li>
+<li><p><strong>price</strong> – </p></li>
+<li><p><strong>currency.</strong> (<em>Current price of X in Y</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.snapshot">
+<span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get uniswapV3 position snapshot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> – timestamp of snapshot.</p></li>
+<li><p><strong>price</strong> – Current price of X in Y currency.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>UniswapV3 position snapshot.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.swap_to_optimal">
+<span class="sig-name descname"><span class="pre">swap_to_optimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.positions.UniV3Position.swap_to_optimal" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – </p></li>
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>price</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.swap_x_to_y">
+<span class="sig-name descname"><span class="pre">swap_x_to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.positions.UniV3Position.swap_x_to_y" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dx</strong> – </p></li>
+<li><p><strong>price</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.swap_y_to_x">
+<span class="sig-name descname"><span class="pre">swap_y_to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">price</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.positions.UniV3Position.swap_y_to_x" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dy</strong> – </p></li>
+<li><p><strong>price</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.to_x">
+<span class="sig-name descname"><span class="pre">to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.to_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get value of UniswapV3 position expessed in X.
+:param price: Current price of X in Y currency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Total value of uniswapV3 position expessed in X.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.to_xy">
+<span class="sig-name descname"><span class="pre">to_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.to_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get values of position in X and Y.
+:param price: Current price of X in Y currency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Position value to X and Y.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.to_y">
+<span class="sig-name descname"><span class="pre">to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.to_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get value of UniswapV3 position expessed in Y.
+:param price: Current price of X in Y currency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Total value of UniswapV3 position expessed in Y.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.positions.UniV3Position.withdraw">
+<span class="sig-name descname"><span class="pre">withdraw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#strategy.positions.UniV3Position.withdraw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Withdraw all liquidity from UniswapV3 position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – Current price of X in Y currency.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value of X, value of Y.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.primitives"></span><p>TODO: write</p>
+</section>
+<section id="primitives">
+<h2>Primitives<a class="headerlink" href="#primitives" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.primitives.Fee">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.primitives.</span></span><span class="sig-name descname"><span class="pre">Fee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.primitives.Fee" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">Fee</span></code> defines available fees for UniV3 pools.
+Currently 3 values are available: 0.05%, 0.3%, 1%.
+The actual enum values are fee * 100_000, i.e. 0.05% enum value is integer 500.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Fee.percent">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">percent</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#strategy.primitives.Fee.percent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The actual uniswap percentage fee, i.e. 0.05%, 0.3% or 1%.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>UniswapV3 percentage fee.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Fee.spacing">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">spacing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#strategy.primitives.Fee.spacing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tick spacing for this fee.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Tick spacing for this fee.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.primitives.Token">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.primitives.</span></span><span class="sig-name descname"><span class="pre">Token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.primitives.Token" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">Token</span></code> represents one of mainnet tokens and contains some
+additional data line address and decimals.
+This class is ordered according to token address. E.g. <code class="code docutils literal notranslate"><span class="pre">Token.WBTC</span> <span class="pre">&lt;</span> <span class="pre">Token.USDC</span></code>.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Token.address">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#strategy.primitives.Token.address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mainnet address of the token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Mainnet address of the token.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Token.decimals">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decimals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#strategy.primitives.Token.decimals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decimals of the token.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Decimals of the token.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.primitives.Pool">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.primitives.</span></span><span class="sig-name descname"><span class="pre">Pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tokenA</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.primitives.Token" title="strategy.primitives.Token"><span class="pre">strategy.primitives.Token</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">tokenB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.primitives.Token" title="strategy.primitives.Token"><span class="pre">strategy.primitives.Token</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fee</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.primitives.Fee" title="strategy.primitives.Fee"><span class="pre">strategy.primitives.Fee</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.primitives.Pool" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">Pool</span></code> represents a mainnet UniV3 pool.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.primitives.Pool.tokenA">
+<span class="sig-name descname"><span class="pre">tokenA</span></span><a class="headerlink" href="#strategy.primitives.Pool.tokenA" title="Permalink to this definition">¶</a></dt>
+<dd><p>First token of the pool.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.primitives.Pool.tokenB">
+<span class="sig-name descname"><span class="pre">tokenB</span></span><a class="headerlink" href="#strategy.primitives.Pool.tokenB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Second token of the pool.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.primitives.Pool.fee">
+<span class="sig-name descname"><span class="pre">fee</span></span><a class="headerlink" href="#strategy.primitives.Pool.fee" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pool fee.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Pool.address">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">address</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#strategy.primitives.Pool.address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Address of the pool on the mainnet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pool mainnet address.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Pool.decimals_diff">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decimals_diff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#strategy.primitives.Pool.decimals_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Difference between <code class="docutils literal notranslate"><span class="pre">token0</span></code> and <code class="docutils literal notranslate"><span class="pre">token1</span></code> decimals.
+Used for conversion of price from <cite>wei</cite> to <cite>eth</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Decimal difference between Tokens.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fee</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#strategy.primitives.Fee" title="strategy.primitives.Fee"><span class="pre">strategy.primitives.Fee</span></a></em><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fee of the pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Fee of the pool.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Pool.l_decimals_diff">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">l_decimals_diff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#strategy.primitives.Pool.l_decimals_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used for conversion of liquidity from <cite>wei</cite> to <cite>eth</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Decimal difference between Tokens in Eth.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Pool.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#strategy.primitives.Pool.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique name for the pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Pool name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Pool.token0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">token0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#strategy.primitives.Token" title="strategy.primitives.Token"><span class="pre">strategy.primitives.Token</span></a></em><a class="headerlink" href="#strategy.primitives.Pool.token0" title="Permalink to this definition">¶</a></dt>
+<dd><p>First token of the pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>First token name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="strategy.primitives.Pool.token1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">token1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#strategy.primitives.Token" title="strategy.primitives.Token"><span class="pre">strategy.primitives.Token</span></a></em><a class="headerlink" href="#strategy.primitives.Pool.token1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Second token of the pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Second token name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.strategies"></span></section>
+<section id="strategies">
+<h2>Strategies<a class="headerlink" href="#strategies" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.strategies.AbstractStrategy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.strategies.</span></span><span class="sig-name descname"><span class="pre">AbstractStrategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.strategies.AbstractStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">AbstractStrategy</span></code> is an abstract class for Strategies.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.strategies.AbstractStrategy.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#strategy.strategies.AbstractStrategy.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique name for the instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.strategies.AbstractStrategy.rebalance">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rebalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#strategy.strategies.AbstractStrategy.rebalance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebalance implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> – Any args.</p></li>
+<li><p><strong>kwargs</strong> – Any kwargs.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Name of event.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.uniswap_utils"></span><dl class="simple">
+<dt>TODO write</dt><dd><p>UniswapLiquidityAligner and other utils classes</p>
+</dd>
+</dl>
+</section>
+<section id="uniswaputils">
+<h2>UniswapUtils<a class="headerlink" href="#uniswaputils" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.uniswap_utils.</span></span><span class="sig-name descname"><span class="pre">UniswapLiquidityAligner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower_price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_price</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner" title="Permalink to this definition">¶</a></dt>
+<dd><p>UniswapLiquidityAligner this is a class with standard uniswap V3 formulas and transformations
+related to liquidity on the interval</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.lower_price">
+<span class="sig-name descname"><span class="pre">lower_price</span></span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.lower_price" title="Permalink to this definition">¶</a></dt>
+<dd><p>Left bound for the UniswapV3 interval.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.upper_price">
+<span class="sig-name descname"><span class="pre">upper_price</span></span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.upper_price" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right bound for the UniswapV3 interval.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.check_xy_is_optimal">
+<span class="sig-name descname"><span class="pre">check_xy_is_optimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.check_xy_is_optimal" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>price</strong> – current market price</p></li>
+<li><p><strong>x</strong> – amount of X tokens</p></li>
+<li><p><strong>y</strong> – amount of Y tokens</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>is_optimal:</dt><dd><p>True: if given amount of X and given amount of Y token can be fully minted
+on given interval at given price
+False: otherwise</p>
+</dd>
+<dt>x_liq:</dt><dd><p>The amount of liquidity for the given price range and amount of tokens X</p>
+</dd>
+<dt>y_liq:</dt><dd><p>The amount of liquidity for the given price range and amount of tokens Y</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(is_optimal, x_liq, y_liq), where</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.liq_to_x">
+<span class="sig-name descname"><span class="pre">liq_to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liq</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.liq_to_x" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>price</strong> – current market price</p></li>
+<li><p><strong>liq</strong> – given amount of liquidity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The amount of token X for a given amount of liquidity and a price range</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.liq_to_xy">
+<span class="sig-name descname"><span class="pre">liq_to_xy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liq</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.liq_to_xy" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>price</strong> – current market price</p></li>
+<li><p><strong>liq</strong> – amount of liquidity to be allocated</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The amount of X tokens and the amount of Y tokens that must be allocated to provide liquidity
+at a given interval and price</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.liq_to_y">
+<span class="sig-name descname"><span class="pre">liq_to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">liq</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.liq_to_y" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>price</strong> – current market price</p></li>
+<li><p><strong>liq</strong> – given amount of liquidity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The amount of token Y for a given amount of liquidity and a price range</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.real_price">
+<span class="sig-name descname"><span class="pre">real_price</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.real_price" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>price</strong> – current price on market</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>price = y/x</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.x_to_liq">
+<span class="sig-name descname"><span class="pre">x_to_liq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.x_to_liq" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>price</strong> – current market price</p></li>
+<li><p><strong>x</strong> – amount of X tokens</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The amount of liquidity for the given price range and amount of tokens X</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.xy_to_liq">
+<span class="sig-name descname"><span class="pre">xy_to_liq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.xy_to_liq" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>price</strong> – current market price</p></li>
+<li><p><strong>x</strong> – amount of X tokens</p></li>
+<li><p><strong>y</strong> – amount of Y tokens</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Maximum liquidity that can be obtained for amounts, interval and current price, without swap</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapLiquidityAligner.y_to_liq">
+<span class="sig-name descname"><span class="pre">y_to_liq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapLiquidityAligner.y_to_liq" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>price</strong> – current market price</p></li>
+<li><p><strong>y</strong> – amount of Y tokens</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The amount of liquidity for the given price range and amount of tokens Y</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV3Utils">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.uniswap_utils.</span></span><span class="sig-name descname"><span class="pre">UniswapV3Utils</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lower_0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV3Utils" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">UniV3Utils</span></code> is a class for creating UniswapV3 position in correct proportions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV3Utils.lower_0">
+<span class="sig-name descname"><span class="pre">lower_0</span></span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV3Utils.lower_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base lower bound of the emulated interval.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV3Utils.upper_0">
+<span class="sig-name descname"><span class="pre">upper_0</span></span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV3Utils.upper_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base upper bound of the emulated interval.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV3Utils.calc_fraction_to_uni">
+<span class="sig-name descname"><span class="pre">calc_fraction_to_uni</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_price</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV3Utils.calc_fraction_to_uni" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO:
+:param price:
+:param lower_price:
+:param upper_price:</p>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV3Utils.calc_fraction_to_x">
+<span class="sig-name descname"><span class="pre">calc_fraction_to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_price</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV3Utils.calc_fraction_to_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO:
+:param price:
+:param upper_price:</p>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV3Utils.calc_fraction_to_y">
+<span class="sig-name descname"><span class="pre">calc_fraction_to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_price</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV3Utils.calc_fraction_to_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO:
+:param price:
+:param lower_price:</p>
+<p>Returns:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV2Utils">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.uniswap_utils.</span></span><span class="sig-name descname"><span class="pre">UniswapV2Utils</span></span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV2Utils" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV2Utils.calc_fraction_to_uni">
+<span class="sig-name descname"><span class="pre">calc_fraction_to_uni</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_price</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV2Utils.calc_fraction_to_uni" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO:
+:param price:
+:param lower_price:
+:param upper_price:</p>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV2Utils.calc_fraction_to_x">
+<span class="sig-name descname"><span class="pre">calc_fraction_to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_price</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV2Utils.calc_fraction_to_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO:
+:param price:
+:param upper_price:</p>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.uniswap_utils.UniswapV2Utils.calc_fraction_to_y">
+<span class="sig-name descname"><span class="pre">calc_fraction_to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_price</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.uniswap_utils.UniswapV2Utils.calc_fraction_to_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO:
+:param price:
+:param lower_price:</p>
+<p>Returns:</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-strategy.viewers"></span></section>
+<section id="viewers">
+<h2>Viewers<a class="headerlink" href="#viewers" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.viewers.PotrfolioViewer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.viewers.</span></span><span class="sig-name descname"><span class="pre">PotrfolioViewer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">portfolio_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.history.PortfolioHistory" title="strategy.history.PortfolioHistory"><span class="pre">strategy.history.PortfolioHistory</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pool</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.primitives.Pool" title="strategy.primitives.Pool"><span class="pre">strategy.primitives.Pool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">30</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.PotrfolioViewer" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">PotrfolioViewer</span></code> is class for potrfolio visualisation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.viewers.PotrfolioViewer.portfolio_history">
+<span class="sig-name descname"><span class="pre">portfolio_history</span></span><a class="headerlink" href="#strategy.viewers.PotrfolioViewer.portfolio_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Portfolio history instance.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.viewers.PotrfolioViewer.pool">
+<span class="sig-name descname"><span class="pre">pool</span></span><a class="headerlink" href="#strategy.viewers.PotrfolioViewer.pool" title="Permalink to this definition">¶</a></dt>
+<dd><p>UniV3 pool meta information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.viewers.PotrfolioViewer.draw_performance_x">
+<span class="sig-name descname"><span class="pre">draw_performance_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">portfolio_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.PotrfolioViewer.draw_performance_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot portfolio performance in X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>portfolio_df</strong> – portfolio history data frame</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio plot with value and apy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.viewers.PotrfolioViewer.draw_performance_y">
+<span class="sig-name descname"><span class="pre">draw_performance_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">portfolio_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.PotrfolioViewer.draw_performance_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot portfolio performance in Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>portfolio_df</strong> – Portfolio history data frame.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio plot with value and apy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.viewers.PotrfolioViewer.draw_portfolio">
+<span class="sig-name descname"><span class="pre">draw_portfolio</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.PotrfolioViewer.draw_portfolio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot in pool in time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Portfolio visualization.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.viewers.PotrfolioViewer.draw_portfolio_to_x">
+<span class="sig-name descname"><span class="pre">draw_portfolio_to_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">portfolio_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.PotrfolioViewer.draw_portfolio_to_x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot portfolio value and fees in X.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>portfolio_df</strong> – Portfolio history data frame.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio plot with value, fees, il.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.viewers.PotrfolioViewer.draw_portfolio_to_y">
+<span class="sig-name descname"><span class="pre">draw_portfolio_to_y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">portfolio_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.PotrfolioViewer.draw_portfolio_to_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot portfolio value and fees in Y.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>portfolio_df</strong> – Portfolio history data frame.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Portfolio plot with value, fees, il.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.viewers.UniswapViewer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.viewers.</span></span><span class="sig-name descname"><span class="pre">UniswapViewer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uni_postition_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.history.UniPositionsHistory" title="strategy.history.UniPositionsHistory"><span class="pre">strategy.history.UniPositionsHistory</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.UniswapViewer" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">UniswapViewer</span></code> is class for visualizing UniswapV3 intervals in time.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.viewers.UniswapViewer.uni_postition_history">
+<span class="sig-name descname"><span class="pre">uni_postition_history</span></span><a class="headerlink" href="#strategy.viewers.UniswapViewer.uni_postition_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uniswap positions history instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.viewers.UniswapViewer.draw_intervals">
+<span class="sig-name descname"><span class="pre">draw_intervals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swaps_df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.UniswapViewer.draw_intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot uniswap positions intervals in time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>swaps_df</strong> – UniswapV3 exchange data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Plot with UniswapV3 position intervals.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.viewers.RebalanceViewer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.viewers.</span></span><span class="sig-name descname"><span class="pre">RebalanceViewer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rebalance_history</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.history.RebalanceHistory" title="strategy.history.RebalanceHistory"><span class="pre">strategy.history.RebalanceHistory</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.RebalanceViewer" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">RebalanceViewer</span></code> is class for rebalance visualisation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="strategy.viewers.RebalanceViewer.rebalance_history">
+<span class="sig-name descname"><span class="pre">rebalance_history</span></span><a class="headerlink" href="#strategy.viewers.RebalanceViewer.rebalance_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rebalance history instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.viewers.RebalanceViewer.draw_rebalances">
+<span class="sig-name descname"><span class="pre">draw_rebalances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">swaps_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.RebalanceViewer.draw_rebalances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot portfolio rabalances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>swaps_df</strong> – UniswapV3 exchange data.</p>
+</dd>
+</dl>
+<p>Returns: Plot with portfolio rabalances</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strategy.viewers.LiquidityViewer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">strategy.viewers.</span></span><span class="sig-name descname"><span class="pre">LiquidityViewer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pool_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#strategy.data.PoolDataUniV3" title="strategy.data.PoolDataUniV3"><span class="pre">strategy.data.PoolDataUniV3</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.LiquidityViewer" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">LiquidityViewer</span></code> is class for liquidity visualisation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="strategy.viewers.LiquidityViewer.draw_plot">
+<span class="sig-name descname"><span class="pre">draw_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#strategy.viewers.LiquidityViewer.draw_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot liquidity in pool in time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Plot with Pool liquidity.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, mellow_team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

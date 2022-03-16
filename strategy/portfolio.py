@@ -1,7 +1,3 @@
-"""
-    TODO: write
-"""
-
 from typing import List, Tuple
 from datetime import datetime
 
@@ -132,13 +128,13 @@ class Portfolio(AbstractPosition):
 
     def to_xy(self, price: float) -> Tuple[float, float]:
         """
-        Get bicurrency equivalence of portfolio.
+        Get amount of X and amount of Y in portfolio
 
         Args:
-            price: Сurrent price of X in Y currency.
+            price: Current price of X in Y currency.
 
         Returns:
-            Portfolio value to X and Y.
+            (amount of X, amount of Y)
         """
         total_x = 0
         total_y = 0
@@ -149,14 +145,16 @@ class Portfolio(AbstractPosition):
         return total_x, total_y
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
+
         """
-        Get portfolio snapshot.
+        | Get portfolio snapshot.
+        | Used in PortfolioHistory.add_snapshot() to collect backtest data.
 
         Args:
-            timestamp: Timestamp of snapshot.
-            price: Current price of X in Y currency.
+            timestamp: Timestamp of snapshot
+            price: Current price of X in Y currency
 
-        Returns: Portfolio snapshot.
+        Returns: Position snapshot
         """
         snapshot = {'timestamp': timestamp, 'price': price}
         for _, pos in self.positions.items():

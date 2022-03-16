@@ -1,7 +1,3 @@
-"""
-TODO write
-"""
-
 import sys
 
 sys.path.append('..')
@@ -10,23 +6,8 @@ import polars as pl
 
 from strategy.data import SyntheticData, RawDataUniV3
 from strategy.backtest import Backtest
-from strategy.strategies import MStrategy
+from strategy.strategies import UniV3Passive
 from strategy.primitives import Pool, Token, Fee
-
-
-def init_strat(data, pool):
-    """
-    Initilize strategy.
-    Args:
-        data: UniswapV3 data.
-        pool: UniswapV3 pool.
-    Returns:
-        Initialized strategy.
-    """
-    lower_0 = data.swaps['price'].min()
-    upper_0 = data.swaps['price'].max()
-    bi_strat = MStrategy(600, lower_0, upper_0, pool, 0.01, 1e-6, 1e-6)
-    return bi_strat
 
 
 def evaluate() -> pl.DataFrame:
@@ -38,9 +19,16 @@ def evaluate() -> pl.DataFrame:
         Performance metrics.
     """
     pool = Pool(Token.WBTC, Token.WETH, Fee.MIDDLE)
-    # data = SyntheticData(pool, init_price=10, mu=0.005).generate_data()
-    data = RawDataUniV3(pool).load_from_folder()
-    m_strat = init_strat(data, pool)
+    data = SyntheticData(pool, init_price=10, mu=0.005).generate_data()
+
+    # data = RawDataUniV3(pool).load_from_folder()
+    m_strat = UniV3Passive(
+        lower_price=data.swaps['price'].min(),
+        upper_price=data.swaps['price'].max(),
+        pool=pool,
+        rebalance_cost=0.,
+        name='passive'
+    )
 
     portfolio_history, _, _ = Backtest(m_strat).backtest(data.swaps)
     metrics = portfolio_history.calculate_stats()

@@ -1,15 +1,12 @@
-"""
-    TODO: write
-"""
 from enum import Enum
 from functools import total_ordering
 
 
 class Fee(Enum):
     """
-    ``Fee`` defines available fees for UniV3 pools.
+    ``Fee`` Enum class defines available fees for UniV3 pools.
     Currently 3 values are available: 0.05%, 0.3%, 1%.
-    The actual enum values are fee * 100_000, i.e. 0.05% enum value is integer 500.
+    The actual enum values are fee * 1_000_000, i.e. 0.05% enum value is integer 500.
     """
 
     LOW = 500
@@ -19,20 +16,16 @@ class Fee(Enum):
     @property
     def percent(self) -> float:
         """
-        The actual uniswap percentage fee, i.e. 0.05%, 0.3% or 1%.
-
         Returns:
-            UniswapV3 percentage fee.
+            UniswapV3 fee in form of 0.0005, 0.003, 0.01.
         """
         return self.value / 1000000
 
     @property
     def spacing(self) -> int:
         """
-        Tick spacing for this fee.
-
         Returns:
-            Tick spacing for this fee.
+            Tick spacing for this fee 10, 60 or 200
         """
         return SPACING[self]
 
@@ -54,8 +47,6 @@ class Token(Enum):
     @property
     def address(self) -> str:
         """
-        Mainnet address of the token.
-
         Returns:
             Mainnet address of the token.
         """
@@ -64,13 +55,11 @@ class Token(Enum):
     @property
     def decimals(self) -> int:
         """
-        Decimals of the token.
-
         Returns:
             Decimals of the token.
         """
         return TOKEN_DETAILS[self.value]["decimals"]
-    # TODO: static
+
     def _is_valid_operand(self, other: 'Token') -> bool:
         """
         Checks if Token is valid.
@@ -116,9 +105,12 @@ class Pool:
     ``Pool`` represents a mainnet UniV3 pool.
 
     Attributes:
-        tokenA: First token of the pool.
-        tokenB: Second token of the pool.
-        fee: Pool fee.
+        tokenA:
+            First token of the pool.
+        tokenB:
+            Second token of the pool.
+        fee:
+            Pool fee.
     """
 
     def __init__(self, tokenA: "Token", tokenB: "Token", fee: "Fee"):
@@ -138,7 +130,6 @@ class Pool:
 
     @property
     def decimals_diff(self) -> int:
-        # TODO: Difference between decimal places ``token0`` and ``token1``??
         """
         Difference between ``token0`` and ``token1`` decimals.
         Used for conversion of price from `wei` to `eth`.
@@ -161,18 +152,14 @@ class Pool:
     @property
     def name(self) -> str:
         """
-        Unique name for the pool.
-
         Returns:
-            Pool name.
+            Pool unique name for the pool.
         """
         return f"{self._token0.value}_{self._token1.value}_{self._fee.value}"
 
     @property
     def address(self) -> str:
         """
-        Address of the pool on the mainnet.
-
         Returns:
             Pool mainnet address.
         """
@@ -181,8 +168,6 @@ class Pool:
     @property
     def token0(self) -> "Token":
         """
-        First token of the pool.
-
         Returns:
             First token name.
         """
@@ -191,8 +176,6 @@ class Pool:
     @property
     def token1(self) -> "Token":
         """
-        Second token of the pool.
-
         Returns:
             Second token name.
         """
@@ -201,8 +184,6 @@ class Pool:
     @property
     def fee(self) -> "Fee":
         """
-        Fee of the pool.
-
         Returns:
             Fee of the pool.
         """

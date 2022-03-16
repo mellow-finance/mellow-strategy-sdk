@@ -19,7 +19,7 @@ from parameterized import parameterized
 from strategy.uniswap_utils import UniswapLiquidityAligner
 
 
-# TODO - сделать так чтобы можно было вызывать один тест
+# TODO - make it possible to call one test
 test_xy_to_optimal_liq_arr = [
     ({'x': 0, 'y': 0, 'price': 9}, 0.0),
     ({'x': 0, 'y': 0, 'price': 10}, 0.0),

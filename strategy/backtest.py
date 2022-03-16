@@ -1,7 +1,3 @@
-"""
-    TODO: write
-"""
-
 import copy
 from typing import Tuple
 import pandas as pd
@@ -13,6 +9,7 @@ from strategy.history import PortfolioHistory, RebalanceHistory, UniPositionsHis
 
 
 class Backtest:
+    # TODO docs
     """
     ``Backtest`` is used for backtesting strategy on pool data.
 
@@ -50,7 +47,6 @@ class Backtest:
         uni_history = UniPositionsHistory()
         for record in df_swaps.to_dicts():
             # df_swaps_prev = df_swaps[['price']][:idx]
-            # TODO добавил None, странно что np.isnan не работает
             if record['price'] is None:
                 continue
 

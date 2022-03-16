@@ -34,6 +34,9 @@ class PoolDataUniV3:
 
 
 class RawDataUniV3:
+    """
+        Load data from folder, preprocess and Return ``PoolDataUniV3`` instance.
+    """
     def __init__(self, pool: Pool, data_dir: Path = None):
         self.pool = pool
 
@@ -43,7 +46,12 @@ class RawDataUniV3:
         else:
             self.data_dir = data_dir
 
-    def load_mints(self):
+    def load_mints(self) -> pl.DataFrame:
+        """
+            read mints from csv and preprocess
+        Returns:
+            mints df
+        """
         mints_converters = {
             'pool': pl.Utf8,
             'block_hash': pl.Utf8,
@@ -59,7 +67,6 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        print()
         df_mints = pl.read_csv(f'{self.data_dir}/mint_{self.pool.name}.csv', dtypes=mints_converters)
         df_prep = df_mints.select([
             pl.col('tx_hash'),
@@ -77,7 +84,12 @@ class RawDataUniV3:
         ).sort(by=['block_number', 'log_index'])
         return df_prep
 
-    def load_burns(self):
+    def load_burns(self) -> pl.DataFrame:
+        """
+            read burns from csv and preprocess
+        Returns:
+            burns df
+        """
         burns_converters = {
             'pool': pl.Utf8,
             'block_hash': pl.Utf8,
@@ -111,7 +123,12 @@ class RawDataUniV3:
         ).sort(by=['block_number', 'log_index'])
         return df_prep
 
-    def load_swaps(self):
+    def load_swaps(self) -> pl.DataFrame:
+        """
+            read swaps from csv, preprocess, create sqrt_price_x96 column.
+        Returns:
+            swaps df
+        """
         swaps_converters = {
             'pool': pl.Utf8,
             'block_hash': pl.Utf8,
@@ -153,6 +170,11 @@ class RawDataUniV3:
         return df_prep
 
     def load_from_folder(self) -> PoolDataUniV3:
+        """
+            Load mints, burns, swaps from folder, preprocess and create ``PoolDataUniV3`` object.
+        Returns:
+            `PoolDataUniV3`` object
+        """
         mints = self.load_mints()
         burns = self.load_burns()
         swaps = self.load_swaps()
@@ -161,18 +183,27 @@ class RawDataUniV3:
 
 class SyntheticData:
     """
-    ``SyntheticData`` generates UniswapV3 synthetic exchange data.
-
+    | ``SyntheticData`` generates UniswapV3 synthetic exchange data (swaps df).
+    | Generates by sampling Geometric Brownian Motion.
     Attributes:
-        pool: UniswapV3 ``Pool`` instance.
-        start_date: Generating starting date.
-        n_points: Amount samples to generate.
-        init_price: Initial price.
-        mu: Expectation of normal distribution.
-        sigma: Variance of normal distributio.
-        seed: Seed for random generator.
+        pool:
+            UniswapV3 ``Pool`` instance.
+        start_date:
+            Generating starting date. (example '1-1-2022')
+        n_points:
+            Amount samples to generate.
+        init_price:
+            Initial price.
+        mu:
+            Expectation of normal distribution.
+        sigma:
+            Variance of normal distribution.
+        seed:
+            Seed for random generator.
    """
-    def __init__(self, pool, start_date='1-1-2022', n_points=365, init_price=1, mu=0, sigma=0.1, seed=42):
+    def __init__(
+            self, pool, start_date: str = '1-1-2022', n_points: int = 365,
+            init_price: float = 1, mu: float = 0, sigma: float = 0.1, seed=42):
         self.pool = pool
         self.start_date = start_date
         self.n_points = n_points
@@ -188,7 +219,7 @@ class SyntheticData:
         Generate synthetic UniswapV3 exchange data.
 
         Returns:
-            PoolDataUniV3 instance with synthetic data.
+            ``PoolDataUniV3`` instance with synthetic swaps data, mint is None, burn is None.
         """
         timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq='D', normalize=True)
         # np.random.seed(self.seed)
@@ -212,6 +243,8 @@ class SyntheticData:
 
 
 class DownloaderRawDataUniV3:
+    # TODO docs
+    # TODO S3
     """
         downloader of raw data from db
     """

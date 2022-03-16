@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started &mdash; mellow_strategy_sdk 0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="strategy" href="strategy.html" />
+    <link rel="prev" title="Mellow Strategy SDK" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> mellow_strategy_sdk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="strategy.html">strategy</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mellow_strategy_sdk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>TODO: install libs</p>
+<p>The easiest way to get started is to clone SDK and use examples in the <a class="reference external" href="https://github.com/mellow-finance/mellow-strategy-sdk/tree/main/examples">Github repo</a>.
+It will also be useful to look at the tests  <a class="reference external" href="https://github.com/mellow-finance/mellow-strategy-sdk/tree/main/tests">Github repo</a>.</p>
+<p>A typical notebook would start with downloading and preparing data for a specific pool:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">strategy.data</span> <span class="kn">import</span> <span class="n">RawDataUniV3</span>
+<span class="kn">from</span> <span class="nn">strategy.primitives</span> <span class="kn">import</span> <span class="n">Pool</span><span class="p">,</span> <span class="n">Token</span><span class="p">,</span> <span class="n">Fee</span>
+<span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">Token</span><span class="o">.</span><span class="n">WBTC</span><span class="p">,</span> <span class="n">Token</span><span class="o">.</span><span class="n">WETH</span><span class="p">,</span> <span class="n">Fee</span><span class="o">.</span><span class="n">MIDDLE</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">RawDataUniV3</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span><span class="o">.</span><span class="n">load_from_folder</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Next optional step is for visualizing the data in the notebook:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LiquidityViewer</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">draw_plot</span><span class="p">()</span> <span class="c1"># Optional step to visualize the data in the notebook</span>
+</pre></div>
+</div>
+<p>Then you define your strategy by inheriting <span class="xref std std-ref">class AbstractStrategy</span> and overriding the <code class="docutils literal notranslate"><span class="pre">rebalance</span></code> method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">strategy.strategies</span> <span class="kn">import</span> <span class="n">AbstractStrategy</span>
+<span class="kn">from</span> <span class="nn">strategy.uniswap_utils</span> <span class="kn">import</span> <span class="n">UniswapLiquidityAligner</span>
+<span class="kn">from</span> <span class="nn">strategy.positions</span> <span class="kn">import</span> <span class="n">UniV3Position</span>
+
+<span class="k">class</span> <span class="nc">UniV3Passive</span><span class="p">(</span><span class="n">AbstractStrategy</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ``UniV3Passive`` is the passive strategy on UniswapV3 without rebalances.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        lower_price: Lower bound of the interval</span>
+<span class="sd">        upper_price: Upper bound of the interval</span>
+<span class="sd">        rebalance_cost: Rebalancing cost, expressed in currency</span>
+<span class="sd">        pool: UniswapV3 Pool instance</span>
+<span class="sd">        name: Unique name for the instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">lower_price</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">upper_price</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">pool</span><span class="p">:</span> <span class="n">Pool</span><span class="p">,</span>
+                 <span class="n">rebalance_cost</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                 <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_price</span> <span class="o">=</span> <span class="n">lower_price</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upper_price</span> <span class="o">=</span> <span class="n">upper_price</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decimal_diff</span> <span class="o">=</span> <span class="o">-</span><span class="n">pool</span><span class="o">.</span><span class="n">decimals_diff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fee_percent</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">fee</span><span class="o">.</span><span class="n">percent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rebalance_cost</span> <span class="o">=</span> <span class="n">rebalance_cost</span>
+
+    <span class="k">def</span> <span class="nf">rebalance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;row&#39;</span><span class="p">]</span>
+        <span class="n">portfolio</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;portfolio&#39;</span><span class="p">]</span>
+        <span class="n">price_before</span><span class="p">,</span> <span class="n">price</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;price_before&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;price&#39;</span><span class="p">]</span>
+
+        <span class="n">is_rebalanced</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">univ3_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_uni_position</span><span class="p">(</span><span class="n">price</span><span class="p">)</span>
+            <span class="n">portfolio</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">univ3_pos</span><span class="p">)</span>
+            <span class="n">is_rebalanced</span> <span class="o">=</span> <span class="s1">&#39;mint&#39;</span>
+
+        <span class="k">if</span> <span class="s1">&#39;UniV3Passive&#39;</span> <span class="ow">in</span> <span class="n">portfolio</span><span class="o">.</span><span class="n">positions</span><span class="p">:</span>
+            <span class="n">uni_pos</span> <span class="o">=</span> <span class="n">portfolio</span><span class="o">.</span><span class="n">get_position</span><span class="p">(</span><span class="s1">&#39;UniV3Passive&#39;</span><span class="p">)</span>
+            <span class="n">uni_pos</span><span class="o">.</span><span class="n">charge_fees</span><span class="p">(</span><span class="n">price_before</span><span class="p">,</span> <span class="n">price</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">is_rebalanced</span>
+
+
+    <span class="k">def</span> <span class="nf">create_uni_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">price</span><span class="p">):</span>
+        <span class="n">uni_aligner</span> <span class="o">=</span> <span class="n">UniswapLiquidityAligner</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_price</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_price</span><span class="p">)</span>
+        <span class="n">x_uni_aligned</span><span class="p">,</span> <span class="n">y_uni_aligned</span> <span class="o">=</span> <span class="n">uni_aligner</span><span class="o">.</span><span class="n">align_to_liq</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">price</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">price</span><span class="p">)</span>
+        <span class="n">univ3_pos</span> <span class="o">=</span> <span class="n">UniV3Position</span><span class="p">(</span><span class="s1">&#39;UniV3Passive&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower_price</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper_price</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fee_percent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rebalance_cost</span><span class="p">)</span>
+        <span class="n">univ3_pos</span><span class="o">.</span><span class="n">deposit</span><span class="p">(</span><span class="n">x_uni_aligned</span><span class="p">,</span> <span class="n">y_uni_aligned</span><span class="p">,</span> <span class="n">price</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">univ3_pos</span>
+</pre></div>
+</div>
+<p>Typycally the definition of the <code class="docutils literal notranslate"><span class="pre">rebalance</span></code> method would contain two sections:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>Init</cite></dt><dd><p>On the first call you need to initialize strategy’s portfolio under management.
+Here you need to create initial positions with <code class="docutils literal notranslate"><span class="pre">append</span></code>
+method of <span class="xref std std-ref">class Portfolio</span> and invest initial amount using <code class="docutils literal notranslate"><span class="pre">deposit</span></code> method.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>Rebalance</cite></dt><dd><p>In this section you decide if you want to rebalance or not.
+If you rebalance you need to implement the logic of rebalance.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The final step is to run backtest using your strategy and data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">strategy.backtest</span> <span class="kn">import</span> <span class="n">Backtest</span>
+
+<span class="n">univ3_passive</span> <span class="o">=</span> <span class="n">UniV3Passive</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">,</span> <span class="n">pool</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">Backtest</span><span class="p">(</span><span class="n">univ3_passive</span><span class="p">)</span>
+<span class="n">portfolio_history</span><span class="p">,</span> <span class="n">rebalance_history</span><span class="p">,</span> <span class="n">uni_history</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">backtest</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">swaps</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Next visualize results:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Draw rebalances</span>
+<span class="n">rv</span> <span class="o">=</span> <span class="n">RebalanceViewer</span><span class="p">(</span><span class="n">rebalance_history</span><span class="p">)</span>
+<span class="n">rv</span><span class="o">.</span><span class="n">draw_rebalances</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">swaps</span><span class="p">)</span>
+<span class="c1"># Draw Uniswap intervals</span>
+<span class="n">uv</span> <span class="o">=</span> <span class="n">UniswapViewer</span><span class="p">(</span><span class="n">uni_history</span><span class="p">)</span>
+<span class="n">uv</span><span class="o">.</span><span class="n">draw_intervals</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">swaps</span><span class="p">)</span>
+<span class="c1"># Calculate Uniswap intervals coverage</span>
+<span class="n">uni_history</span><span class="o">.</span><span class="n">get_coverage</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">swaps</span><span class="p">)</span>
+<span class="c1"># Draw portfolio stats, like value, fees earned, apy</span>
+<span class="n">fig1</span><span class="p">,</span> <span class="n">fig2</span><span class="p">,</span> <span class="n">fig3</span><span class="p">,</span> <span class="n">fig4</span> <span class="o">=</span> <span class="n">PotrfolioViewer</span><span class="p">(</span><span class="n">portfolio_history</span><span class="p">,</span> <span class="n">pool</span><span class="p">)</span><span class="o">.</span><span class="n">draw_portfolio</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Congratulations! Now you have the results of your strategy backtest on the real UniV3 data!</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Mellow Strategy SDK" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="strategy.html" class="btn btn-neutral float-right" title="strategy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, mellow_team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
