@@ -343,6 +343,7 @@ class UniswapViewer:
 
 
 class RebalanceViewer:
+    # TODO docs
     """
     ``RebalanceViewer`` class for visualizing rebalances that occurred during the back test.
 
@@ -396,7 +397,6 @@ class RebalanceViewer:
 
 
 class LiquidityViewer:
-    # TODO docs
     """
     ``LiquidityViewer`` is class for liquidity visualisation.
     """
@@ -405,10 +405,10 @@ class LiquidityViewer:
 
     def draw_plot(self):
         """
-        Plot liquidity in pool in time.
+        Plot liquidity and price in pool in time.
 
         Returns:
-            Plot with Pool liquidity.
+            Plot with Pool liquidity and price.
         """
         spot_prices = self.pool.swaps.groupby('date').agg([
             pl.col('price').mean().alias('price')
