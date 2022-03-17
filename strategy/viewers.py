@@ -270,8 +270,8 @@ class PotrfolioViewer:
             secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="APY", secondary_y=False)
-        fig.update_yaxes(title_text='Value', secondary_y=True)
+        fig.update_yaxes(title_text="APY V@p_n", secondary_y=False)
+        fig.update_yaxes(title_text=f'Value V@p_n in {self.pool.token0.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value in {self.pool.token1.name}, Portfolio Value and APY at price_n')
         return fig
 
