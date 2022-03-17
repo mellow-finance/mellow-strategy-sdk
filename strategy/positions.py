@@ -273,7 +273,7 @@ class BiCurrencyPosition(AbstractPosition):
     def snapshot(self, timestamp: datetime, price: float) -> dict:
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
-        of the entire portfolio when backtesting.
+        | of the entire portfolio when backtesting.
         | for linking in the backtest metrics, you can to add metrics here
 
         Args:

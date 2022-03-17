@@ -289,7 +289,7 @@ class UniswapViewer:
 
     def draw_intervals(self, swaps_df):
         """
-        Plot uniswap positions intervals in time.
+        Plot price and uniswap positions intervals in time.
 
         Args:
             swaps_df: UniswapV3 exchange data.
@@ -343,9 +343,8 @@ class UniswapViewer:
 
 
 class RebalanceViewer:
-    # TODO docs
     """
-    ``RebalanceViewer`` class for visualizing rebalances that occurred during the back test.
+    ``RebalanceViewer`` class to visualize actions (rebalances) other than None that occurred during the backtest.
 
     Attributes:
         rebalance_history:
@@ -356,12 +355,13 @@ class RebalanceViewer:
 
     def draw_rebalances(self, swaps_df: pd.DataFrame):
         """
-        Plot portfolio rabalances.
+        Draws a price chart with portfolio action points.
 
         Args:
-            swaps_df: price data. (timestamp, price).
+            swaps_df: price data. [(timestamp, price)].
 
-        Returns: Plot with portfolio rabalances
+        Returns:
+            Plot with portfolio actions.
         """
         rebalance_df = self.rebalance_history.to_df()
         swaps_df_slice = swaps_df[['timestamp', 'price']].join(rebalance_df, on='timestamp')

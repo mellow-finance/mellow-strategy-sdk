@@ -48,7 +48,8 @@ class RawDataUniV3:
 
     def load_mints(self) -> pl.DataFrame:
         """
-            read mints from csv and preprocess
+            Read mints from csv and preprocess
+
         Returns:
             mints df
         """
@@ -86,7 +87,8 @@ class RawDataUniV3:
 
     def load_burns(self) -> pl.DataFrame:
         """
-            read burns from csv and preprocess
+            Read burns from csv and preprocess
+
         Returns:
             burns df
         """
@@ -125,7 +127,8 @@ class RawDataUniV3:
 
     def load_swaps(self) -> pl.DataFrame:
         """
-            read swaps from csv, preprocess, create sqrt_price_x96 column.
+            Read swaps from csv, preprocess, create sqrt_price_x96 column.
+
         Returns:
             swaps df
         """
@@ -172,6 +175,7 @@ class RawDataUniV3:
     def load_from_folder(self) -> PoolDataUniV3:
         """
             Load mints, burns, swaps from folder, preprocess and create ``PoolDataUniV3`` object.
+
         Returns:
             `PoolDataUniV3`` object
         """
@@ -185,6 +189,7 @@ class SyntheticData:
     """
     | ``SyntheticData`` generates UniswapV3 synthetic exchange data (swaps df).
     | Generates by sampling Geometric Brownian Motion.
+
     Attributes:
         pool:
             UniswapV3 ``Pool`` instance.
@@ -256,10 +261,12 @@ class DownloaderRawDataUniV3:
     def _get_event(self, event: str, pool_address: str, file_name: Path):
         """
             private func, download event from pool and save it
+
         Args:
             event: 'mint', 'burn' or 'swap'
             pool_address:
             file_name: file name to save in mellow-strategy-sdk/data/
+
         Returns:
             None
         """

@@ -1,7 +1,5 @@
 Getting Started
-===============
-
-TODO: install libs
+==============================
 
 The easiest way to get started is to clone SDK and use examples in the `Github repo <https://github.com/mellow-finance/mellow-strategy-sdk/tree/main/examples>`_.
 It will also be useful to look at the tests  `Github repo <https://github.com/mellow-finance/mellow-strategy-sdk/tree/main/tests>`_.
@@ -17,7 +15,7 @@ Next optional step is for visualizing the data in the notebook::
 
     LiquidityViewer(data).draw_plot() # Optional step to visualize the data in the notebook
 
-Then you define your strategy by inheriting :ref:`class AbstractStrategy` and overriding the ``rebalance`` method::
+Then you define your strategy by inheriting :meth:`strategy.strategies.AbstractStrategy` and overriding the ``rebalance`` method::
 
     from strategy.strategies import AbstractStrategy
     from strategy.uniswap_utils import UniswapLiquidityAligner
@@ -80,7 +78,7 @@ Typycally the definition of the ``rebalance`` method would contain two sections:
 - `Init`
             On the first call you need to initialize strategy's portfolio under management.
             Here you need to create initial positions with ``append``
-            method of :ref:`class Portfolio` and invest initial amount using ``deposit`` method.
+            method of :meth:`strategies.portfolio.Portfolio` and invest initial amount using ``deposit`` method.
 - `Rebalance`
             In this section you decide if you want to rebalance or not.
             If you rebalance you need to implement the logic of rebalance.

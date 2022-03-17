@@ -3,7 +3,7 @@ import polars as pl
 import numpy as np
 import datetime
 from typing import Hashable
-
+import typing as tp
 
 class PortfolioHistory:
     """
@@ -57,6 +57,7 @@ class PortfolioHistory:
         """
         | Calculate impermanent loss separately in X and Y currencies.
         | As sum of positions IL.
+
         Args:
             df: Portfolio history DataFrame. return of ``PortfolioHistory.to_df()``
 
@@ -181,6 +182,7 @@ class PortfolioHistory:
                               calculate_full: bool = False) -> pl.DataFrame:
         """
             Calculate APY for metric
+
         Args:
             df: dataframe with metrics
             from_col: metric column name
@@ -236,34 +238,32 @@ class PortfolioHistory:
 
 
 class RebalanceHistory:
-    # TODO docs
     """
-       ``RebalanceHistory`` tracks rebalances over time.
-
-       Each time ``add_snapshot`` method is called it remembers rebalance.
-       All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
+    | ``RebalanceHistory`` tracks porfolio actions (rebalances) over time.
+    | Each time ``add_snapshot`` method is called class remembers action.
+    | All tracked values except None! then can be accessed via ``to_df`` method that will return a ``pl.Dataframe``.
     """
 
     def __init__(self):
         self.rebalances = []
 
-    def add_snapshot(self, timestamp: datetime.datetime, snapshot: Hashable):
+    def add_snapshot(self, timestamp: datetime.datetime, portfolio_action: tp.Optional[str]):
         """
-        Add portfolio rebalance snapshot to history
+        Add portfolio action to memory
 
         Args:
             timestamp: Timestamp of snapshot.
-            snapshot: Dict of portfolio rebalances.
+            portfolio_action: name of portfolio action or None. Usually it takes from ''AbstractStrategy.rebalance`` output.
         """
-        self.rebalances += [{'timestamp': timestamp, 'rebalance': snapshot}]
-        return None
+        self.rebalances += [{'timestamp': timestamp, 'rebalance': portfolio_action}]
 
     def to_df(self) -> pd.DataFrame:
         """
-        Transform list of portfolio rebalance snapshots to data frame.
+        | Transform list of portfolio actions to data frame.
+        | Drop all None actions!
 
         Returns:
-            Portfolio rebalance history data frame.
+            Data frame of porfolio actions, except None actions.
         """
         df = (
             pl.DataFrame(self.rebalances)
@@ -277,7 +277,6 @@ class RebalanceHistory:
 
 
 class UniPositionsHistory:
-    # TODO docs
     """
     ``UniPositionsHistory`` tracks Uniswap positions over time.
     Each time ``add_snapshot`` method is called it remembers all Uniswap positions at current time.
