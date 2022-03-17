@@ -1,21 +1,66 @@
+.. |br| raw:: html
+
+  <br/>
+
 Getting Started
 ==============================
 
-The easiest way to get started is to clone SDK and use examples in the `Github repo <https://github.com/mellow-finance/mellow-strategy-sdk/tree/main/examples>`_.
-It will also be useful to look at the tests  `Github repo <https://github.com/mellow-finance/mellow-strategy-sdk/tree/main/tests>`_.
+Setup
+~~~~~~~~~~~~
+Follow the installation instructions from the ``README.md`` file
 
-A typical notebook would start with downloading and preparing data for a specific pool::
+::
+
+    git clone https://github.com/mellow-finance/mellow-strategy-sdk.git
+    cd mellow-strategy-sdk
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install poetry==1.1.13
+    poetry install
+
+The easiest way to get started is to clone SDK and use examples in the `Github repo <https://github.com/mellow-finance/mellow-strategy-sdk/tree/main/examples>`_.
+|br| The notebook with this code is also in the examples.
+
+
+Choose pool
+~~~~~~~~~~~~
+
+A typical notebook would start with downloading and preparing data for a specific pool.
+|br| ``POOLS`` is a list of available pools, let's choose 1 it is WBTC/WETH, fee 0.3%
+
+::
+
+    from strategy.primitives import POOLS, Pool
+    pool_num = 1
+    my_pool = Pool(
+        tokenA=POOLS[pool_num]['token0'], 
+        tokenB=POOLS[pool_num]['token1'], 
+        fee=POOLS[pool_num]['fee']
+    )
+
+Get data
+~~~~~~~~~~~~
+
+For each pool at the first run you need to download the data
+::
+
+    from strategy.data import DownloaderRawDataUniV3
+    # downloads mint, burn, swap for the pool, this needs to be done once the files are added to ../data/
+    # ~5min
+    DownloaderRawDataUniV3().load_events(pool_num)
+
+You also you can use ``strategy.data.SyntheticData`` or ``utilities.utilities.get_data_from_binance``
+
+After loading the data, they can be read locally. Сreate an object with pool data.
+::
 
     from strategy.data import RawDataUniV3
-    from strategy.primitives import Pool, Token, Fee
-    pool = Pool(Token.WBTC, Token.WETH, Fee.MIDDLE)
-    data = RawDataUniV3(pool).load_from_folder()
+    data = RawDataUniV3(my_pool).load_from_folder()
 
-Next optional step is for visualizing the data in the notebook::
 
-    LiquidityViewer(data).draw_plot() # Optional step to visualize the data in the notebook
-
-Then you define your strategy by inheriting :meth:`strategy.strategies.AbstractStrategy` and overriding the ``rebalance`` method::
+Create strategy
+~~~~~~~~~~~~~~~~~~~~~~~~
+::
 
     from strategy.strategies import AbstractStrategy
     from strategy.uniswap_utils import UniswapLiquidityAligner
@@ -24,8 +69,7 @@ Then you define your strategy by inheriting :meth:`strategy.strategies.AbstractS
     class UniV3Passive(AbstractStrategy):
         """
         ``UniV3Passive`` is the passive strategy on UniswapV3 without rebalances.
-
-        Attributes:
+            i.e. mint interval and wait.
             lower_price: Lower bound of the interval
             upper_price: Upper bound of the interval
             rebalance_cost: Rebalancing cost, expressed in currency
@@ -33,12 +77,12 @@ Then you define your strategy by inheriting :meth:`strategy.strategies.AbstractS
             name: Unique name for the instance
         """
         def __init__(self,
-                     lower_price: float,
-                     upper_price: float,
-                     pool: Pool,
-                     rebalance_cost: float,
-                     name: str = None,
-                     ):
+                    lower_price: float,
+                    upper_price: float,
+                    pool: Pool,
+                    rebalance_cost: float,
+                    name: str = None,
+                    ):
             super().__init__(name)
             self.lower_price = lower_price
             self.upper_price = upper_price
@@ -46,31 +90,26 @@ Then you define your strategy by inheriting :meth:`strategy.strategies.AbstractS
             self.fee_percent = pool.fee.percent
             self.rebalance_cost = rebalance_cost
 
-        def rebalance(self, *args, **kwargs) -> bool:
+        def rebalance(self, *args, **kwargs) -> str:
             timestamp = kwargs['timestamp']
             row = kwargs['row']
             portfolio = kwargs['portfolio']
             price_before, price = row['price_before'], row['price']
 
-            is_rebalanced = None
-
+            
             if len(portfolio.positions) == 0:
                 univ3_pos = self.create_uni_position(price)
                 portfolio.append(univ3_pos)
-                is_rebalanced = 'mint'
-
-            if 'UniV3Passive' in portfolio.positions:
-                uni_pos = portfolio.get_position('UniV3Passive')
-                uni_pos.charge_fees(price_before, price)
-
-            return is_rebalanced
+                return 'mint'
+            
+            uni_pos = portfolio.get_position('UniV3Passive')
+            uni_pos.charge_fees(price_before, price)
 
 
         def create_uni_position(self, price):
-            uni_aligner = UniswapLiquidityAligner(self.lower_price, self.upper_price)
-            x_uni_aligned, y_uni_aligned = uni_aligner.align_to_liq(1 / price, 1, price)
             univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
-            univ3_pos.deposit(x_uni_aligned, y_uni_aligned, price)
+            x_uni_aligned, y_uni_aligned = univ3_pos.swap_to_optimal(x=1 / price, y=1, price=price)
+            univ3_pos.deposit(x=x_uni_aligned, y=y_uni_aligned, price=price)
             return univ3_pos
 
 Typycally the definition of the ``rebalance`` method would contain two sections:
@@ -83,25 +122,103 @@ Typycally the definition of the ``rebalance`` method would contain two sections:
             In this section you decide if you want to rebalance or not.
             If you rebalance you need to implement the logic of rebalance.
 
-The final step is to run backtest using your strategy and data::
+Backtest
+~~~~~~~~~~~~
+
+Next step is to run backtest using your strategy and data::
 
     from strategy.backtest import Backtest
 
-    univ3_passive = UniV3Passive(1e-6, 1e6, pool, 0.01)
+    univ3_passive = UniV3Passive(
+        lower_price=data.swaps['price'].min(),
+        upper_price=data.swaps['price'].max(),
+        pool=pool,
+        rebalance_cost=0.,
+        name='passive'
+    )
     b = Backtest(univ3_passive)
     portfolio_history, rebalance_history, uni_history = b.backtest(data.swaps)
 
-Next visualize results::
+Visualize
+~~~~~~~~~~~~
+
+Next visualize results
+::
+
+    from strategy.viewers import RebalanceViewer, UniswapViewer, PotrfolioViewer
+
+    import plotly.offline as pyo
+    import plotly.graph_objs as go
+
+    rv = RebalanceViewer(rebalance_history)
+    uv = UniswapViewer(uni_history)
+    pv = PotrfolioViewer(portfolio_history, pool)
+
+    # Draw portfolio stats, like value, fees earned, apy
+    fig1, fig2, fig3, fig4, fig5, fig6 = pv.draw_portfolio()
+
+    # Draw Uniswap intervals
+    intervals_plot = uv.draw_intervals(data.swaps)
 
     # Draw rebalances
-    rv = RebalanceViewer(rebalance_history)
-    rv.draw_rebalances(data.swaps)
-    # Draw Uniswap intervals
-    uv = UniswapViewer(uni_history)
-    uv.draw_intervals(data.swaps)
-    # Calculate Uniswap intervals coverage
-    uni_history.get_coverage(data.swaps)
-    # Draw portfolio stats, like value, fees earned, apy
-    fig1, fig2, fig3, fig4 = PotrfolioViewer(portfolio_history, pool).draw_portfolio()
+    rebalances_plot = rv.draw_rebalances(data.swaps)
+
+    # Calculate df with portfolio stats
+    stats = portfolio_history.calculate_stats()
+    
+::
+
+    intervals_plot.update_layout(height=300, width=800).write_image("intervals_plot.png")
+
+.. image:: ../../examples/intervals_plot.png
+    :width: 800
+    :height: 300
+    :alt: Alternative text
+
+
+::
+
+    rebalances_plot.update_layout(height=300, width=800).show()
+
+.. image:: ../../examples/rebalances_plot.png
+    :width: 800
+    :height: 300
+    :alt: Alternative text
+
+::
+
+    fig2.update_layout(height=300, width=800).show()
+
+.. image:: ../../examples/fig2.png
+    :width: 800
+    :height: 300
+    :alt: Alternative text
+
+::
+
+    fig4.update_layout(height=300, width=800).show()
+
+.. image:: ../../examples/fig4.png
+    :width: 800
+    :height: 300
+    :alt: Alternative text
+
+::
+
+    fig6.update_layout(height=300, width=800).show()
+
+.. image:: ../../examples/fig6.png
+    :width: 800
+    :height: 300
+    :alt: Alternative text
+
+::
+
+    stats.tail(3)
+
+
+.. csv-table:: Table Title
+   :file: ../../examples/stats.csv
+   :header-rows: 1
 
 Congratulations! Now you have the results of your strategy backtest on the real UniV3 data!

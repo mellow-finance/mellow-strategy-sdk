@@ -85,8 +85,8 @@ class PotrfolioViewer:
             ), secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Value to X", secondary_y=False)
-        fig.update_yaxes(title_text='Earned fees to X', secondary_y=True)
+        fig.update_yaxes(title_text=f"Value to {self.pool.token0.name}", secondary_y=False)
+        fig.update_yaxes(title_text=f'Earned fees to {self.pool.token0.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token0.name}', width=900, height=500)
         return fig
 
@@ -130,8 +130,8 @@ class PotrfolioViewer:
         )
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Value to Y", secondary_y=False)
-        fig.update_yaxes(title_text='Earned fees to Y', secondary_y=True)
+        fig.update_yaxes(title_text=f"Value to {self.pool.token1.name}", secondary_y=False)
+        fig.update_yaxes(title_text=f'Earned fees to {self.pool.token1.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token1.name}', width=900, height=500)
         return fig
 
@@ -166,7 +166,7 @@ class PotrfolioViewer:
         )
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Value to X", secondary_y=False)
+        fig.update_yaxes(title_text=f"Value to {self.pool.token0.name}", secondary_y=False)
         fig.update_yaxes(title_text=f'APY in {self.pool.token0.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token0.name}')
         return fig
@@ -199,7 +199,7 @@ class PotrfolioViewer:
             ), secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Value to Y", secondary_y=False)
+        fig.update_yaxes(title_text=f"Value to {self.pool.token1.name}", secondary_y=False)
         fig.update_yaxes(title_text=f'APY in {self.pool.token1.name}', secondary_y=True)
 
         fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token1.name}')
@@ -236,8 +236,8 @@ class PotrfolioViewer:
             ), secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Value in X", secondary_y=False)
-        fig.update_yaxes(title_text='Value in Y', secondary_y=True)
+        fig.update_yaxes(title_text=f"Value in {self.pool.token0.name}", secondary_y=False)
+        fig.update_yaxes(title_text=f'Value in {self.pool.token1.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, {self.pool.token1.name}')
         return fig
 
@@ -265,7 +265,7 @@ class PotrfolioViewer:
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['vpn_value'],
-                name=f'Portfolio V@p_n in X',
+                name=f'Portfolio V@p_n in {self.pool.token0.name}',
             ),
             secondary_y=True)
 

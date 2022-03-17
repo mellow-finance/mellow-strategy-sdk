@@ -37,7 +37,8 @@ extensions = [
     "sphinx.ext.autodoc",
     "myst_parser",
     "sphinx.ext.autosectionlabel",
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    # 'jupyter-sphinx'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
