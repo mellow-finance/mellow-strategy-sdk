@@ -5,7 +5,7 @@
 __pycache__/
 **/*.ipynb_checkpoints
 **/*.idea
-**/*.csv
 **/.DS_Store
 .DS_Store
 /docs/build
+/data/*
