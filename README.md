@@ -10,6 +10,3 @@ source .venv/bin/activate
 pip install poetry==1.1.13
 poetry install  
 ```
-
-
-TODO при билде проверять тесты и делать poetry update

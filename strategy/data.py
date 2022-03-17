@@ -68,7 +68,10 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        df_mints = pl.read_csv(f'{self.data_dir}/mint_{self.pool.name}.csv', dtypes=mints_converters)
+        file_name = f'{self.data_dir}/mint_{self.pool.name}.csv'
+        assert os.path.exists(file_name), 'file not downloaded yet'
+
+        df_mints = pl.read_csv(file_name, dtypes=mints_converters)
         df_prep = df_mints.select([
             pl.col('tx_hash'),
             pl.col('owner'),
@@ -106,7 +109,10 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        df_burns = pl.read_csv(f'{self.data_dir}/burn_{self.pool.name}.csv', dtypes=burns_converters)
+        file_name = f'{self.data_dir}/burn_{self.pool.name}.csv'
+        assert os.path.exists(file_name), 'file not downloaded yet'
+
+        df_burns = pl.read_csv(file_name, dtypes=burns_converters)
         df_prep = df_burns.select([
             pl.col('tx_hash'),
             pl.col('owner'),
@@ -147,7 +153,10 @@ class RawDataUniV3:
             "amount1": pl.Float64,
             'sqrt_price_x96': pl.Float64,
         }
-        df_swaps = pl.read_csv(f'{self.data_dir}/swap_{self.pool.name}.csv', dtypes=swaps_converters)
+        file_name = f'{self.data_dir}/swap_{self.pool.name}.csv'
+        assert os.path.exists(file_name), 'file not downloaded yet'
+
+        df_swaps = pl.read_csv(file_name, dtypes=swaps_converters)
         df_prep = df_swaps.select([
             pl.col('tx_hash'),
             pl.col('sender'),
