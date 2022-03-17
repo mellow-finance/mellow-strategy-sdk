@@ -11,11 +11,13 @@ from strategy.primitives import Pool
 
 class PotrfolioViewer:
     """
-    ``PotrfolioViewer`` is class for potrfolio visualisation.
+    ``PotrfolioViewer`` is class for backtest result visualisation.
 
     Attributes:
-        portfolio_history: Portfolio history instance.
-        pool: UniV3 pool meta information.
+        portfolio_history:
+            ``PortfolioHistory`` instance returned from backtest
+        pool:
+            ``Pool``
     """
     def __init__(self, portfolio_history: PortfolioHistory, pool: Pool, offset: int = 30):
         self.portfolio_history = portfolio_history
@@ -24,10 +26,15 @@ class PotrfolioViewer:
 
     def draw_portfolio(self):
         """
-        Plot in pool in time.
+        Main function of the class. Create main plots to track portfolio behavior.
 
-        Returns:
-            Portfolio visualization.
+        Returns: plotly plots
+            | fig1: portfolio value in X, fees in X, IL in X
+            | fig2: portfolio value in Y, fees in Y, IL in Y
+            | fig3: portfolio value in X, portfolio APY in X
+            | fig4: portfolio value in Y, portfolio APY in Y
+            | fig5: amount of X asset in portfolio,  amount of Y asset in portfolio
+            | fig6: V@p_n in X, APY(V@p_n)
         """
         portfolio_df = self.portfolio_history.calculate_stats()
         delta = datetime.timedelta(days=self.offset)
@@ -42,15 +49,14 @@ class PotrfolioViewer:
         fig6 = self.draw_vpn_vs_hold_apy(portfolio_df_offset)
         return fig1, fig2, fig3, fig4, fig5, fig6
 
-    def draw_portfolio_to_x(self, portfolio_df: pd.DataFrame):
+    def draw_portfolio_to_x(self, portfolio_df: pl.DataFrame):
         """
-        Plot portfolio value and fees in X.
-
+        Plot portfolio value in X, fees in X, IL in X.
         Args:
-            portfolio_df: Portfolio history data frame.
-
+            portfolio_df:
+                result of ``PortfolioHistory.calculate_stats()``
         Returns:
-            Portfolio plot with value, fees, il.
+            plotly plot
         """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -89,10 +95,11 @@ class PotrfolioViewer:
         Plot portfolio value and fees in Y.
 
         Args:
-            portfolio_df: Portfolio history data frame.
+            portfolio_df:
+                result of ``PortfolioHistory.calculate_stats()``
 
         Returns:
-            Portfolio plot with value, fees, il.
+            plotly plot
         """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -130,13 +137,14 @@ class PotrfolioViewer:
 
     def draw_performance_x(self, portfolio_df: pd.DataFrame):
         """
-        Plot portfolio performance in X.
+        Plot portfolio value in X, portfolio APY in X.
 
         Args:
-            portfolio_df: portfolio history data frame
+            portfolio_df:
+                result of ``PortfolioHistory.calculate_stats()``
 
         Returns:
-            Portfolio plot with value and apy.
+            plotly plot
         """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(
@@ -165,13 +173,13 @@ class PotrfolioViewer:
 
     def draw_performance_y(self, portfolio_df: pd.DataFrame):
         """
-        Plot portfolio performance in Y.
+        Plot portfolio value in Y, portfolio APY in Y.
 
         Args:
-            portfolio_df: Portfolio history data frame.
-
+            portfolio_df:
+                result of ``PortfolioHistory.calculate_stats()``
         Returns:
-            Portfolio plot with value and apy.
+            plotly plot
         """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -198,6 +206,16 @@ class PotrfolioViewer:
         return fig
 
     def draw_x_y(self, portfolio_df: pd.DataFrame):
+        """
+        | Plot amount of X asset in portfolio
+        | Plot amount of Y asset in portfolio
+
+        Args:
+            portfolio_df:
+                result of ``PortfolioHistory.calculate_stats()``
+        Returns:
+            plotly plot
+        """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
@@ -224,13 +242,22 @@ class PotrfolioViewer:
         return fig
 
     def draw_vpn_vs_hold_apy(self, portfolio_df: pd.DataFrame):
+        """
+        | Plot portfolio value in X in condition of price=last price (in code Vpn or V@p_n).
+        | Plot APY of V@p_n. (btw APY(V@p_n in X) equals APY(V@p_n in Y))
+
+        Args:
+            portfolio_df: result of ``PortfolioHistory.calculate_stats()``
+        Returns:
+            plotly plot
+        """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['vpn_apy'],
-                name=f"Portfolio V*p_n APY",
+                name=f"Portfolio V@p_n APY",
             ),
             secondary_y=False)
 
@@ -238,18 +265,19 @@ class PotrfolioViewer:
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['vpn_value'],
-                name=f'Portfolio V*p_n value APY',
+                name=f'Portfolio V@p_n in X',
             ),
             secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text="APY", secondary_y=False)
         fig.update_yaxes(title_text='Value', secondary_y=True)
-        fig.update_layout(title=f'Portfolio Value in {self.pool.token1.name}, Value and APY in price_n')
+        fig.update_layout(title=f'Portfolio Value in {self.pool.token1.name}, Portfolio Value and APY at price_n')
         return fig
 
 
 class UniswapViewer:
+    # TODO docs
     """
      ``UniswapViewer`` is class for visualizing UniswapV3 intervals in time.
 
@@ -261,7 +289,7 @@ class UniswapViewer:
 
     def draw_intervals(self, swaps_df):
         """
-        Plot uniswap positions intervals in time.
+        Plot price and uniswap positions intervals in time.
 
         Args:
             swaps_df: UniswapV3 exchange data.
@@ -316,22 +344,24 @@ class UniswapViewer:
 
 class RebalanceViewer:
     """
-    ``RebalanceViewer`` is class for rebalance visualisation.
+    ``RebalanceViewer`` class to visualize actions (rebalances) other than None that occurred during the backtest.
 
     Attributes:
-        rebalance_history: Rebalance history instance.
+        rebalance_history:
+            ``RebalanceHistory`` instance returned from backtest.
     """
     def __init__(self, rebalance_history: RebalanceHistory):
         self.rebalance_history = rebalance_history
 
     def draw_rebalances(self, swaps_df: pd.DataFrame):
         """
-        Plot portfolio rabalances.
+        Draws a price chart with portfolio action points.
 
         Args:
-            swaps_df: UniswapV3 exchange data.
+            swaps_df: price data. [(timestamp, price)].
 
-        Returns: Plot with portfolio rabalances
+        Returns:
+            Plot with portfolio actions.
         """
         rebalance_df = self.rebalance_history.to_df()
         swaps_df_slice = swaps_df[['timestamp', 'price']].join(rebalance_df, on='timestamp')
@@ -375,10 +405,10 @@ class LiquidityViewer:
 
     def draw_plot(self):
         """
-        Plot liquidity in pool in time.
+        Plot liquidity and price in pool in time.
 
         Returns:
-            Plot with Pool liquidity.
+            Plot with Pool liquidity and price.
         """
         spot_prices = self.pool.swaps.groupby('date').agg([
             pl.col('price').mean().alias('price')

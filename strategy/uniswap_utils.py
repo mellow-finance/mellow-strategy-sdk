@@ -1,15 +1,10 @@
-"""
-TODO write
-    UniswapLiquidityAligner and other utils classes
-"""
-
 import numpy as np
 
 
 class UniswapLiquidityAligner:
     """
     UniswapLiquidityAligner this is a class with standard uniswap V3 formulas and transformations
-    related to liquidity on the interval
+    related to liquidity on the interval.
 
     Attributes:
         lower_price: Left bound for the UniswapV3 interval.
@@ -26,7 +21,7 @@ class UniswapLiquidityAligner:
         Args:
             price: current price on market
         Returns:
-            price = y/x
+            real_price = y/x
         """
 
         sqrt_price = np.sqrt(price)
@@ -48,7 +43,7 @@ class UniswapLiquidityAligner:
             x: amount of X tokens
 
         Returns:
-            The amount of liquidity for the given price range and amount of tokens X
+            The amount of liquidity for the given price and amount of tokens X
         """
 
         sqrt_lower = np.sqrt(self.lower_price)
@@ -69,7 +64,7 @@ class UniswapLiquidityAligner:
             y: amount of Y tokens
 
         Returns:
-            The amount of liquidity for the given price range and amount of tokens Y
+            The amount of liquidity for the given price and amount of tokens Y
         """
 
         sqrt_lower = np.sqrt(self.lower_price)
@@ -135,7 +130,7 @@ class UniswapLiquidityAligner:
             liq: given amount of liquidity
 
         Returns:
-            The amount of token Y for a given amount of liquidity and a price range
+            The amount of token Y for a given amount of liquidity and market price
         """
         sqrt_lower = np.sqrt(self.lower_price)
         sqrt_upper = np.sqrt(self.upper_price)
@@ -153,8 +148,8 @@ class UniswapLiquidityAligner:
             price: current market price
             liq: amount of liquidity to be allocated
         Returns:
-            The amount of X tokens and the amount of Y tokens that must be allocated to provide liquidity
-            at a given interval and price
+            The amount of X tokens and the amount of Y tokens that must be allocated to provide required amount of
+            liquidity at a given interval and price
         """
         assert liq >= 0, f'Incorrect liquidity {liq}'
         assert price > 1e-16, f'Incorrect price = {price}'
@@ -168,9 +163,9 @@ class UniswapLiquidityAligner:
             price: current market price
             x: amount of X tokens
             y: amount of Y tokens
-        Returns:
-            (is_optimal, x_liq, y_liq), where:
 
+        Returns:
+            (is_optimal, x_liq, y_liq):
             is_optimal:
                 True: if given amount of X and given amount of Y token can be fully minted
                 on given interval at given price
@@ -200,138 +195,136 @@ class UniswapLiquidityAligner:
         return abs(liq_x - liq_y) < 1e-6, liq_x, liq_y
 
 
-class UniswapV3Utils:
-    """
-    ``UniV3Utils`` is a class for creating UniswapV3 position in correct proportions.
-
-    Attributes:
-        lower_0: Base lower bound of the emulated interval.
-        upper_0: Base upper bound of the emulated interval.
-    """
-    def __init__(self,
-                 lower_0: float,
-                 upper_0: float,
-                 ):
-        self.lower_0 = lower_0
-        self.upper_0 = upper_0
-
-    def calc_fraction_to_uni(self, price, lower_price, upper_price):
-        """
-        TODO:
-        Args:
-            price:
-            lower_price:
-            upper_price:
-
-        Returns:
-
-        """
-        numer = 2 * np.sqrt(price) - np.sqrt(lower_price) - price / np.sqrt(upper_price)
-        denom = 2 * np.sqrt(price) - np.sqrt(self.lower_0) - price / np.sqrt(self.upper_0)
-        res = numer / denom
-        if res > 1:
-            print(f'Warning fraction Uni = {res}')
-        elif res < 0:
-            print(f'Warning fraction Uni = {res}')
-        return res
-
-    def calc_fraction_to_x(self, price, upper_price):
-        """
-        TODO:
-        Args:
-            price:
-            upper_price:
-
-        Returns:
-
-        """
-        numer = price / np.sqrt(upper_price) - price / np.sqrt(self.upper_0)
-        denom = 2 * np.sqrt(price) - np.sqrt(self.lower_0) - price / np.sqrt(self.upper_0)
-        res = numer / denom
-        if res > 1:
-            print(f'Warning fraction X = {res}')
-        elif res < 0:
-            print(f'Warning fraction X = {res}')
-        return res
-
-    def calc_fraction_to_y(self, price, lower_price):
-        """
-        TODO:
-        Args:
-            price:
-            lower_price:
-
-        Returns:
-
-        """
-        numer = np.sqrt(lower_price) - np.sqrt(self.lower_0)
-        denom = 2 * np.sqrt(price) - np.sqrt(self.lower_0) - price / np.sqrt(self.upper_0)
-        res = numer / denom
-        if res > 1:
-            print(f'Warning fraction Y = {res}')
-        elif res < 0:
-            print(f'Warning fraction Y = {res}')
-        return res
-
-
-class UniswapV2Utils:
-    """
-    TODO:
-    """
-    def calc_fraction_to_uni(self, price, lower_price, upper_price):
-        """
-        TODO:
-        Args:
-            price:
-            lower_price:
-            upper_price:
-
-        Returns:
-
-        """
-        res = 1 - self.calc_fraction_to_y(price, lower_price) - self.calc_fraction_to_x(price, upper_price)
-        if res > 1:
-            print(f'Warning fraction Uni = {res}')
-        elif res < 0:
-            print(f'Warning fraction Uni = {res}')
-        return res
-
-    # TODO static
-    def calc_fraction_to_x(self, price, upper_price):
-        """
-        TODO:
-        Args:
-            price:
-            upper_price:
-
-        Returns:
-
-        """
-        numer = np.sqrt(price)
-        denom = 2 * np.sqrt(upper_price)
-        res = numer / denom
-        if res > 1:
-            print(f'Warning fraction X = {res}')
-        elif res < 0:
-            print(f'Warning fraction X = {res}')
-        return res
-
-    # TODO static
-    def calc_fraction_to_y(self, price, lower_price):
-        """
-        TODO:
-        Args:
-            price:
-            lower_price:
-
-        Returns:
-
-        """
-        numer = np.sqrt(lower_price)
-        denom = 2 * np.sqrt(price)
-        res = numer / denom
-        if res > 1:
-            print(f'Warning fraction Y = {res}')
-        elif res < 0:
-            print(f'Warning fraction Y = {res}')
-        return res
+# class UniswapV3Utils:
+#     """
+#     ``UniV3Utils`` is a class for creating UniswapV3 position in correct proportions.
+#
+#     Attributes:
+#         lower_0: Base lower bound of the emulated interval.
+#         upper_0: Base upper bound of the emulated interval.
+#     """
+#     def __init__(self,
+#                  lower_0: float,
+#                  upper_0: float,
+#                  ):
+#         self.lower_0 = lower_0
+#         self.upper_0 = upper_0
+#
+#     def calc_fraction_to_uni(self, price, lower_price, upper_price):
+#         """
+#         TODO:
+#         Args:
+#             price:
+#             lower_price:
+#             upper_price:
+#
+#         Returns:
+#
+#         """
+#         numer = 2 * np.sqrt(price) - np.sqrt(lower_price) - price / np.sqrt(upper_price)
+#         denom = 2 * np.sqrt(price) - np.sqrt(self.lower_0) - price / np.sqrt(self.upper_0)
+#         res = numer / denom
+#         if res > 1:
+#             print(f'Warning fraction Uni = {res}')
+#         elif res < 0:
+#             print(f'Warning fraction Uni = {res}')
+#         return res
+#
+#     def calc_fraction_to_x(self, price, upper_price):
+#         """
+#         TODO:
+#         Args:
+#             price:
+#             upper_price:
+#
+#         Returns:
+#
+#         """
+#         numer = price / np.sqrt(upper_price) - price / np.sqrt(self.upper_0)
+#         denom = 2 * np.sqrt(price) - np.sqrt(self.lower_0) - price / np.sqrt(self.upper_0)
+#         res = numer / denom
+#         if res > 1:
+#             print(f'Warning fraction X = {res}')
+#         elif res < 0:
+#             print(f'Warning fraction X = {res}')
+#         return res
+#
+#     def calc_fraction_to_y(self, price, lower_price):
+#         """
+#         TODO:
+#         Args:
+#             price:
+#             lower_price:
+#
+#         Returns:
+#
+#         """
+#         numer = np.sqrt(lower_price) - np.sqrt(self.lower_0)
+#         denom = 2 * np.sqrt(price) - np.sqrt(self.lower_0) - price / np.sqrt(self.upper_0)
+#         res = numer / denom
+#         if res > 1:
+#             print(f'Warning fraction Y = {res}')
+#         elif res < 0:
+#             print(f'Warning fraction Y = {res}')
+#         return res
+#
+#
+# class UniswapV2Utils:
+#     """
+#     TODO:
+#     """
+#     def calc_fraction_to_uni(self, price, lower_price, upper_price):
+#         """
+#         TODO:
+#         Args:
+#             price:
+#             lower_price:
+#             upper_price:
+#
+#         Returns:
+#
+#         """
+#         res = 1 - self.calc_fraction_to_y(price, lower_price) - self.calc_fraction_to_x(price, upper_price)
+#         if res > 1:
+#             print(f'Warning fraction Uni = {res}')
+#         elif res < 0:
+#             print(f'Warning fraction Uni = {res}')
+#         return res
+#
+#     def calc_fraction_to_x(self, price, upper_price):
+#         """
+#         TODO:
+#         Args:
+#             price:
+#             upper_price:
+#
+#         Returns:
+#
+#         """
+#         numer = np.sqrt(price)
+#         denom = 2 * np.sqrt(upper_price)
+#         res = numer / denom
+#         if res > 1:
+#             print(f'Warning fraction X = {res}')
+#         elif res < 0:
+#             print(f'Warning fraction X = {res}')
+#         return res
+#
+#     def calc_fraction_to_y(self, price, lower_price):
+#         """
+#         TODO:
+#         Args:
+#             price:
+#             lower_price:
+#
+#         Returns:
+#
+#         """
+#         numer = np.sqrt(lower_price)
+#         denom = 2 * np.sqrt(price)
+#         res = numer / denom
+#         if res > 1:
+#             print(f'Warning fraction Y = {res}')
+#         elif res < 0:
+#             print(f'Warning fraction Y = {res}')
+#         return res

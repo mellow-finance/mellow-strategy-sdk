@@ -1,11 +1,8 @@
-"""
-    TODO: write
-"""
-
 import copy
 from typing import Tuple
 import pandas as pd
 import numpy as np
+import polars as pl
 
 from strategy.strategies import AbstractStrategy
 from strategy.portfolio import Portfolio
@@ -14,13 +11,9 @@ from strategy.history import PortfolioHistory, RebalanceHistory, UniPositionsHis
 
 class Backtest:
     """
-    ``Backtest`` is used for backtesting strategy on pool data.
-
-    It contains the logic of running strategy on the market data and tracks results.
-
-    Attributes:
-        strategy: Strategy to backtest.
-        portfolio: Portfolio to manage.
+    | ``Backtest`` emulate portfolio behavior on historical data.
+    | Collects and process portfolio state for each point in time.
+    | Returns in a convenient form for analyzing the results
     """
     def __init__(self,
                  strategy: AbstractStrategy,
@@ -32,25 +25,33 @@ class Backtest:
         else:
             self.portfolio = portfolio
 
-    def backtest(
-        self,
-        df_swaps: pd.DataFrame
-    ) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
+    def backtest(self, df_swaps: pl.DataFrame) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
         """
-        Run backtest on data.
+        | 1) Sends ``Portfolio`` and every market action to ``AbstractStrategy.rebalance``
+        | 2) expected return of ``AbstractStrategy.rebalance`` is name of strategy action e.g.
+        | 'init', 'rebalance', 'stop', 'some_cool_action', None. When there is no strategy action prefer return None.
+        | Add porfolio action to ``RebalanceHistory``
+        | 3) Add Porfolio snapshot to ``PortfolioHistory``
+        | 4) Add Porfolio snapshot to ``UniPositionsHistory``
+        |
+        | You can send anything you want to ``AbstractStrategy.rebalance`` cause it take *args, **kwargs,
+        | but be sure to send raw=[('timestamp', 'price')] and portfolio=self.portfolio
 
-        Args:
-            df_swaps: UniswapV3 exchanges data frame.
+        Attributes:
+            df_swaps: df with pool swaps, or df with market data. df format is [('timestamp', 'price')]
 
         Returns:
-            Portfolio statistics on historical data.
+            | History classes that store accumulated&processed results of backtesting.
+            |
+            | ``PortfolioHistory`` - keeps metrics such as APY
+            | ``RebalanceHistory`` - keeps information about portfolio actions, such as init ot rebalances
+            | ``UniPositionsHistory`` -  keeps information about open UniV3 positions
         """
         portfolio_history = PortfolioHistory()
         rebalance_history = RebalanceHistory()
         uni_history = UniPositionsHistory()
         for record in df_swaps.to_dicts():
             # df_swaps_prev = df_swaps[['price']][:idx]
-            # TODO добавил None, странно что np.isnan не работает
             if record['price'] is None:
                 continue
 

@@ -3,20 +3,18 @@ import polars as pl
 import numpy as np
 import datetime
 from typing import Hashable
-from strategy import log
-
+import typing as tp
 
 class PortfolioHistory:
     """
-    ``PortfolioHistory`` tracks position stats over time.
-
-    Each time ``add_snapshot`` method is called it remembers current state in time.
-    All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
+    | ``PortfolioHistory`` accumulate snapshots and can calculate stats over time from snapshots.
+    | Each time ``add_snapshot`` method is called it remembers current state in time.
+    | All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
     """
     def __init__(self):
         self.snapshots = []
 
-    def add_snapshot(self, snapshot: dict):
+    def add_snapshot(self, snapshot: dict) -> None:
         """
         Add portfolio snapshot to history.
 
@@ -26,30 +24,28 @@ class PortfolioHistory:
         if snapshot:
             self.snapshots.append(snapshot)
 
-    def to_df(self):
+    def to_df(self) -> pl.DataFrame:
         """
         Transform list of portfolio snapshots to data frame.
 
         Returns:
             Portfolio history data frame.
         """
-        # log.info('Starting to construct dataframe', length=len(self.snapshots))
         df = pd.DataFrame(self.snapshots)
         df2 = pl.from_pandas(df).sort(by=['timestamp'])
         return df2
 
-    # TODO: static method
     def calculate_values(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-        Calculate value of portfolio in X and Y.
+            Calculate amount of X and amount of Y in ``Portfolio``
 
-        Args:
-            df: Portfolio history DataFrame.
+            Args:
+                df: Portfolio history DataFrame. return of ``PortfolioHistory.to_df()``
 
-        Returns:
-            Portfolio values in X and Y data frame.
+            Returns:
+                dataframe consisting of two columns total_value_x, total_value_y
         """
-        # log.info('Starting to calculate values')
+
         value_of_x_cols = [col for col in df.columns if 'value_x' in col]
         value_of_y_cols = [col for col in df.columns if 'value_y' in col]
 
@@ -57,16 +53,16 @@ class PortfolioHistory:
         df_y = df[value_of_y_cols].sum(axis=1).alias('total_value_y')
         return pl.DataFrame([df_x, df_y])
 
-    # TODO: static method
     def calculate_ils(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-        Calculate IL of portfolio in X and Y.
+        | Calculate impermanent loss separately in X and Y currencies.
+        | As sum of positions IL.
 
         Args:
-            df: Portfolio history DataFrame.
+            df: Portfolio history DataFrame. return of ``PortfolioHistory.to_df()``
 
         Returns:
-            Portfolio ILs in X and Y data frame.
+            dataframe consisting of two columns total_il_x, total_il_y
         """
         # log.info('Starting to calculate ils')
         il_to_x_cols = [col for col in df.columns if 'il_x' in col]
@@ -81,16 +77,16 @@ class PortfolioHistory:
             df_y = pl.Series('total_il_y', data, dtype=pl.Float64)
         return pl.DataFrame([df_x, df_y])
 
-    # TODO: static method
     def calculate_fees(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-        Calculate fees of Uniswap positions in X and Y.
+        | Calculate X and Y fees of Uniswap positions.
+        | As sum over all positions
 
         Args:
-            df: Portfolio history DataFrame.
+            df: Portfolio history DataFrame. return of ``PortfolioHistory.to_df()``
 
         Returns:
-            Portfolio fees in X and Y data frame.
+            dataframe consisting of two columns total_fees_x, total_fees_y
         """
         # log.info('Starting to calculate fees')
         fees_to_x_cols = [col for col in df.columns if 'fees_x' in col]
@@ -104,16 +100,24 @@ class PortfolioHistory:
             df_y = pl.Series('total_fees_y', data, dtype=pl.Float64)
         return pl.DataFrame([df_x, df_y])
 
-    # TODO: static method
     def calculate_value_to(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-        Calculate total value of portfolio denominated in X and Y.
+        | Calculate:
+        | total_value_to_x - total_value denominated in X
+        | total_fees_to_x - total_fees denominated in X
+        | total_il_to_x - total_il denominated in X
+        | hold_to_x - total_value denominated in X for hold strategy
+        | corresponding columns with  denomination in Y
+        | vpn_value - total_value_to_x at last price p_n
+        | vpn_hold - hold_to_x at last price p_n
 
         Args:
-            df: Portfolio history DataFrame.
+            df:
+                Portfolio history DataFrame with cols from ``PortfolioHistory.calculate_values``,
+                ``PortfolioHistory.calculate_ils``, ``PortfolioHistory.calculate_fees``
 
         Returns:
-            Portfolio total value of portfolio denominated in X and Y data frame.
+            dataframe consisting of new columns
         """
         # log.info('Starting to calculate portfolio values')
         df_to = df.select([
@@ -130,16 +134,20 @@ class PortfolioHistory:
         ])
         return df_to
 
-    # TODO: static method
     def calculate_returns(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-        Calculate portfolio returns.
+        | Calculate: returns for columns.
+        | new columns:
+        | portfolio_returns_x, hold_returns_x
+        | portfolio_returns_y, hold_returns_y
+        | vpn_returns
+        | vpn_hold_returns
 
         Args:
             df: Portfolio history DataFrame.
 
         Returns:
-            Portfolio returns data frame.
+            dataframe consisting of new columns
         """
         # log.info('Starting to calculate portfolio returns')
         df_returns = df.select([
@@ -170,21 +178,23 @@ class PortfolioHistory:
         ])
         return df_returns
 
-    # TODO: static method
     def calculate_apy_for_col(self, df: pl.DataFrame, from_col: str, to_col: str,
                               calculate_full: bool = False) -> pl.DataFrame:
         """
-        Calculate portfolio APY.
+            Calculate APY for metric
 
         Args:
-            df: Portfolio history DataFrame.
-            from_col: # TODO
-            to_col: # TODO
-            calculate_full: # TODO
+            df: dataframe with metrics
+            from_col: metric column name
+            to_col: name for new column with metric APY
+            calculate_full:
+                | True: calculate APY from first day to last
+                | False: calculate APY from first day to current
+
         Returns:
-            Portfolio APY data frame.
+            dataframe consisting of 'to_col' column
         """
-        # log.info(f'Starting to calculate portfolio APY for {from_col}')
+
         if calculate_full:
             df_performance = df.select([
                 (pl.col(from_col) / pl.col(from_col).first()).alias('performance'),
@@ -203,7 +213,7 @@ class PortfolioHistory:
 
     def calculate_stats(self) -> pl.DataFrame:
         """
-        Calculate all statistics for portfolio.
+        Calculate all statistics for portfolio. Main function of class.
 
         Returns:
             Portfolio history data frame.
@@ -229,32 +239,31 @@ class PortfolioHistory:
 
 class RebalanceHistory:
     """
-       ``RebalanceHistory`` tracks rebalances over time.
-
-       Each time ``add_snapshot`` method is called it remembers rebalance.
-       All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
+    | ``RebalanceHistory`` tracks porfolio actions (rebalances) over time.
+    | Each time ``add_snapshot`` method is called class remembers action.
+    | All tracked values except None! then can be accessed via ``to_df`` method that will return a ``pl.Dataframe``.
     """
 
     def __init__(self):
         self.rebalances = []
 
-    def add_snapshot(self, timestamp: datetime.datetime, snapshot: Hashable):
+    def add_snapshot(self, timestamp: datetime.datetime, portfolio_action: tp.Optional[str]):
         """
-        Add portfolio rebalance snapshot to history
+        Add portfolio action to memory
 
         Args:
             timestamp: Timestamp of snapshot.
-            snapshot: Dict of portfolio rebalances.
+            portfolio_action: name of portfolio action or None. Usually it takes from ''AbstractStrategy.rebalance`` output.
         """
-        self.rebalances += [{'timestamp': timestamp, 'rebalance': snapshot}]
-        return None
+        self.rebalances += [{'timestamp': timestamp, 'rebalance': portfolio_action}]
 
     def to_df(self) -> pd.DataFrame:
         """
-        Transform list of portfolio rebalance snapshots to data frame.
+        | Transform list of portfolio actions to data frame.
+        | Drop all None actions!
 
         Returns:
-            Portfolio rebalance history data frame.
+            Data frame of porfolio actions, except None actions.
         """
         df = (
             pl.DataFrame(self.rebalances)

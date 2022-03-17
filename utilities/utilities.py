@@ -1,5 +1,5 @@
 """
-TODO write
+    file with helper functions
 """
 import sys
 import os
@@ -15,7 +15,7 @@ from binance import Client
 
 class ConfigParser:
     """
-        parse yml config to python dict
+        Parse yml config configs/config.yml to python dict
     """
     def __init__(self):
         add_main_path()
@@ -27,11 +27,10 @@ class ConfigParser:
 
 def get_db_connector():
     """
-        create connector for using pd.read_sql_query
-    Args:
-        path_to_config:
+        Create db connector for using pd.read_sql_query
+
     Returns:
-        connector :)
+        result of sqlalchemy.create_engine
     """
     parser = ConfigParser()
     return create_engine(
@@ -44,11 +43,11 @@ def get_db_connector():
     )
 
 
-def add_main_path():
+def add_main_path() -> None:
     """
-         add the path to the main directory ../mellow-strategy-sdk
+        Add the path to the main directory ../mellow-strategy-sdk in sys.path
+
     Returns:
-        None
     """
     current_path = os.getcwd()
     while current_path:
@@ -60,9 +59,8 @@ def add_main_path():
 
 def get_main_path():
     """
-         get the path of the main directory ../mellow-strategy-sdk
     Returns:
-        None
+        path of the main directory ../mellow-strategy-sdk
     """
     current_path = os.getcwd()
     while current_path:
@@ -90,9 +88,9 @@ def get_main_path():
 #   ]
 # ]
 
-def get_data_from_binance(pair_name, interval, start_str, end_str):
+def get_data_from_binance(pair_name, interval, start_str, end_str) -> pd.DataFrame:
     """
-        Download pair from binance and write pandas dataframe to /data folder.
+        Download pair data from binance and write csv to /data folder.
     Args:
         pair_name: 'ethusdc' or other
         interval: Binance interval string, e.g.:
@@ -100,7 +98,7 @@ def get_data_from_binance(pair_name, interval, start_str, end_str):
         start_str: string in format '%d-%M-%Y' (utc time format), (example '05-12-2018')
         end_str: string in format '%d-%M-%Y' (utc time format)
     Returns:
-        pandas dataframe that was written to the /data
+        pandas dataframe that was written to the /data/f'{pair_name}_{interval}_{start_str}_{end_str}.csv'
     """
     # in - ms
     # in * 1000 - us
@@ -112,8 +110,8 @@ def get_data_from_binance(pair_name, interval, start_str, end_str):
 
     # binance api client
     client = Client(
-        ConfigParser().config['aenik97_binance']['api_key'],
-        ConfigParser().config['aenik97_binance']['api_secret']
+        ConfigParser().config['binance']['api_key'],
+        ConfigParser().config['binance']['api_secret']
     )
 
     # download candles
@@ -142,17 +140,13 @@ def get_data_from_binance(pair_name, interval, start_str, end_str):
     df = pd.DataFrame({'price': [np.nan]}, index=index_col)
     df.index.name = 'timestamp'
 
-    print('mismatch timestamp rows: ', len(set(ts) - set(index_col)))
+    mismatch_rows = list(set(ts) - set(index_col))
+    print('mismatch timestamp rows: ', len(mismatch_rows))
 
-    ts_correct = []
-    price_col_correct = []
+    data = np.array([ts, price_col])
+    data = data[:, np.isin(data[0, :], mismatch_rows, invert=True)]
 
-    for i in range(len(ts)):
-        if ts[i] in index_col:
-            ts_correct.append(ts[i])
-            price_col_correct.append(price_col[i])
-
-    df.loc[ts_correct, 'price'] = price_col_correct
+    df.loc[data[0, :], 'price'] = data[1, :]
     df.index = pd.to_datetime(df.index, unit='us')
 
     df['price'] = df['price'].shift(1)

@@ -10,7 +10,6 @@ from strategy.primitives import Pool, POOLS
 from utilities.utilities import get_db_connector, get_main_path
 
 
-
 class PoolDataUniV3:
     """
     ``PoolDataUniV3`` contains data for backtesting.
@@ -35,11 +34,25 @@ class PoolDataUniV3:
 
 
 class RawDataUniV3:
-    def __init__(self, pool: Pool, dir: Path = '../data/'):
+    """
+        Load data from folder, preprocess and Return ``PoolDataUniV3`` instance.
+    """
+    def __init__(self, pool: Pool, data_dir: Path = None):
         self.pool = pool
-        self.dir = dir
 
-    def load_mints(self):
+        if not data_dir:
+            root = get_main_path()
+            self.data_dir = os.path.join(root, 'data')
+        else:
+            self.data_dir = data_dir
+
+    def load_mints(self) -> pl.DataFrame:
+        """
+            Read mints from csv and preprocess
+
+        Returns:
+            mints df
+        """
         mints_converters = {
             'pool': pl.Utf8,
             'block_hash': pl.Utf8,
@@ -55,7 +68,7 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        df_mints = pl.read_csv(f'{self.dir}mint_{self.pool.name}.csv', dtypes=mints_converters)
+        df_mints = pl.read_csv(f'{self.data_dir}/mint_{self.pool.name}.csv', dtypes=mints_converters)
         df_prep = df_mints.select([
             pl.col('tx_hash'),
             pl.col('owner'),
@@ -72,7 +85,13 @@ class RawDataUniV3:
         ).sort(by=['block_number', 'log_index'])
         return df_prep
 
-    def load_burns(self):
+    def load_burns(self) -> pl.DataFrame:
+        """
+            Read burns from csv and preprocess
+
+        Returns:
+            burns df
+        """
         burns_converters = {
             'pool': pl.Utf8,
             'block_hash': pl.Utf8,
@@ -87,7 +106,7 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        df_burns = pl.read_csv(f'{self.dir}burn_{self.pool.name}.csv', dtypes=burns_converters)
+        df_burns = pl.read_csv(f'{self.data_dir}/burn_{self.pool.name}.csv', dtypes=burns_converters)
         df_prep = df_burns.select([
             pl.col('tx_hash'),
             pl.col('owner'),
@@ -106,7 +125,13 @@ class RawDataUniV3:
         ).sort(by=['block_number', 'log_index'])
         return df_prep
 
-    def load_swaps(self):
+    def load_swaps(self) -> pl.DataFrame:
+        """
+            Read swaps from csv, preprocess, create sqrt_price_x96 column.
+
+        Returns:
+            swaps df
+        """
         swaps_converters = {
             'pool': pl.Utf8,
             'block_hash': pl.Utf8,
@@ -122,7 +147,7 @@ class RawDataUniV3:
             "amount1": pl.Float64,
             'sqrt_price_x96': pl.Float64,
         }
-        df_swaps = pl.read_csv(f'{self.dir}swap_{self.pool.name}.csv', dtypes=swaps_converters)
+        df_swaps = pl.read_csv(f'{self.data_dir}/swap_{self.pool.name}.csv', dtypes=swaps_converters)
         df_prep = df_swaps.select([
             pl.col('tx_hash'),
             pl.col('sender'),
@@ -148,6 +173,12 @@ class RawDataUniV3:
         return df_prep
 
     def load_from_folder(self) -> PoolDataUniV3:
+        """
+            Load mints, burns, swaps from folder, preprocess and create ``PoolDataUniV3`` object.
+
+        Returns:
+            `PoolDataUniV3`` object
+        """
         mints = self.load_mints()
         burns = self.load_burns()
         swaps = self.load_swaps()
@@ -156,18 +187,28 @@ class RawDataUniV3:
 
 class SyntheticData:
     """
-    ``SyntheticData`` generates UniswapV3 synthetic exchange data.
+    | ``SyntheticData`` generates UniswapV3 synthetic exchange data (swaps df).
+    | Generates by sampling Geometric Brownian Motion.
 
     Attributes:
-        pool: UniswapV3 ``Pool`` instance.
-        start_date: Generating starting date.
-        n_points: Amount samples to generate.
-        init_price: Initial price.
-        mu: Expectation of normal distribution.
-        sigma: Variance of normal distributio.
-        seed: Seed for random generator.
+        pool:
+            UniswapV3 ``Pool`` instance.
+        start_date:
+            Generating starting date. (example '1-1-2022')
+        n_points:
+            Amount samples to generate.
+        init_price:
+            Initial price.
+        mu:
+            Expectation of normal distribution.
+        sigma:
+            Variance of normal distribution.
+        seed:
+            Seed for random generator.
    """
-    def __init__(self, pool, start_date='1-1-2022', n_points=365, init_price=1, mu=0, sigma=0.1, seed=42):
+    def __init__(
+            self, pool, start_date: str = '1-1-2022', n_points: int = 365,
+            init_price: float = 1, mu: float = 0, sigma: float = 0.1, seed=42):
         self.pool = pool
         self.start_date = start_date
         self.n_points = n_points
@@ -183,7 +224,7 @@ class SyntheticData:
         Generate synthetic UniswapV3 exchange data.
 
         Returns:
-            PoolDataUniV3 instance with synthetic data.
+            ``PoolDataUniV3`` instance with synthetic swaps data, mint is None, burn is None.
         """
         timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq='D', normalize=True)
         # np.random.seed(self.seed)
@@ -207,6 +248,8 @@ class SyntheticData:
 
 
 class DownloaderRawDataUniV3:
+    # TODO docs
+    # TODO S3
     """
         downloader of raw data from db
     """
@@ -218,10 +261,12 @@ class DownloaderRawDataUniV3:
     def _get_event(self, event: str, pool_address: str, file_name: Path):
         """
             private func, download event from pool and save it
+
         Args:
             event: 'mint', 'burn' or 'swap'
             pool_address:
             file_name: file name to save in mellow-strategy-sdk/data/
+
         Returns:
             None
         """
@@ -230,7 +275,6 @@ class DownloaderRawDataUniV3:
 
         try:
             if event == 'burn':
-                print()
                 query = f"""
                     select
                         pool,
