@@ -159,7 +159,7 @@ class Pool:
             Tick diff. tick(eth/btc) - tick(wei/satoshi)
         """
 
-        return int(math.floor(-self.decimals_diff) * math.log(10, 1.0001))
+        return int(math.floor(self.decimals_diff) * math.log(10, 1.0001))
 
     @property
     def name(self) -> str:
