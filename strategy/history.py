@@ -69,8 +69,8 @@ class PortfolioHistory:
         il_to_y_cols = [col for col in df.columns if 'il_y' in col]
 
         if il_to_x_cols:
-            df_x = df[il_to_x_cols].fill_null('forward').sum(axis=1).alias('total_il_x')
-            df_y = df[il_to_y_cols].fill_null('forward').sum(axis=1).alias('total_il_y')
+            df_x = df[il_to_x_cols].fill_null('forward').fill_null(0).sum(axis=1).alias('total_il_x')
+            df_y = df[il_to_y_cols].fill_null('forward').fill_null(0).sum(axis=1).alias('total_il_y')
         else:
             data = [0] * df.shape[0]
             df_x = pl.Series('total_il_x', data, dtype=pl.Float64)
