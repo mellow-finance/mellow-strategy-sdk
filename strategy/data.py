@@ -78,11 +78,11 @@ class RawDataUniV3:
             pl.col('block_number'),
             pl.col('log_index'),
             ((pl.col('block_time') * 1e3 + pl.col('log_index')) * 1e3).cast(pl.Datetime).alias('timestamp'),
-            pl.col('tick_lower'),
-            pl.col('tick_upper'),
+            pl.col('tick_lower') + self.pool.tick_diff(),
+            pl.col('tick_upper') + self.pool.tick_diff(),
             pl.col('amount0') / 10 ** self.pool.token0.decimals,
             pl.col('amount1') / 10 ** self.pool.token1.decimals,
-            (pl.col('amount') * 10 ** self.pool.decimals_diff).alias('liquidity'),
+            (pl.col('amount') * self.pool.l_decimals_diff).alias('liquidity'),
         ]).with_column(
             pl.col('timestamp').dt.truncate("1d").alias('date')
         ).sort(by=['block_number', 'log_index'])

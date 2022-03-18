@@ -1,3 +1,4 @@
+import math
 from enum import Enum
 from functools import total_ordering
 
@@ -148,6 +149,17 @@ class Pool:
             Decimal difference between Tokens in Eth.
         """
         return float(self._token0.decimals + self._token1.decimals) / 2
+
+    @property
+    def tick_diff(self) -> int:
+        """
+        Used for conversion of tick from `wei` to `eth`.
+
+        Returns:
+            Tick diff. tick(eth/btc) - tick(wei/satoshi)
+        """
+
+        return int(math.floor(-self.decimals_diff) * math.log(10, 1.0001))
 
     @property
     def name(self) -> str:
