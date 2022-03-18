@@ -20,7 +20,7 @@ class ConfigParser:
     def __init__(self):
         add_main_path()
         self.path = os.path.join(get_main_path(), "configs", "config.yml")
-
+        assert os.path.exists(self.path), 'there is no configs/config.yml file, you should add it'
         with open(self.path, 'r') as stream:
             self.config = yaml.safe_load(stream)
 
