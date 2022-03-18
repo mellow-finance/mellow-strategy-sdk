@@ -22,7 +22,7 @@ The easiest way to get started is to clone SDK and use examples in the `Github r
 |br| The notebook with this code is also in the examples.
 
 
-Choose pool
+Choose a pool
 ~~~~~~~~~~~~
 
 A typical notebook would start with downloading and preparing data for a specific pool.
