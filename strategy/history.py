@@ -5,6 +5,7 @@ import datetime
 from typing import Hashable
 import typing as tp
 
+
 class PortfolioHistory:
     """
     | ``PortfolioHistory`` accumulate snapshots and can calculate stats over time from snapshots.
