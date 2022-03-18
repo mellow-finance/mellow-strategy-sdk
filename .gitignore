@@ -9,3 +9,4 @@ __pycache__/
 /docs/build
 /data/*
 .vscode
+.DS_Store
