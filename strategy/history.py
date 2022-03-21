@@ -5,6 +5,7 @@ import datetime
 from typing import Hashable
 import typing as tp
 
+
 class PortfolioHistory:
     """
     | ``PortfolioHistory`` accumulate snapshots and can calculate stats over time from snapshots.
@@ -65,16 +66,16 @@ class PortfolioHistory:
             dataframe consisting of two columns total_il_x, total_il_y
         """
         # log.info('Starting to calculate ils')
-        il_to_x_cols = [col for col in df.columns if 'il_x' in col]
-        il_to_y_cols = [col for col in df.columns if 'il_y' in col]
+        il_to_x_cols = [col for col in df.columns if 'il_to_x' in col]
+        il_to_y_cols = [col for col in df.columns if 'il_to_y' in col]
 
         if il_to_x_cols:
-            df_x = df[il_to_x_cols].fill_null('forward').fill_null(0).sum(axis=1).alias('total_il_x')
-            df_y = df[il_to_y_cols].fill_null('forward').fill_null(0).sum(axis=1).alias('total_il_y')
+            df_x = df[il_to_x_cols].fill_null('forward').sum(axis=1).alias('total_il_to_x')
+            df_y = df[il_to_y_cols].fill_null('forward').sum(axis=1).alias('total_il_to_y')
         else:
             data = [0] * df.shape[0]
-            df_x = pl.Series('total_il_x', data, dtype=pl.Float64)
-            df_y = pl.Series('total_il_y', data, dtype=pl.Float64)
+            df_x = pl.Series('total_il_to_x', data, dtype=pl.Float64)
+            df_y = pl.Series('total_il_to_y', data, dtype=pl.Float64)
         return pl.DataFrame([df_x, df_y])
 
     def calculate_fees(self, df: pl.DataFrame) -> pl.DataFrame:
@@ -125,8 +126,6 @@ class PortfolioHistory:
             (pl.col('total_value_x') * pl.col('price') + pl.col('total_value_y')).alias('total_value_to_y'),
             (pl.col('total_fees_x') + pl.col('total_fees_y') / pl.col('price')).alias('total_fees_to_x'),
             (pl.col('total_fees_x') * pl.col('price') + pl.col('total_fees_y')).alias('total_fees_to_y'),
-            (pl.col('total_il_x') + pl.col('total_il_y') / pl.col('price')).alias('total_il_to_x'),
-            (pl.col('total_il_x') * pl.col('price') + pl.col('total_il_y')).alias('total_il_to_y'),
             (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price')).alias('hold_to_x'),
             (pl.col('total_value_x').first() * pl.col('price') + pl.col('total_value_y').first()).alias('hold_to_y'),
             (pl.col('total_value_x') + pl.col('total_value_y') / pl.col('price').last()).alias('vpn_value'),
@@ -178,8 +177,7 @@ class PortfolioHistory:
         ])
         return df_returns
 
-    def calculate_apy_for_col(self, df: pl.DataFrame, from_col: str, to_col: str,
-                              calculate_full: bool = False) -> pl.DataFrame:
+    def calculate_apy_for_col(self, df: pl.DataFrame, from_col: str, to_col: str) -> pl.DataFrame:
         """
             Calculate APY for metric
 
@@ -187,27 +185,16 @@ class PortfolioHistory:
             df: dataframe with metrics
             from_col: metric column name
             to_col: name for new column with metric APY
-            calculate_full:
-                | True: calculate APY from first day to last
-                | False: calculate APY from first day to current
 
         Returns:
             dataframe consisting of 'to_col' column
         """
 
-        if calculate_full:
-            df_performance = df.select([
-                (pl.col(from_col) / pl.col(from_col).first()).alias('performance'),
-                ((pl.col('timestamp').last() - pl.col('timestamp').first()).dt.days()).alias('days')
-            ])
-        else:
-            df_performance = df.select([
+        df_performance = df.select([
                 (pl.col(from_col) / pl.col(from_col).first()).alias('performance'),
                 ((pl.col('timestamp') - pl.col('timestamp').first()).dt.days()).alias('days')
             ])
-
         df_apy = df_performance.apply(lambda x: 100 * (x[0] ** (365 / x[1]) - 1) if x[1] != 0 else 0.)
-
         df_apy = df_apy.rename({"apply": to_col})
         return df_apy
 
@@ -265,14 +252,10 @@ class RebalanceHistory:
         Returns:
             Data frame of porfolio actions, except None actions.
         """
-        df = (
-            pl.DataFrame(self.rebalances)
-            .drop_nulls()
-            .with_column(
-                pl.col('timestamp')
-                .cast(pl.Datetime)
-            )
-        )
+        df = pl.DataFrame([
+            pl.Series('timestamp', [x['timestamp'] for x in self.rebalances]),
+            pl.Series('rebalance', [x['rebalance'] for x in self.rebalances], dtype=pl.Utf8),
+        ]).drop_nulls().with_column(pl.col('timestamp').cast(pl.Datetime))
         return df
 
 
@@ -325,25 +308,5 @@ class UniPositionsHistory:
     #     Returns:
     #         Uniswap positions history data frame.
     #     """
-    #     prices = swaps_df[['price']]
-    #     prices['covered'] = np.nan
-    #
-    #     intervals = self.to_df()
-    #     prices_sliced = prices.loc[intervals.index]['price']
-    #
-    #     min_bound = intervals.loc[:, intervals.columns.get_level_values(level=1) == 'lower_bound']
-    #     max_bound = intervals.loc[:, intervals.columns.get_level_values(level=1) == 'upper_bound']
-    #
-    #     min_bound.columns = list(min_bound.columns.droplevel(1))
-    #     max_bound.columns = list(max_bound.columns.droplevel(1))
-    #
-    #     min_mask = min_bound.lt(prices_sliced, axis=0).any(axis=1)
-    #     max_mask = max_bound.gt(prices_sliced, axis=0).any(axis=1)
-    #
-    #     final_mask = min_mask & max_mask
-    #
-    #     prices.loc[intervals.index, 'covered'] = final_mask
-    #     prices.loc[:, 'covered'] = prices['covered'].fillna(False)
-    #     coverage = prices['covered'].sum() / prices.shape[0]
-    #
+    #     pass
     #     return coverage

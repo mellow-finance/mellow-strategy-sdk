@@ -3,7 +3,6 @@ from pathlib import Path
 from decimal import Decimal
 import subprocess
 import numpy as np
-import pandas as pd
 import polars as pl
 from datetime import datetime
 from strategy.primitives import Pool, POOLS
@@ -19,18 +18,22 @@ class PoolDataUniV3:
         mints: UniswapV3 mints data.
         burns: UniswapV3 burns data.
         swaps: UniswapV3 swaps data.
+        swaps: UniswapV3 all events data.
+
     """
     def __init__(self,
                  pool: Pool,
-                 mints: pd.DataFrame = None,
-                 burns: pd.DataFrame = None,
-                 swaps: pd.DataFrame = None
+                 mints: pl.DataFrame = None,
+                 burns: pl.DataFrame = None,
+                 swaps: pl.DataFrame = None,
+                 full_df: pl.DataFrame = None,
                  ):
 
         self.pool = pool
         self.mints = mints
         self.burns = burns
         self.swaps = swaps
+        self.full_df = full_df
 
 
 class RawDataUniV3:
@@ -85,6 +88,8 @@ class RawDataUniV3:
             (pl.col('amount') / 10 ** self.pool.l_decimals_diff).alias('liquidity'),
         ]).with_column(
             pl.col('timestamp').dt.truncate("1d").alias('date')
+        ).with_column(
+            pl.Series(name='event', values=['mint'])
         ).sort(by=['block_number', 'log_index'])
         return df_prep
 
@@ -128,6 +133,8 @@ class RawDataUniV3:
             pl.col('timestamp').dt.truncate("1d").alias('date')
         ).filter(
             (pl.col('amount0') + pl.col('amount1')) > 1e-6
+        ).with_column(
+            pl.Series(name='event', values=['burn'])
         ).sort(by=['block_number', 'log_index'])
         return df_prep
 
@@ -159,8 +166,7 @@ class RawDataUniV3:
         df_swaps = pl.read_csv(file_name, dtypes=swaps_converters)
         df_prep = df_swaps.select([
             pl.col('tx_hash'),
-            pl.col('sender'),
-            pl.col('recipient'),
+            pl.col('sender').alias('owner'),
             pl.col('block_number'),
             pl.col('log_index'),
             ((pl.col('block_time') * 1e3 + pl.col('log_index')) * 1e3).cast(pl.Datetime).alias('timestamp'),
@@ -177,8 +183,9 @@ class RawDataUniV3:
         ).with_columns([
             pl.col('price').shift_and_fill(1, pl.col('price').first()).alias('price_before'),
             pl.col('price').shift_and_fill(-1, pl.col('price').last()).alias('price_next')
-        ]).sort(by=['block_number', 'log_index'])
-
+        ]).with_column(
+            pl.Series(name='event', values=['swap'])
+        ).drop("sqrt_price_x96").sort(by=['block_number', 'log_index'])
         return df_prep
 
     def load_from_folder(self) -> PoolDataUniV3:
@@ -191,7 +198,17 @@ class RawDataUniV3:
         mints = self.load_mints()
         burns = self.load_burns()
         swaps = self.load_swaps()
-        return PoolDataUniV3(self.pool, mints, burns, swaps)
+        full_df = (
+                pl.concat([swaps, mints, burns], how='diagonal')
+                .sort(by=['block_number', 'log_index'])
+                .with_columns(
+                [
+                    pl.col('price').forward_fill().backward_fill(),
+                    pl.col('tick').forward_fill().backward_fill()
+                ]
+            )
+        )
+        return PoolDataUniV3(self.pool, mints, burns, swaps, full_df)
 
 
 class SyntheticData:
@@ -398,26 +415,4 @@ class DownloaderRawDataUniV3:
             print(f'saved to {file_name}')
         except:
             print(f'Failed to download from db or save to {file_name}')
-
-
-    # def get_curvefi(self):
-    #     """
-    #         Doesnt work, Doesnt need for while
-    #     Args:
-    #         self:
-    #
-    #     Returns:
-    #
-    #     """
-    #     event = 'curve_steth_eth'
-    #     file_name = "curve_steth_eth.csv"
-    #
-    #     print(f'get {event}')
-    #     query = f'select * from {event}'
-    #     try:
-    #         df = pd.read_sql(query, con=self.db_connection)
-    #         df.to_csv(f'{self.root}/data/{file_name}', index=False)
-    #         print(f'saved to {file_name}')
-    #     except:
-    #         print(f'Failed to download from db or save to {file_name}')
 

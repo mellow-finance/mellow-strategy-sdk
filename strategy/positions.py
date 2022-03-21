@@ -285,7 +285,7 @@ class BiCurrencyPosition(AbstractPosition):
         snapshot = {
                 f'{self.name}_value_x': float(self.x),
                 f'{self.name}_value_y': float(self.y),
-                # f'{self.name}total_rebalance_costs': self.total_rebalance_costs,
+                f'{self.name}total_rebalance_costs': self.total_rebalance_costs,
             }
         return snapshot
 
@@ -666,19 +666,19 @@ class UniV3Position(AbstractPosition):
         Returns: Position snapshot
         """
         x, y = self.to_xy(price)
-        il_x, il_y = self.impermanent_loss(price)
+        il_to_x, il_to_y = self.impermanent_loss_to_x(price), self.impermanent_loss_to_y(price)
 
         snapshot = {
-                f'{self.name}_value_x': float(x + self.fees_x),
-                f'{self.name}_value_y': float(y + self.fees_y),
+            f'{self.name}_value_x': float(x + self.fees_x),
+            f'{self.name}_value_y': float(y + self.fees_y),
 
-                f'{self.name}_fees_x': float(self.fees_x),
-                f'{self.name}_fees_y': float(self.fees_y),
+            f'{self.name}_fees_x': float(self.fees_x),
+            f'{self.name}_fees_y': float(self.fees_y),
 
-                f'{self.name}_il_x': float(il_x),
-                f'{self.name}_il_y': float(il_y),
+            f'{self.name}_il_to_x': float(il_to_x),
+            f'{self.name}_il_to_y': float(il_to_y),
 
-                # f'{self.name}_total_rebalance_costs': self.total_rebalance_costs,
-                # f'{self.name}_current_liquidity': self.liquidity
-            }
+            f'{self.name}_total_rebalance_costs': self.total_rebalance_costs,
+            # f'{self.name}_current_liquidity': self.liquidity
+        }
         return snapshot

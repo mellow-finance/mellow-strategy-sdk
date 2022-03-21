@@ -170,6 +170,16 @@ class Pool:
         return f"{self._token0.value}_{self._token1.value}_{self._fee.value}"
 
     @property
+    def _name(self) -> str:
+        """
+        Unique name for the pool.
+
+        Returns:
+            Pool name.
+        """
+        return f"{self._token0.value}/{self._token1.value} {100 * self._fee.percent}%"
+
+    @property
     def address(self) -> str:
         """
         Returns:

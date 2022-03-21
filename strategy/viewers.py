@@ -46,7 +46,8 @@ class PotrfolioViewer:
         fig3 = self.draw_performance_x(portfolio_df_offset)
         fig4 = self.draw_performance_y(portfolio_df_offset)
         fig5 = self.draw_x_y(portfolio_df_offset)
-        fig6 = self.draw_vpn_vs_hold_apy(portfolio_df_offset)
+        fig6 = self.draw_vpn_apy(portfolio_df_offset)
+
         return fig1, fig2, fig3, fig4, fig5, fig6
 
     def draw_portfolio_to_x(self, portfolio_df: pl.DataFrame):
@@ -168,7 +169,7 @@ class PotrfolioViewer:
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text=f"Value to {self.pool.token0.name}", secondary_y=False)
         fig.update_yaxes(title_text=f'APY in {self.pool.token0.name}', secondary_y=True)
-        fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token0.name}')
+        fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token0.name}', width=900, height=500)
         return fig
 
     def draw_performance_y(self, portfolio_df: pd.DataFrame):
@@ -202,7 +203,7 @@ class PotrfolioViewer:
         fig.update_yaxes(title_text=f"Value to {self.pool.token1.name}", secondary_y=False)
         fig.update_yaxes(title_text=f'APY in {self.pool.token1.name}', secondary_y=True)
 
-        fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token1.name}')
+        fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token1.name}', width=900, height=500)
         return fig
 
     def draw_x_y(self, portfolio_df: pd.DataFrame):
@@ -238,7 +239,7 @@ class PotrfolioViewer:
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text=f"Value in {self.pool.token0.name}", secondary_y=False)
         fig.update_yaxes(title_text=f'Value in {self.pool.token1.name}', secondary_y=True)
-        fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, {self.pool.token1.name}')
+        fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, {self.pool.token1.name}', width=900, height=500)
         return fig
 
     def draw_vpn_vs_hold_apy(self, portfolio_df: pd.DataFrame):
@@ -256,23 +257,25 @@ class PotrfolioViewer:
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
-                y=portfolio_df['vpn_apy'],
-                name=f"Portfolio V@p_n APY",
+                y=portfolio_df['vpn_value'],
+                name=f'Portfolio value',
             ),
             secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
-                y=portfolio_df['vpn_value'],
-                name=f'Portfolio V@p_n in {self.pool.token0.name}',
+                y=portfolio_df['vpn_apy'],
+                name=f"Portfolio V*p_n APY",
             ),
             secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="APY V@p_n", secondary_y=False)
-        fig.update_yaxes(title_text=f'Value V@p_n in {self.pool.token0.name}', secondary_y=True)
-        fig.update_layout(title=f'Portfolio Value in {self.pool.token1.name}, Portfolio Value and APY at price_n')
+        fig.update_yaxes(title_text='Value', secondary_y=False)
+        fig.update_yaxes(title_text="APY", secondary_y=True)
+        fig.update_layout(title=f'Portfolio value and APY in {self.pool.token0.name}. '
+                                f'Pool {self.pool._name}.',
+                          width=900, height=500)
         return fig
 
 

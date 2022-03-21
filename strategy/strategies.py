@@ -43,7 +43,7 @@ class Hold(AbstractStrategy):
         self.prev_gain_date = None
 
     def rebalance(self, *args, **kwargs):
-        timestamp = kwargs['timestamp']
+        timestamp = kwargs['record']['timestamp']
         portfolio = kwargs['portfolio']
 
         if self.prev_gain_date is None:
@@ -81,10 +81,9 @@ class UniV3Passive(AbstractStrategy):
         self.rebalance_cost = rebalance_cost
 
     def rebalance(self, *args, **kwargs) -> str:
-        timestamp = kwargs['timestamp']
-        row = kwargs['row']
+        record = kwargs['record']
         portfolio = kwargs['portfolio']
-        price_before, price = row['price_before'], row['price']
+        price_before, price = record['price_before'], record['price']
 
         is_rebalanced = None
 
@@ -105,3 +104,125 @@ class UniV3Passive(AbstractStrategy):
         univ3_pos.deposit(x=x_uni_aligned, y=y_uni_aligned, price=price)
         return univ3_pos
 
+
+class StrategyByAddress(AbstractStrategy):
+    def __init__(self,
+                 address,
+                 pool: Pool,
+                 rebalance_cost: float,
+                 name: str = None,
+                 ):
+        super().__init__(name)
+
+        self.address = address
+        self.decimal_diff = -pool.decimals_diff
+        self.fee_percent = pool.fee.percent
+        self.rebalance_cost = rebalance_cost
+
+    def rebalance(self, *args, **kwargs):
+        # prepare data for strategy
+        is_rebalanced = None
+
+        record = kwargs['record']
+        portfolio = kwargs['portfolio']
+        event = record['event']
+
+        if event == 'mint':
+            if record['owner'] == self.address:
+                amount_0, amount_1, tick_lower, tick_upper, liquidity = (record['amount0'], record['amount1'],
+                                                                         record['tick_lower'], record['tick_upper'],
+                                                                         record['liquidity'])
+                self.perform_mint(portfolio, amount_0, amount_1, tick_lower, tick_upper, liquidity)
+                is_rebalanced = 'mint'
+
+        if event == 'burn':
+            if record['owner'] == self.address:
+                amount_0, amount_1, tick_lower, tick_upper, liquidity, price = (
+                record['amount0'], record['amount1'],
+                record['tick_lower'], record['tick_upper'],
+                record['liquidity'], record['price'])
+                self.perform_burn(portfolio, amount_0, amount_1, tick_lower, tick_upper, liquidity, price)
+                is_rebalanced = 'burn'
+
+        if event == 'swap':
+            if record['owner'] == self.address:
+                amount_0, amount_1 = record['amount0'], record['amount1']
+                self.perform_swap(portfolio, amount_0, amount_1)
+                is_rebalanced = 'swap'
+
+        if event == 'swap':
+            price_before, price = record['price_before'], record['price']
+            for name, pos in portfolio.positions.items():
+                if 'Uni' in name:
+                    pos.charge_fees(price_before, price)
+
+        self.perform_clearing(portfolio)
+        return is_rebalanced
+
+    def perform_swap(self, portfolio, amount_0, amount_1):
+        vault = portfolio.get_position('Vault')
+        if amount_0 > 0:
+            if vault.x < amount_0:
+                vault.deposit(amount_0 - vault.x, 0)
+            vault.withdraw(amount_0, 0)
+            vault.deposit(0, -amount_1)
+        else:
+            if vault.y < amount_1:
+                vault.deposit(0, amount_1 - vault.y)
+            vault.withdraw(0, amount_1)
+            vault.deposit(-amount_0, 0)
+
+    def perform_mint(self, portfolio, amount_0, amount_1, tick_lower, tick_upper, liquidity):
+        name = f'UniV3_{tick_lower}_{tick_upper}'
+        vault = portfolio.get_position('Vault')
+
+        if vault.x < amount_0:
+            vault.deposit(amount_0 - vault.x, 0)
+
+        if vault.y < amount_1:
+            vault.deposit(0, amount_1 - vault.y)
+
+        x_uni, y_uni = vault.withdraw(amount_0, amount_1)
+
+        price_lower, price_upper = self._tick_to_price(tick_lower), self._tick_to_price(tick_upper)
+
+        if name in portfolio.positions:
+            univ3_pos_old = portfolio.get_position(name)
+            univ3_pos_old.liquidity = univ3_pos_old.liquidity + liquidity
+            univ3_pos_old.bi_currency.deposit(amount_0, amount_1)
+        else:
+            univ3_pos = UniV3Position(name, price_lower, price_upper, self.fee_percent, self.rebalance_cost)
+            univ3_pos.liquidity = liquidity
+            univ3_pos.bi_currency.deposit(amount_0, amount_1)
+            portfolio.append(univ3_pos)
+
+    def perform_burn(self, portfolio, amount_0, amount_1, tick_lower, tick_upper, liquidity, price):
+        name = f'UniV3_{tick_lower}_{tick_upper}'
+
+        if name in portfolio.positions:
+            univ3_pos_old = portfolio.get_position(name)
+            vault = portfolio.get_position('Vault')
+            vault.deposit(amount_0, amount_1)
+
+            if liquidity > 0:
+                if liquidity > univ3_pos_old.liquidity:
+                    print('Diff =', liquidity - univ3_pos_old.liquidity)
+                    x_out, y_out = univ3_pos_old.burn(univ3_pos_old.liquidity, price)
+                else:
+                    x_out, y_out = univ3_pos_old.burn(liquidity, price)
+            else:
+                print(f'Negative liq {liquidity}')
+        else:
+            print(f'There is no position to burn {name}')
+
+    def perform_clearing(self, portfolio):
+        poses = copy.copy(portfolio.positions)
+        for name, pos in poses.items():
+            if 'UniV3' in name:
+                univ3 = portfolio.get_position(name)
+                if univ3.liquidity < 1e1:
+                    portfolio.remove(name)
+
+    def _tick_to_price(self, tick):
+        price = np.power(1.0001, tick) / 10 ** self.decimal_diff
+        return price
