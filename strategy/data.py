@@ -190,7 +190,8 @@ class RawDataUniV3:
 
     def load_from_folder(self) -> PoolDataUniV3:
         """
-            Load mints, burns, swaps from folder, preprocess and create ``PoolDataUniV3`` object.
+            Load mints, burns, swaps from folder, preprocess and create ``PoolDataUniV3`` object and
+            create all events df.
 
         Returns:
             `PoolDataUniV3`` object

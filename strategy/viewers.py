@@ -244,8 +244,8 @@ class PotrfolioViewer:
 
     def draw_vpn_apy(self, portfolio_df: pd.DataFrame):
         """
-        | Plot portfolio value in X in condition of price=last price (in code Vpn or V@p_n).
-        | Plot APY of V@p_n. (btw APY(V@p_n in X) equals APY(V@p_n in Y))
+        | Plot portfolio value in Y and gAPY_x.
+        | Plot gAPY. (btw gAPY in X equals gAPY in Y)
 
         Args:
             portfolio_df: result of ``PortfolioHistory.calculate_stats()``

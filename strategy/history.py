@@ -199,6 +199,16 @@ class PortfolioHistory:
         return df_apy
 
     def calculate_g_apy(self, df: pl.DataFrame) -> pl.DataFrame:
+        """
+            Calculate gAPY.
+
+        Args:
+            df: dataframe with total_value_to, hold_to_x.
+
+        Returns:
+            dataframe consisting gAPY metric.
+        """
+
         df2 = df.select([
                 (pl.col('total_value_to_x') / pl.col('hold_to_x')).alias('coef'),
                 ((pl.col('timestamp') - pl.col('timestamp').first()).dt.days()).alias('days'),
