@@ -128,8 +128,8 @@ class PortfolioHistory:
             (pl.col('total_fees_x') * pl.col('price') + pl.col('total_fees_y')).alias('total_fees_to_y'),
             (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price')).alias('hold_to_x'),
             (pl.col('total_value_x').first() * pl.col('price') + pl.col('total_value_y').first()).alias('hold_to_y'),
-            (pl.col('total_value_x') + pl.col('total_value_y') / pl.col('price').last()).alias('vpn_value'),
-            (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price').last()).alias('vpn_hold'),
+            # (pl.col('total_value_x') + pl.col('total_value_y') / pl.col('price').last()).alias('vpn_value'),
+            # (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price').last()).alias('vpn_hold'),
         ])
         return df_to
 
@@ -198,6 +198,16 @@ class PortfolioHistory:
         df_apy = df_apy.rename({"apply": to_col})
         return df_apy
 
+    def calculate_g_apy(self, df: pl.DataFrame) -> pl.DataFrame:
+        df2 = df.select([
+                (pl.col('total_value_to_x') / pl.col('hold_to_x')).alias('coef'),
+                ((pl.col('timestamp') - pl.col('timestamp').first()).dt.days()).alias('days'),
+        ])
+
+        df_apy = df2.apply(lambda x: 100 * (x[0] ** (365 / x[1]) - 1) if x[1] != 0 else 0.)
+        df_apy = df_apy.rename({"apply": 'g_apy'})
+        return df_apy
+
     def calculate_stats(self) -> pl.DataFrame:
         """
         Calculate all statistics for portfolio. Main function of class.
@@ -219,9 +229,9 @@ class PortfolioHistory:
         prt_y = self.calculate_apy_for_col(df_to_ext, 'total_value_to_y', 'portfolio_apy_y')
         hld_x = self.calculate_apy_for_col(df_to_ext, 'hold_to_x', 'hold_apy_x')
         hld_y = self.calculate_apy_for_col(df_to_ext, 'hold_to_y', 'hold_apy_y')
-        vpn_apy = self.calculate_apy_for_col(df_to_ext, 'vpn_value', 'vpn_apy')
+        g_apy = self.calculate_g_apy(df_to_ext)
 
-        return pl.concat([df_prep, df_to, prt_x, prt_y, hld_x, hld_y, vpn_apy], how='horizontal')
+        return pl.concat([df_prep, df_to, prt_x, prt_y, hld_x, hld_y, g_apy], how='horizontal')
 
 
 class RebalanceHistory:

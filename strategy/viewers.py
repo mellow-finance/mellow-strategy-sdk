@@ -242,7 +242,7 @@ class PotrfolioViewer:
         fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, {self.pool.token1.name}', width=900, height=500)
         return fig
 
-    def draw_vpn_vs_hold_apy(self, portfolio_df: pd.DataFrame):
+    def draw_vpn_apy(self, portfolio_df: pd.DataFrame):
         """
         | Plot portfolio value in X in condition of price=last price (in code Vpn or V@p_n).
         | Plot APY of V@p_n. (btw APY(V@p_n in X) equals APY(V@p_n in Y))
@@ -257,7 +257,7 @@ class PotrfolioViewer:
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
-                y=portfolio_df['vpn_value'],
+                y=portfolio_df['total_value_to_y'],
                 name=f'Portfolio value',
             ),
             secondary_y=False)
@@ -265,15 +265,15 @@ class PotrfolioViewer:
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
-                y=portfolio_df['vpn_apy'],
-                name=f"Portfolio V*p_n APY",
+                y=portfolio_df['g_apy'],
+                name=f"Portfolio gAPY",
             ),
             secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text='Value', secondary_y=False)
         fig.update_yaxes(title_text="APY", secondary_y=True)
-        fig.update_layout(title=f'Portfolio value and APY in {self.pool.token0.name}. '
+        fig.update_layout(title=f'Portfolio value and gAPY in {self.pool.token0.name}. '
                                 f'Pool {self.pool._name}.',
                           width=900, height=500)
         return fig
