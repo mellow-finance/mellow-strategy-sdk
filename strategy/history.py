@@ -305,7 +305,12 @@ class UniPositionsHistory:
         Returns:
             Uniswap positions history data frame.
         """
-        intervals_df = pl.from_records(self.positions)
+        if len(self.positions) == 0:
+            intervals_df = pl.DataFrame(
+                {'name': [], 'timestamp': [], 'lower_bound': [], 'upper_bound': [], 'liq': []}
+            )
+        else:
+            intervals_df = pl.from_records(self.positions)
         return intervals_df
 
     # def get_coverage(self, swaps_df: pd.DataFrame) -> float:
