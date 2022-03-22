@@ -5,9 +5,8 @@ import subprocess
 import numpy as np
 import polars as pl
 import pandas as pd
-from datetime import datetime
 from strategy.primitives import Pool, POOLS
-from utilities.utilities import get_db_connector, get_main_path
+from strategy.utilities import get_db_connector, get_main_path
 
 
 class PoolDataUniV3:
