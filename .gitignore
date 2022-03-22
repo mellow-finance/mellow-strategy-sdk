@@ -1,0 +1,10 @@
+.venv
+.env
+/configs/*
+__pycache__/
+**/*.ipynb_checkpoints
+**/*.idea
+**/.DS_Store
+.DS_Store
+/docs/build
+/data/*
