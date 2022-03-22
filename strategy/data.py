@@ -2,11 +2,13 @@ import os
 from pathlib import Path
 from decimal import Decimal
 import subprocess
+from datetime import datetime
 import numpy as np
 import polars as pl
 import pandas as pd
-from strategy.primitives import Pool, POOLS
-from strategy.utilities import get_db_connector, get_main_path
+from strategy.primitives import Pool
+from strategy.utils import get_db_connector, ConfigParser, ROOT_DIR, CONFIG_PATH, DATA_DIR
+from binance import Client
 
 
 class PoolDataUniV3:
@@ -40,14 +42,9 @@ class RawDataUniV3:
     """
         Load data from folder, preprocess and Return ``PoolDataUniV3`` instance.
     """
-    def __init__(self, pool: Pool, data_dir: Path = None):
+    def __init__(self, pool: Pool, data_dir):
         self.pool = pool
-
-        if not data_dir:
-            root = get_main_path()
-            self.data_dir = os.path.join(root, 'data')
-        else:
-            self.data_dir = data_dir
+        self.data_dir = data_dir
 
     def load_mints(self) -> pl.DataFrame:
         """
@@ -246,7 +243,7 @@ class SyntheticData:
 
         self.seed = seed
 
-    def generate_data(self):
+    def generate_data(self) -> PoolDataUniV3:
         """
         Generate synthetic UniswapV3 exchange data.
 
@@ -271,7 +268,7 @@ class SyntheticData:
 
         df = pl.from_pandas(df.reset_index())
 
-        return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df)
+        return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df, full_df=df)
 
 
 class DownloaderRawDataUniV3:
@@ -280,25 +277,24 @@ class DownloaderRawDataUniV3:
     """
         downloader of raw data from db
     """
-    def __init__(self):
-        self.db_connection = get_db_connector()
-        self.root = get_main_path()
-        subprocess.run(['mkdir', '-p', os.path.join(self.root, 'data')])
+    def __init__(self, config_path, data_dir):
+        self.db_connection = get_db_connector(config_path=config_path)
+        self.data_dir = data_dir
+        subprocess.run(['mkdir', '-p', self.data_dir])
 
-    def _get_event(self, event: str, pool_address: str, file_name: Path):
+    def _get_event(self, event: str, pool_address: str, file_path: Path):
         """
             private func, download event from pool and save it
 
         Args:
             event: 'mint', 'burn' or 'swap'
             pool_address:
-            file_name: file name to save in mellow-strategy-sdk/data/
+            file_path: file path to save in (example 'root/data')
 
         Returns:
             None
         """
         print(f'get {event}')
-        query = f'select * from {event} WHERE pool="{pool_address}" ORDER BY block_time'
 
         try:
             if event == 'burn':
@@ -365,45 +361,47 @@ class DownloaderRawDataUniV3:
                     ORDER BY block_time
                 """
                 df = pd.read_sql_query(query, con=self.db_connection)
-
-            df.to_csv(f'{self.root}/data/{file_name}', index=False)
-            print(f'saved to {file_name}')
+            
+            df.to_csv(file_path, index=False)
+            print(f'saved to {file_path}')
         except Exception as e:
             print(e)
-            print(f'Failed to download from db or save to {file_name}')
+            print(f'Failed to download from db or save to {file_path}')
 
-    def load_events(self, pool_number: int):
+    def load_events(self, pool: Pool):
         """
-        by pool_number download all events in separate files
+        by pool download all events in separate files
         Args:
-            pool_number:
+            pool: Pool
         Returns:
             None
         """
-        pool_address = POOLS[pool_number]['address']
-        file_name_base = POOLS[pool_number]['token0'].name + '_' + POOLS[pool_number]['token1'].name + '_' + str(
-            POOLS[pool_number]['fee'].value) + '.csv'
 
         events = ["burn", "mint", "swap"]
 
         for event in events:
-            file_name = event + '_' + file_name_base
-            self._get_event(event, pool_address, file_name)
+            file_path = os.path.join(self.data_dir, event + '_' + pool.name + '.csv')
 
-    def get_transactions(self):
+            self._get_event(event=event, pool_address=pool.address, file_path=file_path)
+
+    def get_transactions(self, file_name="all_transactions.csv") -> None:
         """
-            download all transactions
+        Download all transactions
+        Args:
+            file_name: name of file to download
+
         Returns:
-
+            None
         """
-        file_name = "all_transactions.csv"
 
         query = f"""
-        select 
+        select
             hash, block_number, gas, gas_price
             from transaction
             ORDER BY block_time
         """
+        file_path = os.path.join(self.data_dir, file_name)
+        print('get_transactions')
         try:
             df = pd.pandas.read_sql_query(query, con=self.db_connection, dtype={
                 'hash': str,
@@ -411,9 +409,111 @@ class DownloaderRawDataUniV3:
                 'gas': int,
                 'gas_price': int
             })
-
-            df.to_csv(f'{self.root}/data/{file_name}', index=False)
-            print(f'saved to {file_name}')
+            df.to_csv(file_path, index=False)
+            print(f'saved to {file_path}')
         except:
-            print(f'Failed to download from db or save to {file_name}')
+            print(f'Failed to download from db or save to {file_path}')
 
+# Note
+# get_historical_klines
+# [
+#   [
+#     1499040000000,      // Open time - 0
+#     "0.01634790",       // Open
+#     "0.80000000",       // High
+#     "0.01575800",       // Low
+#     "0.01577100",       // Close - 4
+#     "148976.11427815",  // Volume
+#     1499644799999,      // Close time
+#     "2434.19055334",    // Quote asset volume
+#     308,                // Number of trades
+#     "1756.87402397",    // Taker buy base asset volume
+#     "28.46694368",      // Taker buy quote asset volume
+#     "17928899.62484339" // Ignore
+#   ]
+# ]
+
+
+class DownloaderBinanceData:
+    """
+        Download pair data from binance and write csv to /data folder.
+    Args:
+        pair_name: 'ethusdc' or other
+        interval: Binance interval string, e.g.:
+            '1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '3d', '1w'
+        start_str: string in format '%d-%M-%Y' (utc time format), (example '05-12-2018')
+        end_str: string in format '%d-%M-%Y' (utc time format)
+        config_path: path to yml config with config['binance']['api_key'], config['binance']['api_secret']
+    Returns:
+        pandas dataframe that was written to the /data/f'{pair_name}_{interval}_{start_str}_{end_str}.csv'
+    """
+    def __init__(self, pair_name, interval, start_str, end_str, config_path, data_dir):
+        self.pair_name = str.upper(pair_name)
+        self.interval = interval
+        self.start_str = start_str
+        self.end_str = end_str
+        self.config_path = config_path
+        self.data_dir = data_dir
+
+        subprocess.run(['mkdir', '-p', self.data_dir])
+
+    def get(self) -> pd.DataFrame:
+        # in - ms
+        # in * 1000 - us
+        # we need to get the num of sec in the interval
+        map_dict = {'m': 1, 'h': 60, 'd': 24 * 60, 'w': 7 * 24 * 60}
+        # num of nano sec [us]
+        us_num = int(self.interval[0:-1]) * map_dict[self.interval[-1]] * 60 * 1000 * 1000
+
+        # binance api client
+        config = ConfigParser(config_path=self.config_path).config
+        client = Client(
+            config['binance']['api_key'],
+            config['binance']['api_secret']
+        )
+
+        # download candles
+        print('start:', datetime.now())
+        try:
+            klines = client.get_historical_klines(
+                symbol=self.pair_name,
+                interval=self.interval,
+                start_str=self.start_str,
+                end_str=self.end_str
+            )
+        except:
+            assert False, 'using the api failed'
+        print('finish:', datetime.now())
+        print('rows downloaded:', len(klines))
+        assert len(klines) > 1, '0 or 1 rows downloaded!'
+
+        # preparing to timestamp to nano sec datetime[us]
+        ts = [i[0] * 1000 for i in klines]
+        index_col = list(range(ts[0], ts[-1] + us_num, us_num))
+
+        # convert price to float
+        price_col = [float(i[4]) for i in klines]
+
+        # create dataframe
+        df = pd.DataFrame({'price': [np.nan]}, index=index_col)
+        df.index.name = 'timestamp'
+
+        mismatch_rows = list(set(ts) - set(index_col))
+        print('mismatch timestamp rows: ', len(mismatch_rows))
+
+        data = np.array([ts, price_col])
+        data = data[:, np.isin(data[0, :], mismatch_rows, invert=True)]
+
+        df.loc[data[0, :], 'price'] = data[1, :]
+        df.index = pd.to_datetime(df.index, unit='us')
+
+        df['price'] = df['price'].shift(1)
+        df = df.iloc[1:]
+        df = df.reset_index()
+
+        file_name = f'{self.pair_name}_{self.interval}_{self.start_str}_{self.end_str}.csv'
+        file_path = os.path.join(self.data_dir, file_name)
+
+        df.to_csv(file_path, index=False, date_format='%Y-%m-%d %H:%M:%S:%f')
+        print(f'df shape {df.shape} saved to {file_path}')
+        return df
