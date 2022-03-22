@@ -1,5 +1,0 @@
-{
-    "esbonio.server.enabled": true,
-    "restructuredtext.confPath": "${workspaceFolder}/docs/source",
-    "esbonio.sphinx.confDir": "/Users/aleksandr/Desktop/mellow code/mellow-strategy-sdk/docs/source"
-}

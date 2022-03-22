@@ -10,7 +10,8 @@ packages = [
     {include = "strategy"},
     {include = 'examples'},
     {include = 'tests_unittests'},
-    {include = 'utilities'}
+    {include = 'utilities'},
+    {include = 'docs'}
 ]
 
 [tool.poetry.dependencies]
