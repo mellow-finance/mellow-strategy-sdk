@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 import math
 import numpy as np
 import typing as tp
+import copy
 
 
 class AbstractStrategy(ABC):
