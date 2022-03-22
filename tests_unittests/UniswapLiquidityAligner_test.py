@@ -5,7 +5,7 @@
         liq_to_optimal_xy - Yes
         check_xy_is_optimal - Yes
 
-    cd tests_unittests and python -m unittest UniswapLiquidityAligner_test.py
+    cd tests_unittests && python -m unittest UniswapLiquidityAligner_test.py && cd ..
 """
 
 import sys

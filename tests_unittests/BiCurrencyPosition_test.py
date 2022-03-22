@@ -4,7 +4,7 @@
         rebalance - YES
         interest_gain - YES
 
-        cd tests_unittests and python -m unittest BiCurrencyPosition_test.py
+        cd tests_unittests && python -m unittest BiCurrencyPosition_test.py && cd ..
 """
 
 

@@ -6,7 +6,7 @@
         charge_fees - YES
         swap_to_optimal - YES
 
-    cd tests_unittests && python -m unittest UniV3Position_test.py
+    cd tests_unittests && python -m unittest UniV3Position_test.py && cd ..
 """
 
 import sys
