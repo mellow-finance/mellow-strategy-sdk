@@ -2,7 +2,7 @@
 name = "mellow_strategy_sdk"
 version = "0.1"
 description = "Framework for creating new Uniswap V3 strategies"
-authors = ["Your Name <you@example.com>"]
+authors = ["ak@mellow.finance", "alexandernikolaev@mellow.finance", "davidprokhorov@mellow.finance"]
 license = "MIT License"
 homepage = 'https://mellow-strategy-sdk.readthedocs.io/en/latest'
 repository = 'https://github.com/mellow-finance/mellow-strategy-sdk'
