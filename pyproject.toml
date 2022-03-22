@@ -3,7 +3,7 @@ name = "mellow_strategy_sdk"
 version = "0.1"
 description = "Framework for creating new Uniswap V3 strategies"
 authors = [
-    "Alex K<ak@mellow.finance>",
+    "Alex K <ak@mellow.finance>",
     "Alexander Nikolaev <alexandernikolaev@mellow.finance>",
     "David Prokhorov <davidprokhorov@mellow.finance>"
 ]
