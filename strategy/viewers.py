@@ -87,7 +87,7 @@ class PotrfolioViewer:
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text=f"Value to {self.pool.token0.name}", secondary_y=False)
-        fig.update_yaxes(title_text=f'Earned fees to {self.pool.token0.name}', secondary_y=True)
+        fig.update_yaxes(title_text=f'Earned fees to {self.pool.token0.name}' + '<br>' + f' IL to {self.pool.token0.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token0.name}', width=900, height=500)
         return fig
 
@@ -132,7 +132,7 @@ class PotrfolioViewer:
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text=f"Value to {self.pool.token1.name}", secondary_y=False)
-        fig.update_yaxes(title_text=f'Earned fees to {self.pool.token1.name}', secondary_y=True)
+        fig.update_yaxes(title_text=f'Earned fees to {self.pool.token1.name}' + '<br>' + f' IL to {self.pool.token0.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token1.name}', width=900, height=500)
         return fig
 
@@ -274,8 +274,7 @@ class PotrfolioViewer:
         fig.update_yaxes(title_text='Value', secondary_y=False)
         fig.update_yaxes(title_text="APY", secondary_y=True)
         fig.update_layout(title=f'Portfolio value and gAPY in {self.pool.token0.name}. '
-                                f'Pool {self.pool._name}.',
-                          width=900, height=500)
+                                f'Pool {self.pool._name}.', width=900, height=500)
         return fig
 
 
