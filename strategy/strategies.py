@@ -164,12 +164,12 @@ class StrategyByAddress(AbstractStrategy):
         vault = portfolio.get_position('Vault')
         if amount_0 > 0:
             if vault.x < amount_0:
-                vault.deposit(amount_0 - vault.x, 0)
+                vault.deposit(amount_0 - vault.x + 1e-6, 0)
             vault.withdraw(amount_0, 0)
             vault.deposit(0, -amount_1)
         else:
             if vault.y < amount_1:
-                vault.deposit(0, amount_1 - vault.y)
+                vault.deposit(0, amount_1 - vault.y + 1e-6)
             vault.withdraw(0, amount_1)
             vault.deposit(-amount_0, 0)
 
@@ -178,10 +178,10 @@ class StrategyByAddress(AbstractStrategy):
         vault = portfolio.get_position('Vault')
 
         if vault.x < amount_0:
-            vault.deposit(amount_0 - vault.x, 0)
+            vault.deposit(amount_0 - vault.x + 1e-6, 0)
 
         if vault.y < amount_1:
-            vault.deposit(0, amount_1 - vault.y)
+            vault.deposit(0, amount_1 - vault.y + 1e-6)
 
         x_uni, y_uni = vault.withdraw(amount_0, amount_1)
 
