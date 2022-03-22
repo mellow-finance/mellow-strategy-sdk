@@ -225,5 +225,5 @@ class StrategyByAddress(AbstractStrategy):
                     portfolio.remove(name)
 
     def _tick_to_price(self, tick):
-        price = np.power(1.0001, tick) / 10 ** self.decimal_diff
+        price = np.power(1.0001, tick)
         return price
