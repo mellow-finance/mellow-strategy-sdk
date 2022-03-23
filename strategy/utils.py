@@ -5,14 +5,15 @@
 import os
 from pathlib import Path
 import yaml
-
-
+import structlog
 from sqlalchemy import create_engine
 
 
 ROOT_DIR = Path(__file__).parent.parent
 CONFIG_PATH = os.path.join(ROOT_DIR, 'configs/config.yml')
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
+
+log = structlog.get_logger()
 
 
 class ConfigParser:

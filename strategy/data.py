@@ -9,6 +9,8 @@ import pandas as pd
 from strategy.primitives import Pool
 from strategy.utils import get_db_connector, ConfigParser, ROOT_DIR, CONFIG_PATH, DATA_DIR
 from binance import Client
+import boto3
+from strategy.utils import log
 
 
 class PoolDataUniV3:
@@ -38,6 +40,49 @@ class PoolDataUniV3:
         self.full_df = full_df
 
 
+class DownloadFromS3:
+    def __init__(self, data_dir, bucket_name='mellow-public-data'):
+        self.data_dir = data_dir
+        self.bucket_name = bucket_name
+
+    def check_dir(self):
+        path_dir = Path(self.data_dir)
+        if not path_dir.is_dir():
+            log.info('Created directory', directory=self.data_dir)
+            path_dir.mkdir(parents=True, exist_ok=True)
+
+    def get_last_files(self):
+        events = ['mint', 'burn', 'swap']
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(self.bucket_name)
+        suffixes = []
+        for file in bucket.objects.all():
+            name = file.key
+            if 'mint' in name or 'burn' in name or 'swap' in name:
+                date = '-'.join(name.split('.')[0].split('/')[-1].split('-')[1:])
+                suffixes.append(date)
+        last_date = sorted(suffixes)[-1]
+
+        files = []
+        for event in events:
+            file = last_date[:-3] + '/' + 'history-' + last_date + '.' + event + '.csv'
+            files.append(file)
+        return files
+
+    def get_file_from_s3(self, file):
+        file_name = '.'.join(file.split('.')[1:])
+        s3client = boto3.client('s3')
+        path = self.data_dir + '/' + file_name
+        s3client.download_file(self.bucket_name, file, path)
+
+    def download_files(self):
+        self.check_dir()
+        files = self.get_last_files()
+        for file in files:
+            log.info(f'Downloaded {file} from S3')
+            self.get_file_from_s3(file)
+
+
 class RawDataUniV3:
     """
         Load data from folder, preprocess and Return ``PoolDataUniV3`` instance.
@@ -45,6 +90,13 @@ class RawDataUniV3:
     def __init__(self, pool: Pool, data_dir):
         self.pool = pool
         self.data_dir = data_dir
+
+    def check_files(self):
+        path_mint = Path(f'{self.data_dir}/mint.csv')
+        path_burn = Path(f'{self.data_dir}/burn.csv')
+        path_swap = Path(f'{self.data_dir}/swap.csv')
+        res = path_mint.is_file() and path_burn.is_file() and path_swap.is_file()
+        return res
 
     def load_mints(self) -> pl.DataFrame:
         """
@@ -68,10 +120,13 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        file_name = f'{self.data_dir}/mint_{self.pool.name}.csv'
-        assert os.path.exists(file_name), 'file not downloaded yet'
+        file_name = f'{self.data_dir}/mint.csv'
+        assert os.path.exists(file_name), f'File {file_name} does not exist.'
 
-        df_mints = pl.read_csv(file_name, dtypes=mints_converters)
+        df_mints_raw = pl.read_csv(file_name, dtypes=mints_converters)
+        assert self.pool._address in df_mints_raw['pool'].unique(), f'Pool {self.pool._address} is not available yet.'
+        df_mints = df_mints_raw.filter(pl.col('pool') == self.pool._address)
+
         df_prep = df_mints.select([
             pl.col('tx_hash'),
             pl.col('owner'),
@@ -111,10 +166,12 @@ class RawDataUniV3:
             "amount0": pl.Float64,
             "amount1": pl.Float64,
         }
-        file_name = f'{self.data_dir}/burn_{self.pool.name}.csv'
-        assert os.path.exists(file_name), 'file not downloaded yet'
+        file_name = f'{self.data_dir}/burn.csv'
+        assert os.path.exists(file_name), f'File {file_name} does not exist.'
+        df_burns_raw = pl.read_csv(file_name, dtypes=burns_converters)
+        assert self.pool._address in df_burns_raw['pool'].unique(), f'Pool {self.pool._address} is not available yet.'
+        df_burns = df_burns_raw.filter(pl.col('pool') == self.pool._address)
 
-        df_burns = pl.read_csv(file_name, dtypes=burns_converters)
         df_prep = df_burns.select([
             pl.col('tx_hash'),
             pl.col('owner'),
@@ -157,10 +214,13 @@ class RawDataUniV3:
             "amount1": pl.Float64,
             'sqrt_price_x96': pl.Float64,
         }
-        file_name = f'{self.data_dir}/swap_{self.pool.name}.csv'
-        assert os.path.exists(file_name), 'file not downloaded yet'
+        file_name = f'{self.data_dir}/swap.csv'
+        assert os.path.exists(file_name), f'File {file_name} does not exist.'
 
-        df_swaps = pl.read_csv(file_name, dtypes=swaps_converters)
+        df_swaps_raw = pl.read_csv(file_name, dtypes=swaps_converters)
+        assert self.pool._address in df_swaps_raw['pool'].unique(), f'Pool {self.pool._address} is not available yet.'
+        df_swaps = df_swaps_raw.filter(pl.col('pool') == self.pool._address)
+
         df_prep = df_swaps.select([
             pl.col('tx_hash'),
             pl.col('sender').alias('owner'),
@@ -172,7 +232,7 @@ class RawDataUniV3:
             (pl.col('liquidity') / 10 ** self.pool.l_decimals_diff).alias('liquidity'),
             pl.col('tick') + self.pool.tick_diff,
             pl.col('sqrt_price_x96'),
-        ]).with_column(
+        ]).sort(by=['block_number', 'log_index']).with_column(
             pl.col('timestamp').dt.truncate("1d").alias('date')
         ).with_column(
             pl.col("sqrt_price_x96").apply(
@@ -193,9 +253,14 @@ class RawDataUniV3:
         Returns:
             `PoolDataUniV3`` object
         """
+        if not self.check_files():
+            downloader = DownloadFromS3(self.data_dir)
+            downloader.download_files()
+
         mints = self.load_mints()
         burns = self.load_burns()
         swaps = self.load_swaps()
+
         full_df = (
                 pl.concat([swaps, mints, burns], how='diagonal')
                 .sort(by=['block_number', 'log_index'])
@@ -361,7 +426,7 @@ class DownloaderRawDataUniV3:
                     ORDER BY block_time
                 """
                 df = pd.read_sql_query(query, con=self.db_connection)
-            
+
             df.to_csv(file_path, index=False)
             print(f'saved to {file_path}')
         except Exception as e:
