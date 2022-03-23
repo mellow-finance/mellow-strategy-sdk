@@ -7,7 +7,7 @@ import numpy as np
 import polars as pl
 import pandas as pd
 from strategy.primitives import Pool
-from strategy.utils import get_db_connector, ConfigParser, ROOT_DIR, CONFIG_PATH, DATA_DIR
+from strategy.utils import get_db_connector, ConfigParser
 from binance import Client
 import boto3
 from strategy.utils import log
@@ -336,169 +336,6 @@ class SyntheticData:
         return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df, full_df=df)
 
 
-class DownloaderRawDataUniV3:
-    # TODO docs
-    # TODO S3
-    """
-        downloader of raw data from db
-    """
-    def __init__(self, config_path, data_dir):
-        self.db_connection = get_db_connector(config_path=config_path)
-        self.data_dir = data_dir
-        subprocess.run(['mkdir', '-p', self.data_dir])
-
-    def _get_event(self, event: str, pool_address: str, file_path: Path):
-        """
-            private func, download event from pool and save it
-
-        Args:
-            event: 'mint', 'burn' or 'swap'
-            pool_address:
-            file_path: file path to save in (example 'root/data')
-
-        Returns:
-            None
-        """
-        print(f'get {event}')
-
-        try:
-            if event == 'burn':
-                query = f"""
-                    select
-                        pool,
-                        block_number,
-                        block_hash,
-                        block_time,
-                        log_index,
-                        tx_hash,
-                        owner,
-                        (tick_lower div 1) as tick_lower,
-                        (tick_upper div 1) as tick_upper,
-                        cast(amount as char) as amount,
-                        cast(amount0 as char) as amount0,
-                        cast(amount1 as char) as amount1
-                    from {event} 
-                    WHERE pool="{pool_address}" 
-                    ORDER BY block_time
-                """
-                df = pd.read_sql_query(query, con=self.db_connection)
-            if event == 'mint':
-                query = f"""
-                    select
-                        pool,
-                        block_number,
-                        block_hash,
-                        block_time,
-                        log_index,
-                        tx_hash,
-                        sender,
-                        owner,
-                        (tick_lower div 1) as tick_lower,
-                        (tick_upper div 1) as tick_upper,
-                        cast(amount as char) as amount,
-                        cast(amount0 as char) as amount0,
-                        cast(amount1 as char) as amount1
-                    from {event} 
-                    WHERE pool="{pool_address}" 
-                    ORDER BY block_time
-                """
-                df = pd.read_sql_query(query, con=self.db_connection)
-
-            if event == 'swap':
-                query = f"""
-                    select
-                        pool,
-                        block_number,
-                        block_hash,
-                        block_time,
-                        log_index,
-                        tx_hash,
-                        sender,
-                        recipient,
-                        cast(amount0 as char) as amount0,
-                        cast(amount1 as char) as amount1,
-                        cast(sqrt_price_x96 as char) as sqrt_price_x96,
-                        cast(liquidity as char) as liquidity,
-                        (tick div 1) as tick
-
-                    from {event} 
-                    WHERE pool="{pool_address}" 
-                    ORDER BY block_time
-                """
-                df = pd.read_sql_query(query, con=self.db_connection)
-
-            df.to_csv(file_path, index=False)
-            print(f'saved to {file_path}')
-        except Exception as e:
-            print(e)
-            print(f'Failed to download from db or save to {file_path}')
-
-    def load_events(self, pool: Pool):
-        """
-        by pool download all events in separate files
-        Args:
-            pool: Pool
-        Returns:
-            None
-        """
-
-        events = ["burn", "mint", "swap"]
-
-        for event in events:
-            file_path = os.path.join(self.data_dir, event + '_' + pool.name + '.csv')
-
-            self._get_event(event=event, pool_address=pool.address, file_path=file_path)
-
-    def get_transactions(self, file_name="all_transactions.csv") -> None:
-        """
-        Download all transactions
-        Args:
-            file_name: name of file to download
-
-        Returns:
-            None
-        """
-
-        query = f"""
-        select
-            hash, block_number, gas, gas_price
-            from transaction
-            ORDER BY block_time
-        """
-        file_path = os.path.join(self.data_dir, file_name)
-        print('get_transactions')
-        try:
-            df = pd.pandas.read_sql_query(query, con=self.db_connection, dtype={
-                'hash': str,
-                'block_number': int,
-                'gas': int,
-                'gas_price': int
-            })
-            df.to_csv(file_path, index=False)
-            print(f'saved to {file_path}')
-        except:
-            print(f'Failed to download from db or save to {file_path}')
-
-# Note
-# get_historical_klines
-# [
-#   [
-#     1499040000000,      // Open time - 0
-#     "0.01634790",       // Open
-#     "0.80000000",       // High
-#     "0.01575800",       // Low
-#     "0.01577100",       // Close - 4
-#     "148976.11427815",  // Volume
-#     1499644799999,      // Close time
-#     "2434.19055334",    // Quote asset volume
-#     308,                // Number of trades
-#     "1756.87402397",    // Taker buy base asset volume
-#     "28.46694368",      // Taker buy quote asset volume
-#     "17928899.62484339" // Ignore
-#   ]
-# ]
-
-
 class DownloaderBinanceData:
     """
         Download pair data from binance and write csv to /data folder.
@@ -512,6 +349,25 @@ class DownloaderBinanceData:
     Returns:
         pandas dataframe that was written to the /data/f'{pair_name}_{interval}_{start_str}_{end_str}.csv'
     """
+
+    # Note
+    # get_historical_klines
+    # [
+    #   [
+    #     1499040000000,      // Open time - 0
+    #     "0.01634790",       // Open
+    #     "0.80000000",       // High
+    #     "0.01575800",       // Low
+    #     "0.01577100",       // Close - 4
+    #     "148976.11427815",  // Volume
+    #     1499644799999,      // Close time
+    #     "2434.19055334",    // Quote asset volume
+    #     308,                // Number of trades
+    #     "1756.87402397",    // Taker buy base asset volume
+    #     "28.46694368",      // Taker buy quote asset volume
+    #     "17928899.62484339" // Ignore
+    #   ]
+    # ]
     def __init__(self, pair_name, interval, start_str, end_str, config_path, data_dir):
         self.pair_name = str.upper(pair_name)
         self.interval = interval

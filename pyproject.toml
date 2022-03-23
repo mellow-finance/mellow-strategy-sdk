@@ -35,6 +35,7 @@ myst-parser = "^0.17.0"
 sphinx-autodoc-typehints = "^1.17.0"
 poetry = "^1.1.13"
 kaleido = "0.2.1"
+boto3 = "^1.21.24"
 
 [tool.poetry.dev-dependencies]
 
