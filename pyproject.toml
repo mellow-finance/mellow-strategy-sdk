@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mellow_strategy_sdk"
-version = "0.1"
+version = "0.1.1"
 description = "Framework for creating new Uniswap V3 strategies"
 authors = [
     "Alex K <ak@mellow.finance>",
