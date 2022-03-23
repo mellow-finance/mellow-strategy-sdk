@@ -8,13 +8,10 @@ authors = [
     "David Prokhorov <davidprokhorov@mellow.finance>"
 ]
 license = "MIT License"
-homepage = 'https://mellow-strategy-sdk.readthedocs.io/en/latest'
+homepage = 'https://mellow.finance/'
 repository = 'https://github.com/mellow-finance/mellow-strategy-sdk'
 packages = [
-    {include = "strategy"},
-    {include = 'examples'},
-    {include = 'tests_unittests'},
-    {include = 'docs'}
+    {include = "strategy"}
 ]
 
 [tool.poetry.dependencies]
