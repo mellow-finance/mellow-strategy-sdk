@@ -200,7 +200,10 @@ class PortfolioHistory:
 
     def calculate_g_apy(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-            Calculate gAPY.
+            Calculate gAPY. gAPY is a strategy profitability metric,
+            which means how much a portfolio is better than simple holding.
+            More details can be found here:
+            https://twitter.com/0xAlexEuler/status/1503444182257393666?s=20&t=VyzSBZEemZZIxc3AalXqQA
 
         Args:
             df: dataframe with total_value_to, hold_to_x.
