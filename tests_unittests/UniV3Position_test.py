@@ -9,8 +9,6 @@
     cd tests_unittests && python -m unittest UniV3Position_test.py && cd ..
 """
 
-import sys
-sys.path.append('..')
 
 import unittest
 from parameterized import parameterized

@@ -8,9 +8,6 @@
     cd tests_unittests && python -m unittest UniswapLiquidityAligner_test.py && cd ..
 """
 
-import sys
-sys.path.append('..')
-
 import numpy as np
 import unittest
 from parameterized import parameterized

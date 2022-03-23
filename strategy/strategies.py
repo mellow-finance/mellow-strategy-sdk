@@ -139,9 +139,10 @@ class StrategyByAddress(AbstractStrategy):
         if event == 'burn':
             if record['owner'] == self.address:
                 amount_0, amount_1, tick_lower, tick_upper, liquidity, price = (
-                record['amount0'], record['amount1'],
-                record['tick_lower'], record['tick_upper'],
-                record['liquidity'], record['price'])
+                    record['amount0'], record['amount1'],
+                    record['tick_lower'], record['tick_upper'],
+                    record['liquidity'], record['price']
+                )
                 self.perform_burn(portfolio, amount_0, amount_1, tick_lower, tick_upper, liquidity, price)
                 is_rebalanced = 'burn'
 
