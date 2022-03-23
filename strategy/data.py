@@ -7,7 +7,7 @@ import numpy as np
 import polars as pl
 import pandas as pd
 from strategy.primitives import Pool
-from strategy.utils import get_db_connector, ConfigParser
+from strategy.utils import ConfigParser
 from binance import Client
 import boto3
 from strategy.utils import log

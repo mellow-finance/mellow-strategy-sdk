@@ -17,13 +17,11 @@ class Backtest:
     """
     def __init__(self,
                  strategy: AbstractStrategy,
-                 portfolio: Portfolio = None):
+                 portfolio: Portfolio,
+                 ):
 
         self.strategy = strategy
-        if portfolio is None:
-            self.portfolio = Portfolio('main')
-        else:
-            self.portfolio = portfolio
+        self.portfolio = portfolio
 
     def backtest(self, df_swaps: pl.DataFrame) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
         """

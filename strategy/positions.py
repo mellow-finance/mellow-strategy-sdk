@@ -93,12 +93,18 @@ class BiCurrencyPosition(AbstractPosition):
                  name: str,
                  swap_fee: float,
                  rebalance_cost: float,
+                 main_vault=None,
                  x: float = None,
                  y: float = None,
                  x_interest: float = None,
                  y_interest: float = None,
                  ) -> None:
         super().__init__(name)
+
+        self.main_vault = main_vault
+
+        assert x >= 0, f'Can not init position with negative X = {x}'
+        assert y >= 0, f'Can not init position with negative Y = {y}'
 
         self.x = x if x is not None else 0
         self.y = y if y is not None else 0
@@ -121,6 +127,10 @@ class BiCurrencyPosition(AbstractPosition):
         """
         assert x >= 0, f'Can not deposit negative X = {x}'
         assert y >= 0, f'Can not deposit negative Y = {y}'
+
+        if self.main_vault:
+            self.main_vault.withdraw(x, y)
+
         self.x += x
         self.y += y
         return None
@@ -136,10 +146,17 @@ class BiCurrencyPosition(AbstractPosition):
         Returns:
              X amount withdrawn, Y amount withdrawn
         """
+        assert x >= 0, f'Can not withdraw negative X = {x}'
+        assert y >= 0, f'Can not withdraw negative Y = {y}'
+
         assert x <= self.x, f'Too much to withdraw X = {x} / {self.x}'
         assert y <= self.y, f'Too much to withdraw Y = {y} / {self.y}'
         self.x -= x
         self.y -= y
+
+        if self.main_vault:
+            self.main_vault.deposit(x, y)
+
         return x, y
 
     def withdraw_fraction(self, fraction: float) -> Tuple[float, float]:
@@ -185,6 +202,7 @@ class BiCurrencyPosition(AbstractPosition):
         Args:
             date: Gaining date.
         """
+        # TODO to think about self.main_vault
         if self.previous_gain is not None:
             assert self.previous_gain < date, "Already gained this day"
         else:
@@ -309,9 +327,11 @@ class UniV3Position(AbstractPosition):
                  upper_price: float,
                  fee_percent: float,
                  rebalance_cost: float,
+                 main_vault=None,
                  ) -> None:
 
         super().__init__(name)
+        self.main_vault = main_vault
 
         self.lower_price = lower_price
         self.upper_price = upper_price
@@ -322,7 +342,10 @@ class UniV3Position(AbstractPosition):
         self.sqrt_upper = np.sqrt(self.upper_price)
 
         self.liquidity = 0
-        self.bi_currency = BiCurrencyPosition('Virtual', self.fee_percent, self.rebalance_cost)
+
+        self.x_hold = 0
+        self.y_hold = 0
+
         self.total_rebalance_costs = 0
 
         self.realized_loss_to_x = 0
@@ -345,6 +368,13 @@ class UniV3Position(AbstractPosition):
             y: Value of Y currency.
             price: Current price of X in Y currency.
         """
+
+        assert x >= 0, f'Can not deposit negative X = {x}'
+        assert y >= 0, f'Can not deposit negative Y = {y}'
+
+        if self.main_vault:
+            self.main_vault.withdraw(x, y)
+
         self.mint(x, y, price)
 
     def withdraw(self, price: float) -> Tuple[float, float]:
@@ -362,76 +392,11 @@ class UniV3Position(AbstractPosition):
         x_out, y_out = self.burn(self.liquidity, price)
         x_fees, y_fees = self.collect_fees()
         x_res, y_res = x_out + x_fees, y_out + y_fees
+
+        if self.main_vault:
+            self.main_vault.deposit(x_fees, y_fees)
+
         return x_res, y_res
-
-    def swap_to_optimal(self, x: float, y: float, price: float) -> Tuple[float, float]:
-        """
-        For price and amounts perform swap to token amounts that can be completely mint.
-
-        Args:
-            x: number of tokens X
-            y: number of tokens X
-            price: current market price
-
-        Returns:
-            (optimal number of tokens X, optimal number of tokens Y)
-        """
-        sqrt_price = np.sqrt(price)
-        sqrt_lower = np.sqrt(self.lower_price)
-        sqrt_upper = np.sqrt(self.upper_price)
-
-        if self.aligner.check_xy_is_optimal(x=x, y=y, price=price)[0]:
-            return x, y
-
-        if price <= self.lower_price:
-            dx = self._swap_y_to_x(dy=y, price=price)
-            return x + dx, 0
-
-        if price >= self.upper_price:
-            dy = self._swap_x_to_y(dx=x, price=price)
-            return 0, y + dy
-
-        price_real = (sqrt_price - sqrt_lower) * sqrt_upper * sqrt_price / (sqrt_upper - sqrt_price)
-
-        v_y = price * x + y
-        x_new = v_y / (price + price_real)
-        y_new = price_real * x_new
-
-        if x_new < x:
-            self._swap_x_to_y(dx=x - x_new, price=price)
-        else:
-            self._swap_y_to_x(dy=y - y_new, price=price)
-
-        return x_new, y_new
-
-    def _swap_x_to_y(self, dx, price) -> float:
-        """
-        Using ``BiCurrencyPosition`` vault swap x tokens to y tokens.
-        Args:
-            dx: Amount of X to be swapped.
-            price: Current price of X in Y currency.
-
-        Returns:
-            Amount of Y was getted
-        """
-
-        self.bi_currency.deposit(x=dx, y=0)
-        dy = self.bi_currency.swap_x_to_y(dx=dx, price=price)
-        self.bi_currency.y -= dy
-        return dy
-
-    def _swap_y_to_x(self, dy, price) -> float:
-        """
-        Args:
-            dy: Amount of Y to be swapped.
-            price: Current price of X in Y currency.
-        Returns:
-            Amount of X was getted
-        """
-        self.bi_currency.deposit(x=0, y=dy)
-        dx = self.bi_currency.swap_y_to_x(dy=dy, price=price)
-        self.bi_currency.x -= dx
-        return dx
 
     def mint(self, x: float, y: float, price: float) -> None:
         """
@@ -442,8 +407,8 @@ class UniV3Position(AbstractPosition):
             y: Value of Y currency.
             price: Current price of X in Y currency.
         """
-        assert x >= 0, f'Can not deposit negative X = {x}'
-        assert y >= 0, f'Can not deposit negative Y = {y}'
+        assert x >= 0, f'Can not mint negative X = {x}'
+        assert y >= 0, f'Can not mint negative Y = {y}'
         assert price > 1e-16, f'Incorrect Price = {price}'
 
         is_optimal, x_liq, y_liq = self.aligner.check_xy_is_optimal(x=x, y=y, price=price)
@@ -462,7 +427,8 @@ class UniV3Position(AbstractPosition):
         d_liq = self.aligner.xy_to_liq(x=x, y=y, price=price)
 
         self.liquidity += d_liq
-        self.bi_currency.deposit(x, y)
+        self.x_hold += x
+        self.y_hold += y
         self.total_rebalance_costs += self.rebalance_cost
 
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
@@ -485,7 +451,13 @@ class UniV3Position(AbstractPosition):
 
         x_out, y_out = self.aligner.liq_to_xy(price=price, liq=liq)
 
-        self.bi_currency.withdraw_fraction(liq / self.liquidity)
+        if self.main_vault:
+            self.main_vault.deposit(x_out, y_out)
+        # TODO think about add self.collect_fees() problem - duplicated in with withdraw
+
+        self.x_hold -= self.x_hold * (liq / self.liquidity)
+        self.y_hold -= self.y_hold * (liq / self.liquidity)
+
         self.liquidity -= liq
 
         il_x_1 = self.impermanent_loss_to_x(price)
@@ -568,10 +540,9 @@ class UniV3Position(AbstractPosition):
         """
         assert price > 1e-16, f'Incorrect Price = {price}'
 
-        x_hold, y_hold = self.bi_currency.to_xy(price)
         x_stake, y_stake = self.to_xy(price)
-        il_x = x_hold - x_stake
-        il_y = y_hold - y_stake
+        il_x = self.x_hold - x_stake
+        il_y = self.y_hold - y_stake
         return il_x, il_y
 
     def impermanent_loss_to_x(self, price: float) -> float:
@@ -585,8 +556,7 @@ class UniV3Position(AbstractPosition):
             Value of X il.
         """
         assert price > 1e-16, f'Incorrect Price = {price}'
-
-        v_hold = self.bi_currency.to_x(price)
+        v_hold = self.x_hold + self.y_hold / price
         v_stake = self.to_x(price)
         il_x = v_hold - v_stake
         return il_x
@@ -603,7 +573,7 @@ class UniV3Position(AbstractPosition):
         """
         assert price > 1e-16, f'Incorrect Price = {price}'
 
-        v_hold = self.bi_currency.to_y(price)
+        v_hold = self.x_hold * price + self.y_hold
         v_stake = self.to_y(price)
         il_y = v_hold - v_stake
         return il_y
