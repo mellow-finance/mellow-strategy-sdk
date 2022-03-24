@@ -114,8 +114,8 @@ class BiCurrencyPosition(AbstractPosition):
         self.total_rebalance_costs = 0
         self.previous_gain = None
 
-        self.cf_in_x = 0
-        self.cf_in_y = 0
+        self.cf_in_x = x
+        self.cf_in_y = y
         self.cf_out_x = 0
         self.cf_out_y = 0
 
@@ -428,8 +428,8 @@ class UniV3Position(AbstractPosition):
         is_optimal, x_liq, y_liq = self.aligner.check_xy_is_optimal(x=x, y=y, price=price)
 
         assert is_optimal, f"""
-                    x={x}, y={y}, Lx={x_liq}, Ly={y_liq}, lower_price={self.lower_price},
-                    upper_price={self.lower_price}, price={price}
+                    x={x}, y={y}, Lx={x_liq}, Ly={y_liq}, 
+                    lower_price={self.lower_price}, upper_price={self.upper_price}, price={price}
                         if price <= lower_price:
                             must be y=0
                         if price >= upper_price:

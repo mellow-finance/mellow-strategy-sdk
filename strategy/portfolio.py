@@ -1,9 +1,7 @@
 from typing import List, Tuple
 from datetime import datetime
-import numpy as np
 
-from strategy.positions import BiCurrencyPosition, AbstractPosition, UniV3Position
-from strategy.uniswap_utils import UniswapLiquidityAligner
+from strategy.positions import AbstractPosition
 
 
 class Portfolio(AbstractPosition):
@@ -16,45 +14,13 @@ class Portfolio(AbstractPosition):
     """
 
     def __init__(
-            self, name: str, rebalance_cost, swap_fee, fee_percent, x_interest=None,
-            y_interest=None,positions: List[AbstractPosition] = None
+            self, name: str, positions: List[AbstractPosition] = None
     ):
         super().__init__(name)
 
         if positions is None:
             positions = []
         self.positions = {pos.name: pos for pos in positions}
-
-        self.swap_fee = swap_fee
-        self.fee_percent = fee_percent
-        self.x_interest = x_interest
-        self.y_interest = y_interest
-        self.rebalance_cost = rebalance_cost
-
-        self.positions['main_vault'] = BiCurrencyPosition(
-            name='main_vault',
-            swap_fee=self.swap_fee,
-            rebalance_cost=self.rebalance_cost,
-            x=0,
-            y=0,
-            x_interest=self.x_interest,
-            y_interest=self.y_interest
-        )
-
-        self.cf_in_x = 0
-        self.cf_in_y = 0
-        self.cf_out_x = 0
-        self.cf_out_y = 0
-
-    def deposit(self, x, y):
-        self.positions['main_vault'].deposit(x, y)
-        self.cf_in_x += x
-        self.cf_in_y += y
-
-    def withdraw(self, x, y):
-        self.positions['main_vault'].withdraw(x, y)
-        self.cf_out_x += x
-        self.cf_out_y += y
 
     def rename_position(self, current_name: str, new_name: str) -> None:
         """

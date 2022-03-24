@@ -2,6 +2,8 @@ import math
 from enum import Enum
 from functools import total_ordering
 
+# TODO different fees to lp holders and swap operation
+
 
 class Fee(Enum):
     """
