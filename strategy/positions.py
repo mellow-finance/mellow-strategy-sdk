@@ -93,15 +93,12 @@ class BiCurrencyPosition(AbstractPosition):
                  name: str,
                  swap_fee: float,
                  rebalance_cost: float,
-                 main_vault=None,
                  x: float = None,
                  y: float = None,
                  x_interest: float = None,
                  y_interest: float = None,
                  ) -> None:
         super().__init__(name)
-
-        self.main_vault = main_vault
 
         assert x >= 0, f'Can not init position with negative X = {x}'
         assert y >= 0, f'Can not init position with negative Y = {y}'
@@ -117,6 +114,11 @@ class BiCurrencyPosition(AbstractPosition):
         self.total_rebalance_costs = 0
         self.previous_gain = None
 
+        self.cf_in_x = 0
+        self.cf_in_y = 0
+        self.cf_out_x = 0
+        self.cf_out_y = 0
+
     def deposit(self, x: float, y: float) -> None:
         """
         Deposit X currency and Y currency to position.
@@ -128,11 +130,12 @@ class BiCurrencyPosition(AbstractPosition):
         assert x >= 0, f'Can not deposit negative X = {x}'
         assert y >= 0, f'Can not deposit negative Y = {y}'
 
-        if self.main_vault:
-            self.main_vault.withdraw(x, y)
-
         self.x += x
         self.y += y
+
+        self.cf_in_x += x
+        self.cf_in_y += y
+
         return None
 
     def withdraw(self, x: float, y: float) -> Tuple[float, float]:
@@ -154,8 +157,8 @@ class BiCurrencyPosition(AbstractPosition):
         self.x -= x
         self.y -= y
 
-        if self.main_vault:
-            self.main_vault.deposit(x, y)
+        self.cf_out_x += x
+        self.cf_out_y += y
 
         return x, y
 
@@ -171,6 +174,10 @@ class BiCurrencyPosition(AbstractPosition):
         """
         assert 0 <= fraction <= 1, f'Incorrect Fraction = {fraction}'
         x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
+
+        self.cf_out_x += x_out
+        self.cf_out_y += y_out
+
         return x_out, y_out
 
     def rebalance(self, x_fraction: float, y_fraction: float, price: float) -> None:
@@ -304,6 +311,10 @@ class BiCurrencyPosition(AbstractPosition):
                 f'{self.name}_value_x': float(self.x),
                 f'{self.name}_value_y': float(self.y),
                 f'{self.name}total_rebalance_costs': self.total_rebalance_costs,
+                f'{self.name}_cf_in_x': self.cf_in_x,
+                f'{self.name}_cf_in_y': self.cf_in_y,
+                f'{self.name}_cf_out_x': self.cf_out_x,
+                f'{self.name}_cf_out_y': self.cf_out_y,
             }
         return snapshot
 
@@ -327,11 +338,9 @@ class UniV3Position(AbstractPosition):
                  upper_price: float,
                  fee_percent: float,
                  rebalance_cost: float,
-                 main_vault=None,
                  ) -> None:
 
         super().__init__(name)
-        self.main_vault = main_vault
 
         self.lower_price = lower_price
         self.upper_price = upper_price
@@ -359,6 +368,11 @@ class UniV3Position(AbstractPosition):
 
         self.aligner = UniswapLiquidityAligner(self.lower_price, self.upper_price)
 
+        self.cf_in_x = 0
+        self.cf_in_y = 0
+        self.cf_out_x = 0
+        self.cf_out_y = 0
+
     def deposit(self, x: float, y: float, price: float) -> None:
         """
         Deposit X and Y to position.
@@ -372,8 +386,8 @@ class UniV3Position(AbstractPosition):
         assert x >= 0, f'Can not deposit negative X = {x}'
         assert y >= 0, f'Can not deposit negative Y = {y}'
 
-        if self.main_vault:
-            self.main_vault.withdraw(x, y)
+        self.cf_in_x += x
+        self.cf_in_y += y
 
         self.mint(x, y, price)
 
@@ -393,8 +407,8 @@ class UniV3Position(AbstractPosition):
         x_fees, y_fees = self.collect_fees()
         x_res, y_res = x_out + x_fees, y_out + y_fees
 
-        if self.main_vault:
-            self.main_vault.deposit(x_fees, y_fees)
+        self.cf_out_x += x_res
+        self.cf_out_y += y_res
 
         return x_res, y_res
 
@@ -451,8 +465,8 @@ class UniV3Position(AbstractPosition):
 
         x_out, y_out = self.aligner.liq_to_xy(price=price, liq=liq)
 
-        if self.main_vault:
-            self.main_vault.deposit(x_out, y_out)
+        self.cf_out_x += x_out
+        self.cf_out_y += y_out
         # TODO think about add self.collect_fees() problem - duplicated in with withdraw
 
         self.x_hold -= self.x_hold * (liq / self.liquidity)
@@ -649,6 +663,11 @@ class UniV3Position(AbstractPosition):
             f'{self.name}_il_to_y': float(il_to_y),
 
             f'{self.name}_total_rebalance_costs': self.total_rebalance_costs,
+
+            f'{self.name}_cf_in_x': self.cf_in_x,
+            f'{self.name}_cf_in_y': self.cf_in_y,
+            f'{self.name}_cf_out_x': self.cf_out_x,
+            f'{self.name}_cf_out_y': self.cf_out_y,
             # f'{self.name}_current_liquidity': self.liquidity
         }
         return snapshot

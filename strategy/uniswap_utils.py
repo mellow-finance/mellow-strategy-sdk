@@ -1,4 +1,6 @@
 import numpy as np
+from typing import Tuple
+# from strategy.positions import BiCurrencyPosition
 
 
 class UniswapLiquidityAligner:
@@ -193,3 +195,28 @@ class UniswapLiquidityAligner:
             return x < 1e-6, liq_x, liq_y
 
         return abs(liq_x - liq_y) < 1e-6, liq_x, liq_y
+
+    def get_optimal_swap(self, x, y, price, swap_fee) -> Tuple[float, float]:
+        is_optimal, liq_x, liq_y = self.check_xy_is_optimal(x=x, y=y, price=price)
+
+        if is_optimal:
+            return 0., 0.
+
+        if price <= self.lower_price:
+            return 0, y
+
+        if price >= self.upper_price:
+            return x, 0
+
+        if liq_x > liq_y:
+            num = self.x_to_liq(price=price, x=x) - self.y_to_liq(price=price, y=y)
+            den = self.x_to_liq(price=price, x=1.) + self.y_to_liq(price=price, y=(1 - swap_fee) * price)
+
+            return num / den, 0
+
+        if liq_x < liq_y:
+            num = self.y_to_liq(price=price, y=y) - self.x_to_liq(price=price, x=x)
+            den = self.x_to_liq(price=price, x=(1 - swap_fee) / price) + self.y_to_liq(price=price, y=1.)
+
+            return 0, num / den
+
