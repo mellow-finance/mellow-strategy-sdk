@@ -27,7 +27,7 @@ class Backtest:
 
         self.strategy = strategy
 
-    def backtest(self, df_swaps: pl.DataFrame) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
+    def backtest(self, df: pl.DataFrame) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
         """
         | 1) Sends ``Portfolio`` and every market action to ``AbstractStrategy.rebalance``
         | 2) expected return of ``AbstractStrategy.rebalance`` is name of strategy action e.g.
@@ -52,7 +52,7 @@ class Backtest:
         portfolio_history = PortfolioHistory()
         rebalance_history = RebalanceHistory()
         uni_history = UniPositionsHistory()
-        for record in df_swaps.to_dicts():
+        for record in df.to_dicts():
             is_rebalanced = self.strategy.rebalance(record=record, portfolio=self.portfolio)
             portfolio_snapshot = self.portfolio.snapshot(record['timestamp'], record['price'])
             portfolio_history.add_snapshot(portfolio_snapshot)
