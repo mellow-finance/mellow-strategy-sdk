@@ -175,9 +175,6 @@ class BiCurrencyPosition(AbstractPosition):
         assert 0 <= fraction <= 1, f'Incorrect Fraction = {fraction}'
         x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
 
-        self.cf_out_x += x_out
-        self.cf_out_y += y_out
-
         return x_out, y_out
 
     def rebalance(self, x_fraction: float, y_fraction: float, price: float) -> None:
@@ -209,7 +206,6 @@ class BiCurrencyPosition(AbstractPosition):
         Args:
             date: Gaining date.
         """
-        # TODO to think about self.main_vault
         if self.previous_gain is not None:
             assert self.previous_gain < date, "Already gained this day"
         else:
@@ -217,6 +213,10 @@ class BiCurrencyPosition(AbstractPosition):
         multiplier = (date - self.previous_gain).days
         self.x *= (1 + self.x_interest) ** multiplier
         self.y *= (1 + self.y_interest) ** multiplier
+
+        self.cf_in_x += (1 + self.x_interest) ** multiplier
+        self.cf_in_y *= (1 + self.y_interest) ** multiplier
+
         self.previous_gain = date
 
     def to_x(self, price: float) -> float:
