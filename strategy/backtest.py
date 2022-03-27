@@ -51,13 +51,13 @@ class Backtest:
             | ``UniPositionsHistory`` -  keeps information about open UniV3 positions
         """
 
-
         portfolio_history = PortfolioHistory()
         rebalance_history = RebalanceHistory()
         uni_history = UniPositionsHistory()
 
         ats = AtomicSnapshot() # new PortfolioHistory
         ats.portfolio = self.portfolio
+        ats.snapshots = []
 
         for record in df.to_dicts():
             ats.timestamp = record['timestamp']
