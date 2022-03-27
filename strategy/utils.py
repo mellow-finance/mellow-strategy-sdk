@@ -40,16 +40,19 @@ class AtomicSnapshot(metaclass=Singleton):
         self.snapshots = []
         self.timestamp = None
         self.price = None
+        self.portfolio = None
 
     def __call__(self, func):
 
         def wrapper(obj, *args, **kwargs):
-            snapshot = {'timestamp': self.timestamp, 'price': self.price}
-
-            snapshot.update(
-                **obj.snapshot(timestamp=self.timestamp, price=self.price)
-            )
+            # snapshot = {'timestamp': self.timestamp, 'price': self.price}
+            snapshot = self.portfolio.snapshot(timestamp=self.timestamp, price=self.price)
             self.snapshots.append(snapshot)
+
+            # snapshot.update(
+            #     **obj.snapshot(timestamp=self.timestamp, price=self.price)
+            # )
+            # self.snapshots.append(snapshot)
             return func(obj, *args, **kwargs)
 
         return wrapper

@@ -57,6 +57,7 @@ class Backtest:
         uni_history = UniPositionsHistory()
 
         ats = AtomicSnapshot() # new PortfolioHistory
+        ats.portfolio = self.portfolio
 
         for record in df.to_dicts():
             ats.timestamp = record['timestamp']
