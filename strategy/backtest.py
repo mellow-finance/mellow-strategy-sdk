@@ -8,6 +8,7 @@ from strategy.strategies import AbstractStrategy
 from strategy.portfolio import Portfolio
 from strategy.history import PortfolioHistory, RebalanceHistory, UniPositionsHistory
 
+from strategy.utils import Singleton, AtomicSnapshot
 
 class Backtest:
     """
@@ -49,10 +50,18 @@ class Backtest:
             | ``RebalanceHistory`` - keeps information about portfolio actions, such as init ot rebalances
             | ``UniPositionsHistory`` -  keeps information about open UniV3 positions
         """
+
+
         portfolio_history = PortfolioHistory()
         rebalance_history = RebalanceHistory()
         uni_history = UniPositionsHistory()
+
+        ats = AtomicSnapshot() # new PortfolioHistory
+
         for record in df.to_dicts():
+            ats.timestamp = record['timestamp']
+            ats.price = record['price']
+
             is_rebalanced = self.strategy.rebalance(record=record, portfolio=self.portfolio)
             portfolio_snapshot = self.portfolio.snapshot(record['timestamp'], record['price'])
             portfolio_history.add_snapshot(portfolio_snapshot)
