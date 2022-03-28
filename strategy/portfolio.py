@@ -155,7 +155,7 @@ class Portfolio(AbstractPosition):
             timestamp: Timestamp of snapshot
             price: Current price of X in Y currency
 
-        Returns: Position snapshot
+        Returns: Positions snapshot
         """
         snapshot = {'timestamp': timestamp, 'price': price}
         for _, pos in self.positions.items():

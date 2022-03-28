@@ -1,8 +1,6 @@
 import pandas as pd
 import polars as pl
-import numpy as np
 import datetime
-from typing import Hashable
 import typing as tp
 
 
@@ -10,7 +8,7 @@ class PortfolioHistory:
     """
     | ``PortfolioHistory`` accumulate snapshots and can calculate stats over time from snapshots.
     | Each time ``add_snapshot`` method is called it remembers current state in time.
-    | All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
+    | All tracked values then can be accessed via ``to_df`` method that will return a ``pl.Dataframe``.
     """
     def __init__(self):
         self.snapshots = []
@@ -41,10 +39,10 @@ class PortfolioHistory:
             Calculate amount of X and amount of Y in ``Portfolio``
 
             Args:
-                df: Portfolio history DataFrame. return of ``PortfolioHistory.to_df()``
+                df: Portfolio history DataFrame.
 
             Returns:
-                dataframe consisting of two columns total_value_x, total_value_y
+                dataframe consisting of two columns total_value_x, total_value_y.
         """
 
         value_of_x_cols = [col for col in df.columns if 'value_x' in col]
@@ -60,10 +58,10 @@ class PortfolioHistory:
         | As sum of positions IL.
 
         Args:
-            df: Portfolio history DataFrame. return of ``PortfolioHistory.to_df()``
+            df: Portfolio history DataFrame.
 
         Returns:
-            dataframe consisting of two columns total_il_x, total_il_y
+            dataframe consisting of two columns total_il_x, total_il_y.
         """
         # log.info('Starting to calculate ils')
         il_to_x_cols = [col for col in df.columns if 'il_to_x' in col]
@@ -84,10 +82,10 @@ class PortfolioHistory:
         | As sum over all positions
 
         Args:
-            df: Portfolio history DataFrame. return of ``PortfolioHistory.to_df()``
+            df: Portfolio history DataFrame.
 
         Returns:
-            dataframe consisting of two columns total_fees_x, total_fees_y
+            dataframe consisting of two columns total_fees_x, total_fees_y.
         """
         # log.info('Starting to calculate fees')
         fees_to_x_cols = [col for col in df.columns if 'fees_x' in col]
@@ -103,22 +101,21 @@ class PortfolioHistory:
 
     def calculate_value_to(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-        | Calculate:
-        | total_value_to_x - total_value denominated in X
-        | total_fees_to_x - total_fees denominated in X
-        | total_il_to_x - total_il denominated in X
-        | hold_to_x - total_value denominated in X for hold strategy
-        | corresponding columns with  denomination in Y
-        | vpn_value - total_value_to_x at last price p_n
-        | vpn_hold - hold_to_x at last price p_n
+        | Calculates:
+        | total_value_to_x - total_value denominated in X,
+        | total_value_to_y - total_value denominated in Y,
+        | total_fees_to_x - total_fees denominated in X,
+        | total_fees_to_y - total_fees denominated in Y,
+        | hold_to_x - total_value denominated in X for corresponding hold strategy,
+        | hold_to_y - total_value denominated in Y for corresponding hold strategy,
 
         Args:
             df:
                 Portfolio history DataFrame with cols from ``PortfolioHistory.calculate_values``,
-                ``PortfolioHistory.calculate_ils``, ``PortfolioHistory.calculate_fees``
+                ``PortfolioHistory.calculate_ils``, ``PortfolioHistory.calculate_fees``.
 
         Returns:
-            dataframe consisting of new columns
+            Dataframe consisting of new 'total_value_...' columns
         """
         # log.info('Starting to calculate portfolio values')
         df_to = df.select([
@@ -128,70 +125,20 @@ class PortfolioHistory:
             (pl.col('total_fees_x') * pl.col('price') + pl.col('total_fees_y')).alias('total_fees_to_y'),
             (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price')).alias('hold_to_x'),
             (pl.col('total_value_x').first() * pl.col('price') + pl.col('total_value_y').first()).alias('hold_to_y'),
-            # (pl.col('total_value_x') + pl.col('total_value_y') / pl.col('price').last()).alias('vpn_value'),
-            # (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price').last()).alias('vpn_hold'),
         ])
         return df_to
 
-    def calculate_returns(self, df: pl.DataFrame) -> pl.DataFrame:
-        """
-        | Calculate: returns for columns.
-        | new columns:
-        | portfolio_returns_x, hold_returns_x
-        | portfolio_returns_y, hold_returns_y
-        | vpn_returns
-        | vpn_hold_returns
-
-        Args:
-            df: Portfolio history DataFrame.
-
-        Returns:
-            dataframe consisting of new columns
-        """
-        # log.info('Starting to calculate portfolio returns')
-        df_returns = df.select([
-                (
-                    pl.col('total_value_to_x') /
-                    pl.col('total_value_to_x').shift_and_fill(1, pl.col('total_value_to_x').first())
-                ).alias('portfolio_returns_x'),
-                (
-                    pl.col('total_value_to_y') /
-                    pl.col('total_value_to_y').shift_and_fill(1, pl.col('total_value_to_y').first())
-                ).alias('portfolio_returns_y'),
-                (
-                    pl.col('hold_to_x') /
-                    pl.col('hold_to_x').shift_and_fill(1, pl.col('hold_to_x').first())
-                ).alias('hold_returns_x'),
-                (
-                    pl.col('hold_to_y') /
-                    pl.col('hold_to_y').shift_and_fill(1, pl.col('hold_to_y').first())
-                ).alias('hold_returns_y'),
-                (
-                    pl.col('vpn_value') /
-                    pl.col('vpn_value').shift_and_fill(1, pl.col('vpn_value').first())
-                ).alias('vpn_returns'),
-                (
-                    pl.col('vpn_hold') /
-                    pl.col('vpn_hold').shift_and_fill(1, pl.col('vpn_hold').first())
-                ).alias('vpn_hold_returns'),
-        ])
-        return df_returns
-
-    # def calculate_tw_apy_for_col(self):
-
-
-
     def calculate_apy_for_col(self, df: pl.DataFrame, from_col: str, to_col: str) -> pl.DataFrame:
         """
-            Calculate APY for metric
+            Calculate APY for metric.
 
         Args:
-            df: dataframe with metrics
-            from_col: metric column name
-            to_col: name for new column with metric APY
+            df: Dataframe with metrics.
+            from_col: Metric column name.
+            to_col: Name for new column with metric's APY.
 
         Returns:
-            dataframe consisting of 'to_col' column
+            Dataframe consisting APY metric.
         """
 
         df_performance = df.select([
@@ -210,10 +157,10 @@ class PortfolioHistory:
             https://twitter.com/0xAlexEuler/status/1503444182257393666?s=20&t=VyzSBZEemZZIxc3AalXqQA
 
         Args:
-            df: dataframe with total_value_to, hold_to_x.
+            df: Dataframe with total_value_to, hold_to_x.
 
         Returns:
-            dataframe consisting gAPY metric.
+            Dataframe consisting gAPY metric.
         """
 
         df2 = df.select([
@@ -230,7 +177,7 @@ class PortfolioHistory:
         Calculate all statistics for portfolio. Main function of class.
 
         Returns:
-            Portfolio history data frame.
+            Portfolio statistics dataframe.
         """
         df = self.to_df()
         values = self.calculate_values(df)
@@ -239,7 +186,6 @@ class PortfolioHistory:
 
         df_prep = pl.concat([df[['timestamp', 'price']], values, ils, fees], how='horizontal')
         df_to = self.calculate_value_to(df_prep)
-        # df_returns = self.calculate_returns(df_to)
         df_to_ext = pl.concat([df[['timestamp']], df_to], how='horizontal')
 
         prt_x = self.calculate_apy_for_col(df_to_ext, 'total_value_to_x', 'portfolio_apy_x')
@@ -253,7 +199,7 @@ class PortfolioHistory:
 
 class RebalanceHistory:
     """
-    | ``RebalanceHistory`` tracks porfolio actions (rebalances) over time.
+    | ``RebalanceHistory`` tracks portfolio actions (rebalances) over time.
     | Each time ``add_snapshot`` method is called class remembers action.
     | All tracked values except None! then can be accessed via ``to_df`` method that will return a ``pl.Dataframe``.
     """
@@ -263,11 +209,11 @@ class RebalanceHistory:
 
     def add_snapshot(self, timestamp: datetime.datetime, portfolio_action: tp.Optional[str]):
         """
-        Add portfolio action to memory
+        Add portfolio action to memory.
 
         Args:
             timestamp: Timestamp of snapshot.
-            portfolio_action: name of portfolio action or None. Usually it takes from ''AbstractStrategy.rebalance`` output.
+            portfolio_action: Name of portfolio action or None. Usually it takes from ''AbstractStrategy.rebalance`` output.
         """
         self.rebalances += [{'timestamp': timestamp, 'rebalance': portfolio_action}]
 
@@ -283,7 +229,6 @@ class RebalanceHistory:
             pl.Series(name='timestamp', values=[x['timestamp'] for x in self.rebalances]),
             pl.Series(name='rebalance', values=[x['rebalance'] for x in self.rebalances], dtype=pl.Utf8),
         ]).drop_nulls().with_column(pl.col('timestamp').cast(pl.Datetime))
-        #
         return df
 
 
@@ -291,7 +236,7 @@ class UniPositionsHistory:
     """
     ``UniPositionsHistory`` tracks Uniswap positions over time.
     Each time ``add_snapshot`` method is called it remembers all Uniswap positions at current time.
-    All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
+    All tracked values then can be accessed via ``to_df`` method that will return a ``pl.Dataframe``.
     """
 
     def __init__(self):

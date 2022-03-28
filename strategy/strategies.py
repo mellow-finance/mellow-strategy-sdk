@@ -60,6 +60,8 @@ class UniV3Passive(AbstractStrategy):
     """
     ``UniV3Passive`` is the passive strategy on UniswapV3 without rebalances.
         i.e. mint interval and wait.
+
+    Attributes:
         lower_price: Lower bound of the interval
         upper_price: Upper bound of the interval
         rebalance_cost: Rebalancing cost, expressed in currency
@@ -137,9 +139,19 @@ class UniV3Passive(AbstractStrategy):
         bi_cur.withdraw(x_uni, y_uni)
         uni_pos.deposit(x_uni, y_uni, price=price)
 
+
 class StrategyByAddress(AbstractStrategy):
+    """
+    ``StrategyByAddress`` is the strategy on UniswapV3 that follows the actions of certain address.
+
+    Attributes:
+        address: The address to follow.
+        pool: UniswapV3 Pool instance
+        rebalance_cost: Rebalancing cost, expressed in currency
+        name: Unique name for the instance
+    """
     def __init__(self,
-                 address,
+                 address: str,
                  pool: Pool,
                  rebalance_cost: float,
                  name: str = None,
@@ -152,7 +164,6 @@ class StrategyByAddress(AbstractStrategy):
         self.rebalance_cost = rebalance_cost
 
     def rebalance(self, *args, **kwargs):
-        # prepare data for strategy
         is_rebalanced = None
 
         record = kwargs['record']
@@ -226,7 +237,9 @@ class StrategyByAddress(AbstractStrategy):
         else:
             univ3_pos = UniV3Position(name, price_lower, price_upper, self.fee_percent, self.rebalance_cost)
             univ3_pos.liquidity = liquidity
-            univ3_pos.bi_currency.deposit(amount_0, amount_1)
+            univ3_pos.x_hold += amount_0
+            univ3_pos.y_hold += amount_1
+            # univ3_pos.bi_currency.deposit(amount_0, amount_1)
             portfolio.append(univ3_pos)
 
     def perform_burn(self, portfolio, amount_0, amount_1, tick_lower, tick_upper, liquidity, price):

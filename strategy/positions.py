@@ -1,8 +1,8 @@
 from typing import Tuple
 from abc import ABC, abstractmethod
 from datetime import datetime
-
 import numpy as np
+
 from strategy.uniswap_utils import UniswapLiquidityAligner
 
 
@@ -32,7 +32,7 @@ class AbstractPosition(ABC):
             price: Current price of X in Y currency
 
         Returns:
-            Total value of vault expessed in X
+            Total value of vault expressed in X
         """
         raise Exception(NotImplemented)
 
@@ -43,7 +43,7 @@ class AbstractPosition(ABC):
             price: Current price of X in Y currency.
 
         Returns:
-            Total value of vault expessed in Y.
+            Total value of vault expressed in Y.
         """
         raise Exception(NotImplemented)
 
@@ -89,15 +89,16 @@ class BiCurrencyPosition(AbstractPosition):
         x_interest: Interest on currency X deposit expressed as a daily percentage yield.
         y_interest: Interest on currency Y deposit expressed as a daily percentage yield.
    """
-    def __init__(self,
-                 name: str,
-                 swap_fee: float,
-                 rebalance_cost: float,
-                 x: float = None,
-                 y: float = None,
-                 x_interest: float = None,
-                 y_interest: float = None,
-                 ) -> None:
+    def __init__(
+        self,
+        name: str,
+        swap_fee: float,
+        rebalance_cost: float,
+        x: float = None,
+        y: float = None,
+        x_interest: float = None,
+        y_interest: float = None,
+    ) -> None:
         super().__init__(name)
 
         assert x >= 0, f'Can not init position with negative X = {x}'
@@ -114,11 +115,6 @@ class BiCurrencyPosition(AbstractPosition):
         self.total_rebalance_costs = 0
         self.previous_gain = None
 
-        self.cf_in_x = x
-        self.cf_in_y = y
-        self.cf_out_x = 0
-        self.cf_out_y = 0
-
     def deposit(self, x: float, y: float) -> None:
         """
         Deposit X currency and Y currency to position.
@@ -132,11 +128,6 @@ class BiCurrencyPosition(AbstractPosition):
 
         self.x += x
         self.y += y
-
-        self.cf_in_x += x
-        self.cf_in_y += y
-
-        return None
 
     def withdraw(self, x: float, y: float) -> Tuple[float, float]:
         """
@@ -157,9 +148,6 @@ class BiCurrencyPosition(AbstractPosition):
         self.x -= x
         self.y -= y
 
-        self.cf_out_x += x
-        self.cf_out_y += y
-
         return x, y
 
     def withdraw_fraction(self, fraction: float) -> Tuple[float, float]:
@@ -179,7 +167,7 @@ class BiCurrencyPosition(AbstractPosition):
 
     def rebalance(self, x_fraction: float, y_fraction: float, price: float) -> None:
         """
-        Rebalance bicurrency vault with respect to their proportion.
+        Rebalance bi-currency vault with respect to their proportion.
 
         Args:
             x_fraction: Fraction of X after rebalance. from 0 to 1.
@@ -189,8 +177,7 @@ class BiCurrencyPosition(AbstractPosition):
         assert 0 <= x_fraction <= 1, f'Incorrect Fraction X = {x_fraction}'
         assert 0 <= y_fraction <= 1, f'Incorrect Fraction Y = {y_fraction}'
         assert self.x > 1e-6 or self.y > 1e-6, f'Cant rebalance empty portfolio x={self.x}, y={self.y}'
-        assert abs(x_fraction + y_fraction - 1) <= 1e-6, \
-            f'Incorrect fractions {x_fraction}, {y_fraction}'
+        assert abs(x_fraction + y_fraction - 1) <= 1e-6, f'Incorrect fractions {x_fraction}, {y_fraction}'
         d_v = y_fraction * price * self.x - x_fraction * self.y
         if d_v > 0:
             dx = d_v / price
@@ -213,10 +200,6 @@ class BiCurrencyPosition(AbstractPosition):
         multiplier = (date - self.previous_gain).days
         self.x *= (1 + self.x_interest) ** multiplier
         self.y *= (1 + self.y_interest) ** multiplier
-
-        self.cf_in_x += (1 + self.x_interest) ** multiplier
-        self.cf_in_y *= (1 + self.y_interest) ** multiplier
-
         self.previous_gain = date
 
     def to_x(self, price: float) -> float:
@@ -299,7 +282,7 @@ class BiCurrencyPosition(AbstractPosition):
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.
-        | for linking in the backtest metrics, you can to add metrics here
+        | for linking in the backtest metrics, you can to add metrics here.
 
         Args:
             timestamp: Timestamp of snapshot
@@ -310,11 +293,7 @@ class BiCurrencyPosition(AbstractPosition):
         snapshot = {
                 f'{self.name}_value_x': float(self.x),
                 f'{self.name}_value_y': float(self.y),
-                f'{self.name}total_rebalance_costs': self.total_rebalance_costs,
-                f'{self.name}_cf_in_x': self.cf_in_x,
-                f'{self.name}_cf_in_y': self.cf_in_y,
-                f'{self.name}_cf_out_x': self.cf_out_x,
-                f'{self.name}_cf_out_y': self.cf_out_y,
+                f'{self.name}total_rebalance_costs': self.total_rebalance_costs
             }
         return snapshot
 
@@ -368,10 +347,6 @@ class UniV3Position(AbstractPosition):
 
         self.aligner = UniswapLiquidityAligner(self.lower_price, self.upper_price)
 
-        self.cf_in_x = 0
-        self.cf_in_y = 0
-        self.cf_out_x = 0
-        self.cf_out_y = 0
 
     def deposit(self, x: float, y: float, price: float) -> None:
         """
@@ -385,9 +360,6 @@ class UniV3Position(AbstractPosition):
 
         assert x >= 0, f'Can not deposit negative X = {x}'
         assert y >= 0, f'Can not deposit negative Y = {y}'
-
-        self.cf_in_x += x
-        self.cf_in_y += y
 
         self.mint(x, y, price)
 
@@ -406,9 +378,6 @@ class UniV3Position(AbstractPosition):
         x_out, y_out = self.burn(self.liquidity, price)
         x_fees, y_fees = self.collect_fees()
         x_res, y_res = x_out + x_fees, y_out + y_fees
-
-        self.cf_out_x += x_res
-        self.cf_out_y += y_res
 
         return x_res, y_res
 
@@ -464,10 +433,6 @@ class UniV3Position(AbstractPosition):
         il_y_0 = self.impermanent_loss_to_y(price)
 
         x_out, y_out = self.aligner.liq_to_xy(price=price, liq=liq)
-
-        self.cf_out_x += x_out
-        self.cf_out_y += y_out
-        # TODO think about add self.collect_fees() problem - duplicated in with withdraw
 
         self.x_hold -= self.x_hold * (liq / self.liquidity)
         self.y_hold -= self.y_hold * (liq / self.liquidity)
@@ -594,12 +559,12 @@ class UniV3Position(AbstractPosition):
 
     def to_x(self, price: float) -> float:
         """
-        Get value of UniswapV3 position expessed in X.
+        Get value of UniswapV3 position expressed in X.
 
         Args:
             price: Current price of X in Y currency.
         Returns:
-            Total value of uniswapV3 position expessed in X.
+            Total value of uniswapV3 position expressed in X.
         """
         assert price > 1e-16, f'Incorrect Price = {price}'
 
@@ -609,12 +574,12 @@ class UniV3Position(AbstractPosition):
 
     def to_y(self, price: float) -> float:
         """
-        Get value of UniswapV3 position expessed in Y.
+        Get value of UniswapV3 position expressed in Y.
 
         Args:
             price: Current price of X in Y currency.
         Returns:
-            Total value of UniswapV3 position expessed in Y.
+            Total value of UniswapV3 position expressed in Y.
         """
         assert price > 1e-16, f'Incorrect Price = {price}'
 
@@ -664,10 +629,6 @@ class UniV3Position(AbstractPosition):
 
             f'{self.name}_total_rebalance_costs': self.total_rebalance_costs,
 
-            f'{self.name}_cf_in_x': self.cf_in_x,
-            f'{self.name}_cf_in_y': self.cf_in_y,
-            f'{self.name}_cf_out_x': self.cf_out_x,
-            f'{self.name}_cf_out_y': self.cf_out_y,
             # f'{self.name}_current_liquidity': self.liquidity
         }
         return snapshot

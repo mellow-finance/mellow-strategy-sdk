@@ -166,6 +166,8 @@ class Pool:
     @property
     def name(self) -> str:
         """
+        Unique name for the pool.
+
         Returns:
             Pool unique name for the pool.
         """
