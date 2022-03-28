@@ -94,18 +94,12 @@ class BiCurrencyPosition(AbstractPosition):
                  name: str,
                  swap_fee: float,
                  rebalance_cost: float,
-                 x: float = None,
-                 y: float = None,
                  x_interest: float = None,
                  y_interest: float = None,
                  ) -> None:
         super().__init__(name)
-
-        assert x >= 0, f'Can not init position with negative X = {x}'
-        assert y >= 0, f'Can not init position with negative Y = {y}'
-
-        self.x = x if x is not None else 0
-        self.y = y if y is not None else 0
+        self.x = 0
+        self.y = 0
 
         self.x_interest = x_interest if x_interest is not None else 0
         self.y_interest = y_interest if y_interest is not None else 0
@@ -115,8 +109,8 @@ class BiCurrencyPosition(AbstractPosition):
         self.total_rebalance_costs = 0
         self.previous_gain = None
 
-        self.cf_in_x = x
-        self.cf_in_y = y
+        self.cf_in_x = 0
+        self.cf_in_y = 0
         self.cf_out_x = 0
         self.cf_out_y = 0
 
@@ -257,7 +251,7 @@ class BiCurrencyPosition(AbstractPosition):
         """
         return self.x, self.y
 
-    # @PortfolioHistory()
+    @PortfolioHistory()
     def swap_x_to_y(self, dx: float, price: float) -> float:
         """
         Swap some X to Y.
@@ -279,7 +273,7 @@ class BiCurrencyPosition(AbstractPosition):
 
         return dy
 
-    # @PortfolioHistory()
+    @PortfolioHistory()
     def swap_y_to_x(self, dy: float, price: float) -> float:
         """
         Swap some Y to X.
@@ -396,7 +390,6 @@ class UniV3Position(AbstractPosition):
 
         self.mint(x, y, price)
 
-    @PortfolioHistory()
     def withdraw(self, price: float) -> Tuple[float, float]:
         """
         Withdraw all liquidity from UniswapV3 position.
@@ -409,8 +402,9 @@ class UniV3Position(AbstractPosition):
         """
         assert price > 1e-16, f'Incorrect Price = {price}'
 
-        x_out, y_out = self.burn(self.liquidity, price)
         x_fees, y_fees = self.collect_fees()
+        x_out, y_out = self.burn(self.liquidity, price)
+
         x_res, y_res = x_out + x_fees, y_out + y_fees
 
         self.cf_out_x += x_res
@@ -418,7 +412,6 @@ class UniV3Position(AbstractPosition):
 
         return x_res, y_res
 
-    @PortfolioHistory()
     def mint(self, x: float, y: float, price: float) -> None:
         """
         Mint X and Y to uniswapV3 interval.
@@ -455,7 +448,7 @@ class UniV3Position(AbstractPosition):
     @PortfolioHistory()
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
         """
-        Burn some liquidity from UniswapV3 position.
+        Burn some liquid    ity from UniswapV3 position.
 
         Args:
             liq: Value of liquidity to burn.
@@ -525,6 +518,7 @@ class UniV3Position(AbstractPosition):
         self.fees_y += fee_y
         self._fees_y_earned_ += fee_y
 
+    @PortfolioHistory()
     def collect_fees(self) -> Tuple[float, float]:
         """
         Collect all gained fees.
@@ -532,6 +526,7 @@ class UniV3Position(AbstractPosition):
         Returns:
             Value of X fees, value of Y fees.
         """
+        # TODO make possible multiple calls
         fees_x = self.fees_x
         fees_y = self.fees_y
         self.fees_x = 0
