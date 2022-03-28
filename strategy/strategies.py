@@ -66,7 +66,6 @@ class UniV3Passive(AbstractStrategy):
         pool: UniswapV3 Pool instance
         name: Unique name for the instance
     """
-
     def __init__(self,
                  lower_price: float,
                  upper_price: float,
@@ -77,9 +76,10 @@ class UniV3Passive(AbstractStrategy):
         super().__init__(name)
         self.lower_price = lower_price
         self.upper_price = upper_price
-        self.decimal_diff = -pool.decimals_diff
+
         self.fee_percent = pool.fee.percent
         self.rebalance_cost = rebalance_cost
+        self.swap_fee = pool.fee.percent
 
     def rebalance(self, *args, **kwargs) -> str:
         record = kwargs['record']
@@ -89,8 +89,7 @@ class UniV3Passive(AbstractStrategy):
         is_rebalanced = None
 
         if len(portfolio.positions) == 0:
-            univ3_pos = self.create_uni_position(price)
-            portfolio.append(univ3_pos)
+            self.create_uni_position(portfolio=portfolio, price=price)
             is_rebalanced = 'mint'
 
         if 'UniV3Passive' in portfolio.positions:
@@ -99,12 +98,44 @@ class UniV3Passive(AbstractStrategy):
 
         return is_rebalanced
 
-    def create_uni_position(self, price):
-        univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
-        x_uni_aligned, y_uni_aligned = univ3_pos.swap_to_optimal(x=1 / price, y=1, price=price)
-        univ3_pos.deposit(x=x_uni_aligned, y=y_uni_aligned, price=price)
-        return univ3_pos
+    def create_uni_position(self, portfolio, price):
+        x = 1 / price
+        y = 1
 
+        bi_cur = BiCurrencyPosition(
+            name=f'main_vault',
+            swap_fee=self.swap_fee,
+            rebalance_cost=self.rebalance_cost,
+            x=x,
+            y=y,
+            x_interest=None,
+            y_interest=None
+        )
+        uni_pos = UniV3Position(
+            name=f'UniV3Passive',
+            lower_price=self.lower_price,
+            upper_price=self.upper_price,
+            fee_percent=self.fee_percent,
+            rebalance_cost=self.rebalance_cost,
+        )
+
+        portfolio.append(bi_cur)
+        portfolio.append(uni_pos)
+
+        dx, dy = uni_pos.aligner.get_amounts_for_swap_to_optimal(
+            x, y, swap_fee=bi_cur.swap_fee, price=price
+        )
+
+        if dx > 0:
+            bi_cur.swap_x_to_y(dx, price=price)
+        if dy > 0:
+            bi_cur.swap_y_to_x(dy, price=price)
+
+        x_uni, y_uni = uni_pos.aligner.get_amounts_after_optimal_swap(
+            x, y, swap_fee=bi_cur.swap_fee, price=price
+        )
+        bi_cur.withdraw(x_uni, y_uni)
+        uni_pos.deposit(x_uni, y_uni, price=price)
 
 class StrategyByAddress(AbstractStrategy):
     def __init__(self,
