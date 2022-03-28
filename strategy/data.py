@@ -296,11 +296,20 @@ class SyntheticData:
             Seed for random generator.
    """
     def __init__(
-            self, pool, start_date: str = '1-1-2022', n_points: int = 365,
-            init_price: float = 1, mu: float = 0, sigma: float = 0.1, seed=42):
+            self,
+            pool: Pool,
+            start_date: datetime = datetime(2022, 1, 1),
+            end_date:datetime = datetime(2022, 12, 31),
+            frequency: str = '1d',
+            init_price: float = 1.,
+            mu: float = 0,
+            sigma: float = 0.1,
+            seed: int = 42):
+
         self.pool = pool
         self.start_date = start_date
-        self.n_points = n_points
+        self.end_date = end_date
+        self.frequency = frequency
 
         self.init_price = init_price
         self.mu = mu
@@ -315,25 +324,25 @@ class SyntheticData:
         Returns:
             ``PoolDataUniV3`` instance with synthetic swaps data, mint is None, burn is None.
         """
-        timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq='D', normalize=True)
-        # np.random.seed(self.seed)
-        price_log_returns = np.random.normal(loc=self.mu, scale=self.sigma, size=self.n_points)
+        timestamps = pl.date_range(self.start_date, self.end_date, self.frequency).to_list()
+
+        price_log_returns = np.random.normal(loc=self.mu, scale=self.sigma, size=len(timestamps))
         price_returns = np.exp(price_log_returns)
         price_returns[0] = self.init_price
-
         prices = np.cumprod(price_returns)
 
-        df = pd.DataFrame(zip(timestamps, prices), columns=['timestamp', 'price']).set_index('timestamp')
+        timestamps = pl.Series(name='timestamp', values=timestamps)
+        prices = pl.Series(name='price', values=prices, dtype=pl.Float64)
 
-        df["price_before"] = df["price"].shift(1)
-        df["price_before"] = df["price_before"].bfill()
+        df = pl.DataFrame([timestamps, prices]).with_column(pl.col('timestamp').cast(pl.Datetime))
 
-        df["price_next"] = df["price"].shift(-1)
-        df["price_next"] = df["price_next"].ffill()
+        df = df.with_columns([
+            pl.col('price').shift_and_fill(1, pl.col('price').first()).alias('price_before'),
+            pl.col('price').shift_and_fill(-1, pl.col('price').last()).alias('price_after'),
+        ])
+        df = df.with_column((np.trunc(np.log(pl.col('price')) / np.log(1.0001))).alias('tick'))
 
-        df = pl.from_pandas(df.reset_index())
-
-        return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df, full_df=df)
+        return PoolDataUniV3(self.pool, swaps=df)
 
 
 class DownloaderBinanceData:

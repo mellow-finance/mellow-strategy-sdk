@@ -280,9 +280,10 @@ class RebalanceHistory:
             Data frame of porfolio actions, except None actions.
         """
         df = pl.DataFrame([
-            pl.Series('timestamp', [x['timestamp'] for x in self.rebalances]),
-            pl.Series('rebalance', [x['rebalance'] for x in self.rebalances], dtype=pl.Utf8),
+            pl.Series(name='timestamp', values=[x['timestamp'] for x in self.rebalances]),
+            pl.Series(name='rebalance', values=[x['rebalance'] for x in self.rebalances], dtype=pl.Utf8),
         ]).drop_nulls().with_column(pl.col('timestamp').cast(pl.Datetime))
+        #
         return df
 
 
