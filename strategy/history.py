@@ -54,35 +54,6 @@ class PortfolioHistory:
         df_y = df[value_of_y_cols].sum(axis=1).alias('total_value_y')
         return pl.DataFrame([df_x, df_y])
 
-    def calculate_cf(self, df: pl.DataFrame) -> pl.DataFrame:
-        cf_in_x_cols = [col for col in df.columns if '_cf_in_x' in col]
-        cf_out_x_cols = [col for col in df.columns if '_cf_out_x' in col]
-
-        cf_in_y_cols = [col for col in df.columns if '_cf_in_y' in col]
-        cf_out_y_cols = [col for col in df.columns if '_cf_out_y' in col]
-
-        if cf_in_x_cols:
-            df_x = (
-                    df[cf_in_x_cols].fill_null(0).sum(axis=1) - df[cf_out_x_cols].fill_null(0).sum(axis=1)
-            ).alias('total_x_cf')
-
-            first_val = df_x[0]
-            df_x = df_x.diff()
-            df_x[0] = first_val
-
-            df_y = (
-                    df[cf_in_y_cols].fill_null(0).sum(axis=1) - df[cf_out_y_cols].fill_null(0).sum(axis=1)
-            ).alias('total_y_cf')
-
-            first_val = df_y[0]
-            df_y = df_y.diff()
-            df_y[0] = first_val
-        else:
-            data = [0] * df.shape[0]
-            df_x = pl.Series('total_x_cf', data, dtype=pl.Float64)
-            df_y = pl.Series('total_y_cf', data, dtype=pl.Float64)
-        return pl.DataFrame([df_x, df_y])
-
     def calculate_ils(self, df: pl.DataFrame) -> pl.DataFrame:
         """
         | Calculate impermanent loss separately in X and Y currencies.
@@ -265,9 +236,8 @@ class PortfolioHistory:
         values = self.calculate_values(df)
         ils = self.calculate_ils(df)
         fees = self.calculate_fees(df)
-        cf = self.calculate_cf(df)
 
-        df_prep = pl.concat([df[['timestamp', 'price']], values, ils, fees, cf], how='horizontal')
+        df_prep = pl.concat([df[['timestamp', 'price']], values, ils, fees], how='horizontal')
         df_to = self.calculate_value_to(df_prep)
         # df_returns = self.calculate_returns(df_to)
         df_to_ext = pl.concat([df[['timestamp']], df_to], how='horizontal')
