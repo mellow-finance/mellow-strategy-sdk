@@ -125,7 +125,7 @@ class UniV3Passive(AbstractStrategy):
         dx, dy = uni_pos.aligner.get_amounts_for_swap_to_optimal(
             x, y, swap_fee=bi_cur.swap_fee, price=price
         )
-        
+
         if dx > 0:
             bi_cur.swap_x_to_y(dx, price=price)
         if dy > 0:
