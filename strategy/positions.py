@@ -180,7 +180,6 @@ class BiCurrencyPosition(AbstractPosition):
 
         return x_out, y_out
 
-    @PortfolioHistory()
     def rebalance(self, x_fraction: float, y_fraction: float, price: float) -> None:
         """
         Rebalance bicurrency vault with respect to their proportion.
@@ -216,11 +215,9 @@ class BiCurrencyPosition(AbstractPosition):
         else:
             self.previous_gain = date
         multiplier = (date - self.previous_gain).days
+
         self.x *= (1 + self.x_interest) ** multiplier
         self.y *= (1 + self.y_interest) ** multiplier
-
-        self.cf_in_x += (1 + self.x_interest) ** multiplier
-        self.cf_in_y *= (1 + self.y_interest) ** multiplier
 
         self.previous_gain = date
 

@@ -30,17 +30,25 @@ class PortfolioHistory(metaclass=Singleton):
     def __call__(self, func):
         # TODO docstring
         def wrapper(obj, *args, **kwargs):
+
             snapshot = self.portfolio.snapshot(timestamp=self.timestamp, price=self.price)
-            snapshot.update({'num': self.snapshots_before_num})
+            snapshot.update({
+                'num': self.snapshots_before_num,
+                'pos_name': obj.name,
+                'action': func.__name__,
+                'args': str(tuple([args, kwargs])),
+                'pos_attr': str(obj.__dict__)
+            })
+
             self.snapshots_before_num += 1
             self.snapshots_before.append(snapshot)
 
             res = func(obj, *args, **kwargs)
 
-            snapshot = self.portfolio.snapshot(timestamp=self.timestamp, price=self.price)
-            snapshot.update({'num': self.snapshots_after_num})
-            self.snapshots_after_num += 1
-            self.snapshots_after.append(snapshot)
+            # snapshot = self.portfolio.snapshot(timestamp=self.timestamp, price=self.price)
+            # snapshot.update({'num': self.snapshots_after_num})
+            # self.snapshots_after_num += 1
+            # self.snapshots_after.append(snapshot)
 
             return res
 

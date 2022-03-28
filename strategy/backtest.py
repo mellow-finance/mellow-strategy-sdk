@@ -8,6 +8,7 @@ from strategy.strategies import AbstractStrategy
 from strategy.portfolio import Portfolio
 from strategy.history import PortfolioHistory, RebalanceHistory, UniPositionsHistory
 
+from tqdm import tqdm
 
 class Backtest:
     """
@@ -59,7 +60,7 @@ class Backtest:
         uni_history = UniPositionsHistory()
 
 
-        for record in df.to_dicts():
+        for record in tqdm(df.to_dicts()):
             portfolio_history.timestamp = record['timestamp']
             portfolio_history.price = record['price']
 
