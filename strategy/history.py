@@ -5,25 +5,51 @@ import datetime
 from typing import Hashable
 import typing as tp
 
+from strategy.utils import Singleton
 
-class PortfolioHistory:
+
+class PortfolioHistory(metaclass=Singleton):
     """
     | ``PortfolioHistory`` accumulate snapshots and can calculate stats over time from snapshots.
     | Each time ``add_snapshot`` method is called it remembers current state in time.
     | All tracked values then can be accessed via ``to_df`` method that will return a ``pd.Dataframe``.
     """
+    # TODO new docsting
+
     def __init__(self):
+        self.snapshots_before = []
+        self.snapshots_after = []
         self.snapshots = []
 
-    def add_snapshot(self, snapshot: dict) -> None:
-        """
-        Add portfolio snapshot to history.
+        self.timestamp = None
+        self.price = None
+        self.portfolio = None
+        self.snapshots_before_num = 0
+        self.snapshots_after_num = 0
 
-        Args:
-            snapshot: Dict of portfolio params.
-        """
-        if snapshot:
-            self.snapshots.append(snapshot)
+    def __call__(self, func):
+        # TODO docstring
+        def wrapper(obj, *args, **kwargs):
+            snapshot = self.portfolio.snapshot(timestamp=self.timestamp, price=self.price)
+            snapshot.update({'num': self.snapshots_before_num})
+            self.snapshots_before_num += 1
+            self.snapshots_before.append(snapshot)
+
+            res = func(obj, *args, **kwargs)
+
+            snapshot = self.portfolio.snapshot(timestamp=self.timestamp, price=self.price)
+            snapshot.update({'num': self.snapshots_after_num})
+            self.snapshots_after_num += 1
+            self.snapshots_after.append(snapshot)
+
+            return res
+
+        return wrapper
+
+    def snapshot(self):
+        # TODO docstring
+        snapshot = self.portfolio.snapshot(self.timestamp, self.price)
+        self.snapshots.append(snapshot)
 
     def to_df(self) -> pl.DataFrame:
         """
@@ -35,6 +61,18 @@ class PortfolioHistory:
         df = pd.DataFrame(self.snapshots)
         df2 = pl.from_pandas(df).sort(by=['timestamp'])
         return df2
+
+    def to_df_before(self) -> pl.DataFrame:
+        # TODO docstring
+        df_before = pd.DataFrame(self.snapshots_before)
+        df_before_2 = pl.DataFrame(df_before).sort(by=['num'])
+        return df_before_2
+
+    def to_df_after(self) -> pl.DataFrame:
+        # TODO docstring
+        df_after = pd.DataFrame(self.snapshots_after)
+        df_after_2 = pl.DataFrame(df_after).sort(by=['num'])
+        return df_after_2
 
     def calculate_values(self, df: pl.DataFrame) -> pl.DataFrame:
         """

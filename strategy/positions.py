@@ -5,7 +5,7 @@ from datetime import datetime
 import numpy as np
 from strategy.uniswap_utils import UniswapLiquidityAligner
 
-from strategy.utils import AtomicSnapshot
+from strategy.history import PortfolioHistory
 
 class AbstractPosition(ABC):
     """
@@ -120,7 +120,7 @@ class BiCurrencyPosition(AbstractPosition):
         self.cf_out_x = 0
         self.cf_out_y = 0
 
-    @AtomicSnapshot()
+    @PortfolioHistory()
     def deposit(self, x: float, y: float) -> None:
         """
         Deposit X currency and Y currency to position.
@@ -140,7 +140,7 @@ class BiCurrencyPosition(AbstractPosition):
 
         return None
 
-    @AtomicSnapshot()
+    @PortfolioHistory()
     def withdraw(self, x: float, y: float) -> Tuple[float, float]:
         """
         Withdraw X currency and Y currency from position
@@ -180,7 +180,7 @@ class BiCurrencyPosition(AbstractPosition):
 
         return x_out, y_out
 
-    @AtomicSnapshot()
+    @PortfolioHistory()
     def rebalance(self, x_fraction: float, y_fraction: float, price: float) -> None:
         """
         Rebalance bicurrency vault with respect to their proportion.
@@ -203,7 +203,7 @@ class BiCurrencyPosition(AbstractPosition):
             dy = abs(d_v)
             self.swap_y_to_x(dy, price)
 
-    @AtomicSnapshot()
+    @PortfolioHistory()
     def interest_gain(self, date: datetime) -> None:
         """
         Get interest on deposit X, deposit Y
@@ -260,7 +260,7 @@ class BiCurrencyPosition(AbstractPosition):
         """
         return self.x, self.y
 
-    # @AtomicSnapshot()
+    # @PortfolioHistory()
     def swap_x_to_y(self, dx: float, price: float) -> float:
         """
         Swap some X to Y.
@@ -282,7 +282,7 @@ class BiCurrencyPosition(AbstractPosition):
 
         return dy
 
-    # @AtomicSnapshot()
+    # @PortfolioHistory()
     def swap_y_to_x(self, dy: float, price: float) -> float:
         """
         Swap some Y to X.
@@ -380,7 +380,7 @@ class UniV3Position(AbstractPosition):
         self.cf_out_x = 0
         self.cf_out_y = 0
 
-    @AtomicSnapshot()
+    @PortfolioHistory()
     def deposit(self, x: float, y: float, price: float) -> None:
         """
         Deposit X and Y to position.
@@ -399,7 +399,7 @@ class UniV3Position(AbstractPosition):
 
         self.mint(x, y, price)
 
-    @AtomicSnapshot()
+    @PortfolioHistory()
     def withdraw(self, price: float) -> Tuple[float, float]:
         """
         Withdraw all liquidity from UniswapV3 position.
@@ -421,7 +421,7 @@ class UniV3Position(AbstractPosition):
 
         return x_res, y_res
 
-    @AtomicSnapshot()
+    @PortfolioHistory()
     def mint(self, x: float, y: float, price: float) -> None:
         """
         Mint X and Y to uniswapV3 interval.
@@ -455,7 +455,7 @@ class UniV3Position(AbstractPosition):
         self.y_hold += y
         self.total_rebalance_costs += self.rebalance_cost
 
-    @AtomicSnapshot()
+    @PortfolioHistory()
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
         """
         Burn some liquidity from UniswapV3 position.
@@ -495,7 +495,7 @@ class UniV3Position(AbstractPosition):
 
         return x_out, y_out
 
-    @AtomicSnapshot()
+    @PortfolioHistory()
     def charge_fees(self, price_0: float, price_1: float):
         """
         Charge exchange fees.
@@ -541,7 +541,7 @@ class UniV3Position(AbstractPosition):
         self.fees_y = 0
         return fees_x, fees_y
 
-    # @AtomicSnapshot()
+    # @PortfolioHistory()
     # def reinvest_fees(self, price) -> None:
     #     """
     #     Collect all gained fees and reinvest to current position.

@@ -27,32 +27,12 @@ class ConfigParser:
 
 
 class Singleton(type):
+    """
+        Singleton metaclass
+    """
     _instances = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
-
-
-class AtomicSnapshot(metaclass=Singleton):
-    def __init__(self):
-        self.snapshots = []
-        self.timestamp = None
-        self.price = None
-        self.portfolio = None
-
-    def __call__(self, func):
-        def wrapper(obj, *args, **kwargs):
-            # snapshot = {'timestamp': self.timestamp, 'price': self.price}
-
-            # snapshot.update(
-            #     **obj.snapshot(timestamp=self.timestamp, price=self.price)
-            # )
-            # self.snapshots.append(snapshot)
-
-            snapshot = self.portfolio.snapshot(timestamp=self.timestamp, price=self.price)
-            self.snapshots.append(snapshot)
-            return func(obj, *args, **kwargs)
-
-        return wrapper
