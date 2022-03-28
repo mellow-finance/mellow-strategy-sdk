@@ -18,19 +18,19 @@ class PortfolioHistory(metaclass=Singleton):
 
     def __init__(self):
         self.snapshots_before = []
-        self.snapshots_after = []
+        # self.snapshots_after = []
         self.snapshots = []
 
         self.timestamp = None
         self.price = None
         self.portfolio = None
         self.snapshots_before_num = 0
-        self.snapshots_after_num = 0
+        # self.snapshots_after_num = 0
 
     def __call__(self, func):
         # TODO docstring
         def wrapper(obj, *args, **kwargs):
-
+            # TODO docstring
             snapshot = self.portfolio.snapshot(timestamp=self.timestamp, price=self.price)
             snapshot.update({
                 'num': self.snapshots_before_num,
@@ -76,11 +76,11 @@ class PortfolioHistory(metaclass=Singleton):
         df_before_2 = pl.DataFrame(df_before).sort(by=['num'])
         return df_before_2
 
-    def to_df_after(self) -> pl.DataFrame:
-        # TODO docstring
-        df_after = pd.DataFrame(self.snapshots_after)
-        df_after_2 = pl.DataFrame(df_after).sort(by=['num'])
-        return df_after_2
+    # def to_df_after(self) -> pl.DataFrame:
+    #     # TODO docstring
+    #     df_after = pd.DataFrame(self.snapshots_after)
+    #     df_after_2 = pl.DataFrame(df_after).sort(by=['num'])
+    #     return df_after_2
 
     def calculate_values(self, df: pl.DataFrame) -> pl.DataFrame:
         """
