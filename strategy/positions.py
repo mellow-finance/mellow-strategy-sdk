@@ -86,7 +86,7 @@ class BiCurrencyPosition(AbstractPosition):
     Attributes:
         name: Unique name for the position.
         swap_fee: Exchange fee expressed as a percentage.
-        rebalance_cost: Rebalancing cost, expressed in Y currency.
+        gas_cost: Gas costs, expressed in Y currency.
         x: Amount of asset X.
         y: Amount of asset Y.
         x_interest: Interest on currency X deposit expressed as a daily percentage yield.
@@ -96,7 +96,7 @@ class BiCurrencyPosition(AbstractPosition):
         self,
         name: str,
         swap_fee: float,
-        rebalance_cost: float,
+        gas_cost: float,
         x: float = None,
         y: float = None,
         x_interest: float = None,
@@ -114,8 +114,8 @@ class BiCurrencyPosition(AbstractPosition):
         self.y_interest = y_interest if y_interest is not None else 0
 
         self.swap_fee = swap_fee
-        self.rebalance_cost = rebalance_cost
-        self.total_rebalance_costs = 0
+        self.gas_cost = gas_cost
+        self.total_gas_costs = 0
         self.previous_gain = None
 
     def deposit(self, x: float, y: float) -> None:
@@ -264,7 +264,7 @@ class BiCurrencyPosition(AbstractPosition):
         self.x -= dx
         dy = price * (1 - self.swap_fee) * dx
         self.y += dy
-        self.total_rebalance_costs += self.rebalance_cost
+        self.total_gas_costs += self.gas_cost
 
         return dy
 
@@ -285,7 +285,7 @@ class BiCurrencyPosition(AbstractPosition):
         self.y -= dy
         dx = (1 - self.swap_fee) * dy / price
         self.x += dx
-        self.total_rebalance_costs += self.rebalance_cost
+        self.total_gas_costs += self.gas_cost
         return dx
 
     def snapshot(self, timestamp: datetime, price: float) -> dict:
@@ -302,7 +302,7 @@ class BiCurrencyPosition(AbstractPosition):
         snapshot = {
                 f'{self.name}_value_x': float(self.x),
                 f'{self.name}_value_y': float(self.y),
-                f'{self.name}total_rebalance_costs': self.total_rebalance_costs
+                f'{self.name}total_gas_costs': self.total_gas_costs
             }
         return snapshot
 
@@ -318,7 +318,7 @@ class UniV3Position(AbstractPosition):
         lower_price: Lower bound of the interval (price).
         upper_price:  Upper bound of the interval (price).
         fee_percent: Amount of fee expressed as a percentage.
-        rebalance_cost: Rebalancing cost, expressed in Y currency.
+        gas_cost: Gas costs, expressed in Y currency.
    """
     def __init__(
         self,
@@ -326,7 +326,7 @@ class UniV3Position(AbstractPosition):
         lower_price: float,
         upper_price: float,
         fee_percent: float,
-        rebalance_cost: float,
+        gas_cost: float,
     ) -> None:
 
         super().__init__(name)
@@ -334,7 +334,7 @@ class UniV3Position(AbstractPosition):
         self.lower_price = lower_price
         self.upper_price = upper_price
         self.fee_percent = fee_percent
-        self.rebalance_cost = rebalance_cost
+        self.gas_cost = gas_cost
 
         self.sqrt_lower = np.sqrt(self.lower_price)
         self.sqrt_upper = np.sqrt(self.upper_price)
@@ -344,7 +344,7 @@ class UniV3Position(AbstractPosition):
         self.x_hold = 0
         self.y_hold = 0
 
-        self.total_rebalance_costs = 0
+        self.total_gas_costs = 0
 
         self.realized_loss_to_x = 0
         self.realized_loss_to_y = 0
@@ -422,7 +422,7 @@ class UniV3Position(AbstractPosition):
         self.liquidity += d_liq
         self.x_hold += x
         self.y_hold += y
-        self.total_rebalance_costs += self.rebalance_cost
+        self.total_gas_costs += self.gas_cost
 
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
         """
@@ -455,7 +455,7 @@ class UniV3Position(AbstractPosition):
         self.realized_loss_to_x += (il_x_0 - il_x_1)
         self.realized_loss_to_y += (il_y_0 - il_y_1)
 
-        self.total_rebalance_costs += self.rebalance_cost
+        self.total_gas_costs += self.gas_cost
 
         return x_out, y_out
 
@@ -639,7 +639,7 @@ class UniV3Position(AbstractPosition):
             f'{self.name}_il_to_x': float(il_to_x),
             f'{self.name}_il_to_y': float(il_to_y),
 
-            f'{self.name}_total_rebalance_costs': self.total_rebalance_costs,
+            f'{self.name}_total_gas_costs': self.total_gas_costs,
 
             # f'{self.name}_current_liquidity': self.liquidity
         }
