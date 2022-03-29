@@ -448,7 +448,7 @@ class UniV3Position(AbstractPosition):
     @PortfolioHistory()
     def burn(self, liq: float, price: float) -> Tuple[float, float]:
         """
-        Burn some liquid    ity from UniswapV3 position.
+        Burn some liquidity from UniswapV3 position.
 
         Args:
             liq: Value of liquidity to burn.
@@ -468,7 +468,6 @@ class UniV3Position(AbstractPosition):
 
         self.cf_out_x += x_out
         self.cf_out_y += y_out
-        # TODO think about add self.collect_fees() problem - duplicated in with withdraw
 
         self.x_hold -= self.x_hold * (liq / self.liquidity)
         self.y_hold -= self.y_hold * (liq / self.liquidity)
