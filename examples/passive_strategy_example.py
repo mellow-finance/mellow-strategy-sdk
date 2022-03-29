@@ -4,7 +4,7 @@ sys.path.append('..')
 
 import polars as pl
 
-from strategy.data import SyntheticData, RawDataUniV3
+from strategy.data import SyntheticData
 from strategy.backtest import Backtest
 from strategy.strategies import UniV3Passive
 from strategy.primitives import Pool, Token, Fee
@@ -26,7 +26,7 @@ def evaluate() -> pl.DataFrame:
         lower_price=data.swaps['price'].min(),
         upper_price=data.swaps['price'].max(),
         pool=pool,
-        rebalance_cost=0.,
+        gas_cost=0.,
         name='passive'
     )
 
