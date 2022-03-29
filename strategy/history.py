@@ -36,7 +36,7 @@ class PortfolioHistory:
 
     def calculate_values(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-            Calculate amount of X and amount of Y in ``Portfolio``
+            Calculate amount of X and amount of Y in ``Portfolio``.
 
             Args:
                 df: Portfolio history DataFrame.
@@ -54,14 +54,13 @@ class PortfolioHistory:
 
     def calculate_ils(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-        | Calculate impermanent loss separately in X and Y currencies.
-        | As sum of positions IL.
+        | Calculate impermanent loss separately in X and Y currencies as sum of positions IL.
 
         Args:
             df: Portfolio history DataFrame.
 
         Returns:
-            dataframe consisting of two columns total_il_x, total_il_y.
+            Dataframe consisting of two columns total_il_x, total_il_y.
         """
         # log.info('Starting to calculate ils')
         il_to_x_cols = [col for col in df.columns if 'il_to_x' in col]
@@ -78,14 +77,13 @@ class PortfolioHistory:
 
     def calculate_fees(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-        | Calculate X and Y fees of Uniswap positions.
-        | As sum over all positions
+        | Calculate X and Y fees of Uniswap positions as sum over all positions.
 
         Args:
             df: Portfolio history DataFrame.
 
         Returns:
-            dataframe consisting of two columns total_fees_x, total_fees_y.
+            Dataframe consisting of two columns total_fees_x, total_fees_y.
         """
         # log.info('Starting to calculate fees')
         fees_to_x_cols = [col for col in df.columns if 'fees_x' in col]
@@ -107,7 +105,7 @@ class PortfolioHistory:
         | total_fees_to_x - total_fees denominated in X,
         | total_fees_to_y - total_fees denominated in Y,
         | hold_to_x - total_value denominated in X for corresponding hold strategy,
-        | hold_to_y - total_value denominated in Y for corresponding hold strategy,
+        | hold_to_y - total_value denominated in Y for corresponding hold strategy.
 
         Args:
             df:
@@ -115,7 +113,7 @@ class PortfolioHistory:
                 ``PortfolioHistory.calculate_ils``, ``PortfolioHistory.calculate_fees``.
 
         Returns:
-            Dataframe consisting of new 'total_value_...' columns
+            Dataframe consisting of 'total_value_...' columns.
         """
         # log.info('Starting to calculate portfolio values')
         df_to = df.select([
@@ -199,9 +197,9 @@ class PortfolioHistory:
 
 class RebalanceHistory:
     """
-    | ``RebalanceHistory`` tracks portfolio actions (rebalances) over time.
+    | ``RebalanceHistory`` tracks Strategy actions (portfolio rebalances) over time.
     | Each time ``add_snapshot`` method is called class remembers action.
-    | All tracked values except None! then can be accessed via ``to_df`` method that will return a ``pl.Dataframe``.
+    | All actions can be accessed via ``to_df`` method that will return a ``pl.Dataframe``.
     """
 
     def __init__(self):
@@ -219,11 +217,10 @@ class RebalanceHistory:
 
     def to_df(self) -> pd.DataFrame:
         """
-        | Transform list of portfolio actions to data frame.
-        | Drop all None actions!
+        | Transform list of strategy actions to data frame.
 
         Returns:
-            Data frame of porfolio actions, except None actions.
+            Data frame of strategy actions, except None actions.
         """
         df = pl.DataFrame([
             pl.Series(name='timestamp', values=[x['timestamp'] for x in self.rebalances]),
@@ -234,15 +231,15 @@ class RebalanceHistory:
 
 class UniPositionsHistory:
     """
-    ``UniPositionsHistory`` tracks Uniswap positions over time.
-    Each time ``add_snapshot`` method is called it remembers all Uniswap positions at current time.
+    ``UniPositionsHistory`` tracks UniswapV3 positions over time.
+    Each time ``add_snapshot`` method is called it remembers all UniswapV3 positions at current time.
     All tracked values then can be accessed via ``to_df`` method that will return a ``pl.Dataframe``.
     """
 
     def __init__(self):
         self.positions = []
 
-    def add_snapshot(self, timestamp: datetime.datetime, positions: dict):
+    def add_snapshot(self, timestamp: datetime.datetime, positions: dict) -> None:
         """
         Add Uniswap position snapshot to history.
 

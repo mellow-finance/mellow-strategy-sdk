@@ -68,7 +68,7 @@ class Token(Enum):
         Checks if Token is valid.
 
         Args:
-            other: Other Token
+            other: Other Token.
 
         Returns:
             Valid or not.
@@ -80,7 +80,7 @@ class Token(Enum):
         Checks if Tokens are equal.
 
         Args:
-            other: Other Token
+            other: Other Token.
 
         Returns:
             Equal or not.
@@ -92,7 +92,7 @@ class Token(Enum):
     def __lt__(self, other: 'Token') -> bool:
         """
         Args:
-            other: Other Token
+            other: Other Token.
         """
         if not self._is_valid_operand(other):
             return NotImplemented

@@ -28,17 +28,21 @@ class AbstractPosition(ABC):
     @abstractmethod
     def to_x(self, price: float) -> float:
         """
+        Return amount of X and Y in vault expressed in X currency.
+
         Args:
-            price: Current price of X in Y currency
+            price: Current price of X in Y currency.
 
         Returns:
-            Total value of vault expressed in X
+            Total value of vault expressed in X.
         """
         raise Exception(NotImplemented)
 
     @abstractmethod
     def to_y(self, price: float) -> float:
         """
+        Return amount of X and Y in vault expressed in Y currency.
+
         Args:
             price: Current price of X in Y currency.
 
@@ -50,7 +54,7 @@ class AbstractPosition(ABC):
     @abstractmethod
     def to_xy(self, price: float) -> Tuple[float, float]:
         """
-        Get amount of X and amount of Y in vault
+        Get amount of X and amount of Y in vault.
 
         Args:
             price: Current price of X in Y currency.
@@ -65,13 +69,12 @@ class AbstractPosition(ABC):
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.
-        | for linking in the backtest metrics, you can to add metrics here
 
         Args:
-            timestamp: Timestamp of snapshot
-            price: Current price of X in Y currency
+            timestamp: Timestamp of snapshot.
+            price: Current price of X in Y currency.
 
-        Returns: Position snapshot
+        Returns: Position snapshot.
         """
         raise Exception(NotImplemented)
 
@@ -120,8 +123,8 @@ class BiCurrencyPosition(AbstractPosition):
         Deposit X currency and Y currency to position.
 
         Args:
-            x: Value of X currency
-            y: Value of Y currency
+            x: Value of X currency.
+            y: Value of Y currency.
         """
         assert x >= 0, f'Can not deposit negative X = {x}'
         assert y >= 0, f'Can not deposit negative Y = {y}'
@@ -131,14 +134,14 @@ class BiCurrencyPosition(AbstractPosition):
 
     def withdraw(self, x: float, y: float) -> Tuple[float, float]:
         """
-        Withdraw X currency and Y currency from position
+        Withdraw x amount of X currency and y amount of Y currency from position.
 
         Args:
-            x: Value of X currency
-            y: Value of Y currency
+            x: Value of X currency.
+            y: Value of Y currency.
 
         Returns:
-             X amount withdrawn, Y amount withdrawn
+             x amount withdrawn, y amount withdrawn.
         """
         assert x >= 0, f'Can not withdraw negative X = {x}'
         assert y >= 0, f'Can not withdraw negative Y = {y}'
@@ -152,13 +155,13 @@ class BiCurrencyPosition(AbstractPosition):
 
     def withdraw_fraction(self, fraction: float) -> Tuple[float, float]:
         """
-        Withdraw percent of X currency and percent of Y currency from position
+        Withdraw percent of X currency and percent of Y currency from position.
 
         Args:
-            fraction: Fraction from 0 to 1.
+            fraction: Percent from 0 to 1.
 
         Returns:
-             X amount withdrawn, Y amount withdrawn
+             X amount withdrawn, Y amount withdrawn.
         """
         assert 0 <= fraction <= 1, f'Incorrect Fraction = {fraction}'
         x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
@@ -168,6 +171,7 @@ class BiCurrencyPosition(AbstractPosition):
     def rebalance(self, x_fraction: float, y_fraction: float, price: float) -> None:
         """
         Rebalance bi-currency vault with respect to their proportion.
+        Note that the sum of x_fraction and y_fraction must be equal to 1.
 
         Args:
             x_fraction: Fraction of X after rebalance. from 0 to 1.
@@ -188,7 +192,8 @@ class BiCurrencyPosition(AbstractPosition):
 
     def interest_gain(self, date: datetime) -> None:
         """
-        Get interest on deposit X, deposit Y
+        Gain interest on deposit X, deposit Y.
+        Note that you can only gain one time per day.
 
         Args:
             date: Gaining date.
@@ -204,6 +209,8 @@ class BiCurrencyPosition(AbstractPosition):
 
     def to_x(self, price: float) -> float:
         """
+        Return amount of X and Y in vault expressed in X currency.
+
         Args:
             price: Current price of X in Y currency
 
@@ -216,6 +223,8 @@ class BiCurrencyPosition(AbstractPosition):
 
     def to_y(self, price: float) -> float:
         """
+        Return amount of X and Y in vault expressed in Y currency.
+
         Args:
             price: Current price of X in Y currency.
 
@@ -247,7 +256,7 @@ class BiCurrencyPosition(AbstractPosition):
             price: Current price of X in Y currency.
 
         Returns:
-            Amount of Y was getted
+            Amount of Y was got.
         """
         assert price > 1e-16, f'Incorrect price = {price}'
         assert dx >= 0, f'Incorrect dX = {dx}'
@@ -266,8 +275,9 @@ class BiCurrencyPosition(AbstractPosition):
         Args:
             dy: Amount of Y to be swapped.
             price: Current price of X in Y currency.
+
         Returns:
-            Amount of X was getted
+            Amount of X was got.
         """
         assert price > 1e-16, f'Incorrect price = {price}'
         assert dy >= 0, f'Incorrect dY = {dy}'
@@ -282,13 +292,12 @@ class BiCurrencyPosition(AbstractPosition):
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.
-        | for linking in the backtest metrics, you can to add metrics here.
 
         Args:
-            timestamp: Timestamp of snapshot
-            price: Current price of X in Y currency
+            timestamp: Timestamp of snapshot.
+            price: Current price of X in Y currency.
 
-        Returns: Position snapshot
+        Returns: Position snapshot.
         """
         snapshot = {
                 f'{self.name}_value_x': float(self.x),
@@ -305,19 +314,20 @@ class UniV3Position(AbstractPosition):
     and  pool fee percent ``fee_percent``.
 
     Attributes:
-        name: Unique name for the position
-        lower_price: Lower bound of the interval (price)
-        upper_price:  Upper bound of the interval (price)
-        fee_percent: Amount of fee expressed as a percentage
-        rebalance_cost: Rebalancing cost, expressed in currency
+        name: Unique name for the position.
+        lower_price: Lower bound of the interval (price).
+        upper_price:  Upper bound of the interval (price).
+        fee_percent: Amount of fee expressed as a percentage.
+        rebalance_cost: Rebalancing cost, expressed in Y currency.
    """
-    def __init__(self,
-                 name: str,
-                 lower_price: float,
-                 upper_price: float,
-                 fee_percent: float,
-                 rebalance_cost: float,
-                 ) -> None:
+    def __init__(
+        self,
+        name: str,
+        lower_price: float,
+        upper_price: float,
+        fee_percent: float,
+        rebalance_cost: float,
+    ) -> None:
 
         super().__init__(name)
 
@@ -371,7 +381,7 @@ class UniV3Position(AbstractPosition):
             price: Current price of X in Y currency.
 
         Returns:
-            X amount withdrawn, Y amount withdrawn
+            X amount withdrawn, Y amount withdrawn.
         """
         assert price > 1e-16, f'Incorrect Price = {price}'
 
@@ -383,7 +393,7 @@ class UniV3Position(AbstractPosition):
 
     def mint(self, x: float, y: float, price: float) -> None:
         """
-        Mint X and Y to uniswapV3 interval.
+        Mint X and Y to UniswapV3 interval.
 
         Args:
             x: Value of X currency.
@@ -449,13 +459,13 @@ class UniV3Position(AbstractPosition):
 
         return x_out, y_out
 
-    def charge_fees(self, price_0: float, price_1: float):
+    def charge_fees(self, price_0: float, price_1: float) -> None:
         """
-        Charge exchange fees.
+        Charge fees for swap.
 
         Args:
-            price_0: Price before exchange.
-            price_1: Price after exchange.
+            price_0: Price before swap.
+            price_1: Price after swap.
         """
 
         # TODO: research how to charge fees in better way (check UniV3 docs)
@@ -563,8 +573,9 @@ class UniV3Position(AbstractPosition):
 
         Args:
             price: Current price of X in Y currency.
+
         Returns:
-            Total value of uniswapV3 position expressed in X.
+            Total value of UniswapV3 position expressed in X.
         """
         assert price > 1e-16, f'Incorrect Price = {price}'
 
@@ -578,6 +589,7 @@ class UniV3Position(AbstractPosition):
 
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             Total value of UniswapV3 position expressed in Y.
         """
@@ -593,6 +605,7 @@ class UniV3Position(AbstractPosition):
 
         Args:
             price: Current price of X in Y currency.
+
         Returns:
             amount of X and amount of Y in position.
         """
@@ -606,7 +619,6 @@ class UniV3Position(AbstractPosition):
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.
-        | for linking in the backtest metrics, you can to add metrics here
 
         Args:
             timestamp: Timestamp of snapshot

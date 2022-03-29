@@ -18,10 +18,13 @@ log = structlog.get_logger()
 class ConfigParser:
     """
         Parse yml config configs/config.yml to python dict
+
+        Attributes:
+            config_path: Path to config file.
+
     """
-    def __init__(self, config_path):
+    def __init__(self, config_path: str = CONFIG_PATH):
         self.path = config_path
 
         with open(self.path, 'r') as stream:
             self.config = yaml.safe_load(stream)
-

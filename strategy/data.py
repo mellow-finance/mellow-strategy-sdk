@@ -6,10 +6,12 @@ from datetime import datetime
 import numpy as np
 import polars as pl
 import pandas as pd
-from strategy.primitives import Pool
-from strategy.utils import ConfigParser
 from binance import Client
 import boto3
+from typing import List
+
+from strategy.primitives import Pool
+from strategy.utils import ConfigParser
 from strategy.utils import log
 
 
@@ -18,7 +20,7 @@ class PoolDataUniV3:
     ``PoolDataUniV3`` contains data for backtesting.
 
     Attributes:
-        pool: UniswapV3 ``Pool`` data
+        pool: UniswapV3 ``Pool`` data.
         mints: UniswapV3 mints data.
         burns: UniswapV3 burns data.
         swaps: UniswapV3 swaps data.
@@ -56,7 +58,7 @@ class DownloadFromS3:
         self.data_dir = data_dir
         self.bucket_name = bucket_name
 
-    def check_dir(self):
+    def check_dir(self) -> None:
         """
         Check if data directory exists. If not, create it.
         """
@@ -65,7 +67,7 @@ class DownloadFromS3:
             log.info('Created directory', directory=self.data_dir)
             path_dir.mkdir(parents=True, exist_ok=True)
 
-    def get_last_files(self):
+    def get_last_files(self) -> List[str]:
         """
         Get last files from S3 bucket.
 
@@ -89,20 +91,19 @@ class DownloadFromS3:
             files.append(file)
         return files
 
-    def get_file_from_s3(self, file: str):
+    def get_file_from_s3(self, file: str) -> None:
         """
         Download file from S3 bucket and save it to directory.
 
         Args:
             file: File name.
-
         """
         file_name = '.'.join(file.split('.')[1:])
         s3client = boto3.client('s3')
         path = self.data_dir + '/' + file_name
         s3client.download_file(self.bucket_name, file, path)
 
-    def download_files(self):
+    def download_files(self) -> None:
         """
         Download all files from S3 bucket.
         """
@@ -132,7 +133,7 @@ class RawDataUniV3:
         self.data_dir = data_dir
         self.reload_data = reload_data
 
-    def check_files(self):
+    def check_files(self) -> bool:
         """
         Check if all files are in the directory.
 

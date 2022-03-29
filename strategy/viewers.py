@@ -11,7 +11,7 @@ from strategy.primitives import Pool
 
 class PotrfolioViewer:
     """
-    ``PotrfolioViewer`` is class for backtest result visualisation.
+    ``PotrfolioViewer`` is class for backtesting result visualisation.
 
     Attributes:
         portfolio_history: ``PortfolioHistory`` instance returned from backtest.
@@ -50,16 +50,18 @@ class PotrfolioViewer:
         fig3 = self.draw_performance_x(portfolio_df_offset)
         fig4 = self.draw_performance_y(portfolio_df_offset)
         fig5 = self.draw_x_y(portfolio_df_offset)
-        fig6 = self.draw_vpn_apy(portfolio_df_offset)
+        fig6 = self.draw_gapy(portfolio_df_offset)
 
         return fig1, fig2, fig3, fig4, fig5, fig6
 
     def draw_portfolio_to_x(self, portfolio_df: pl.DataFrame) -> go.Figure:
         """
         Plot portfolio value in X, fees in X, IL in X.
+
         Args:
             portfolio_df:
                 result of ``PortfolioHistory.calculate_stats()``
+
         Returns:
             Plotly plot.
         """
@@ -100,11 +102,9 @@ class PotrfolioViewer:
         Plot portfolio value and fees in Y.
 
         Args:
-            portfolio_df:
-                result of ``PortfolioHistory.calculate_stats()``
+            portfolio_df: Dataframe from ``PortfolioHistory.calculate_stats()``.
 
-        Returns:
-            Plotly plot.
+        Returns: Plotly plot.
         """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -145,11 +145,9 @@ class PotrfolioViewer:
         Plot portfolio value in X, portfolio APY in X.
 
         Args:
-            portfolio_df:
-                result of ``PortfolioHistory.calculate_stats()``
+            portfolio_df: Dataframe from ``PortfolioHistory.calculate_stats()``.
 
-        Returns:
-            Plotly plot
+        Returns: Plotly plot.
         """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(
@@ -181,10 +179,9 @@ class PotrfolioViewer:
         Plot portfolio value in Y, portfolio APY in Y.
 
         Args:
-            portfolio_df:
-                result of ``PortfolioHistory.calculate_stats()``
-        Returns:
-            Plotly plot.
+            portfolio_df: Dataframe from ``PortfolioHistory.calculate_stats()``.
+
+        Returns: Plotly plot.
         """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -212,14 +209,12 @@ class PotrfolioViewer:
 
     def draw_x_y(self, portfolio_df: pl.DataFrame) -> go.Figure:
         """
-        | Plot amount of X asset in portfolio
-        | Plot amount of Y asset in portfolio
+        Plot amount of X asset and amount of Y asset in portfolio.
 
         Args:
-            portfolio_df:
-                result of ``PortfolioHistory.calculate_stats()``
-        Returns:
-            Plotly plot.
+            portfolio_df: Dataframe from ``PortfolioHistory.calculate_stats()``.
+
+        Returns: Plotly plot.
         """
         fig = make_subplots(specs=[[{"secondary_y": True}]])
 
@@ -246,13 +241,13 @@ class PotrfolioViewer:
         fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, {self.pool.token1.name}', width=900, height=500)
         return fig
 
-    def draw_vpn_apy(self, portfolio_df: pl.DataFrame) -> go.Figure:
+    def draw_gapy(self, portfolio_df: pl.DataFrame) -> go.Figure:
         """
-        | Plot portfolio value in Y and gAPY_x.
-        | Plot gAPY. (btw gAPY in X equals gAPY in Y)
+        Plot portfolio value and gAPY in Y. Note that gAPY in X equals gAPY in Y.
 
         Args:
-            portfolio_df: result of ``PortfolioHistory.calculate_stats()``
+            portfolio_df: result of ``PortfolioHistory.calculate_stats()``.
+
         Returns:
             Plotly plot.
         """
@@ -288,7 +283,7 @@ class UniswapViewer:
      ``UniswapViewer`` is class for visualizing UniswapV3 intervals in time.
 
      Attributes:
-        uni_postition_history: Uniswap positions history instance.
+        uni_postition_history: UniswapV3 positions history object.
     """
     def __init__(self, uni_postition_history: UniPositionsHistory):
         self.uni_postition_history = uni_postition_history
@@ -298,10 +293,10 @@ class UniswapViewer:
         Plot price and uniswap positions intervals in time.
 
         Args:
-            swaps_df: UniswapV3 exchange data.
+            swaps_df: UniswapV3 swap data.
 
         Returns:
-            Plot with UniswapV3 position intervals.
+            Plot with UniswapV3 position intervals and market price.
         """
         intervals_df = self.uni_postition_history.to_df()
         positions = intervals_df['name'].unique().to_list()
@@ -350,11 +345,10 @@ class UniswapViewer:
 
 class RebalanceViewer:
     """
-    ``RebalanceViewer`` class to visualize actions (rebalances) other than None that occurred during the backtest.
+    ``RebalanceViewer`` class to visualize strategy actions that occurred during the backtest.
 
     Attributes:
-        rebalance_history:
-            ``RebalanceHistory`` instance returned from backtest.
+        rebalance_history: ``RebalanceHistory`` instance returned from backtest.
     """
     def __init__(self, rebalance_history: RebalanceHistory):
         self.rebalance_history = rebalance_history
@@ -364,10 +358,9 @@ class RebalanceViewer:
         Draws a price chart with portfolio action points.
 
         Args:
-            swaps_df: price data. [(timestamp, price)].
+            swaps_df: Price data. [(timestamp, price)].
 
-        Returns:
-            Plot with portfolio actions.
+        Returns: Plot with portfolio actions.
         """
         rebalance_df = self.rebalance_history.to_df()
         swaps_df_slice = swaps_df[['timestamp', 'price']].join(rebalance_df, on='timestamp')
@@ -405,8 +398,11 @@ class RebalanceViewer:
 class LiquidityViewer:
     """
     ``LiquidityViewer`` is class for liquidity visualisation.
+
+    Attributes:
+        pool_data: ``PoolData`` object.
     """
-    def __init__(self, pool_data: PoolDataUniV3):
+    def __init__(self, pool_data: PoolDataUniV3) -> None:
         self.pool = pool_data
 
     def draw_plot(self) -> go.Figure:

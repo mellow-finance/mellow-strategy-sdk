@@ -26,9 +26,11 @@ class AbstractStrategy(ABC):
     def rebalance(self, *args, **kwargs) -> tp.Optional[str]:
         """
         Rebalance implementation.
+
         Args:
             args: Any args.
             kwargs: Any kwargs.
+
         Returns:
             Name of event or None if there was no event.
         """
@@ -58,8 +60,7 @@ class Hold(AbstractStrategy):
 
 class UniV3Passive(AbstractStrategy):
     """
-    ``UniV3Passive`` is the passive strategy on UniswapV3 without rebalances.
-        i.e. mint interval and wait.
+    ``UniV3Passive`` is the passive strategy on UniswapV3, i.e. mint one interval and wait.
 
     Attributes:
         lower_price: Lower bound of the interval
@@ -146,9 +147,9 @@ class StrategyByAddress(AbstractStrategy):
 
     Attributes:
         address: The address to follow.
-        pool: UniswapV3 Pool instance
-        rebalance_cost: Rebalancing cost, expressed in currency
-        name: Unique name for the instance
+        pool: UniswapV3 Pool instance.
+        rebalance_cost: Rebalancing cost, expressed in currency.
+        name: Unique name for the instance.
     """
     def __init__(self,
                  address: str,

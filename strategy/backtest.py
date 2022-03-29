@@ -32,14 +32,14 @@ class Backtest:
     ) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
         """
         | 1) Calls ``AbstractStrategy.rebalance`` for every market action with.
-        | 2) The return of ``AbstractStrategy.rebalance`` is name of strategy action e.g.
+        | 2) The return of ``AbstractStrategy.rebalance`` is a name of strategy action e.g.
         | 'init', 'rebalance', 'stop', 'some_cool_action', None. When there is no strategy action ``rebalance`` returns None.
         | 3) Add Strategy action to ``RebalanceHistory``
         | 4) Add Porfolio snapshot to ``PortfolioHistory``
         | 5) Add Porfolio snapshot to ``UniPositionsHistory``
         |
         | You can call ``AbstractStrategy.rebalance`` with any arguments, as it takes *args, **kwargs.
-        | Notice that 'timestamp', 'price' and 'portfolio' is required.
+        | Note that 'timestamp', 'price' and 'portfolio' is required.
 
         Attributes:
             df: df with pool events, or df with market data. df format is [('timestamp': datetime, 'price' : float)]
