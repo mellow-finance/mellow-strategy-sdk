@@ -7,14 +7,6 @@ Backtest
 .. autoclass:: Backtest
     :members:
 
-.. automodule:: strategy.cross_validation
-
-CrossValidation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: FolderSimple
-    :members:
-.. autoclass:: CrossValidation
-    :members:
 
 .. automodule:: strategy.data
 
@@ -22,9 +14,13 @@ Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: PoolDataUniV3
     :members:
+.. autoclass:: DownloadFromS3
+    :members:
 .. autoclass:: RawDataUniV3
     :members:
 .. autoclass:: SyntheticData
+    :members:
+.. autoclass:: DownloaderBinanceData
     :members:
 
 .. automodule:: strategy.history
@@ -38,12 +34,6 @@ History
 .. autoclass:: UniPositionsHistory
     :members:
 
-.. automodule:: strategy.multi_strategy
-
-Data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: MultiStrategy
-    :members:
 
 .. automodule:: strategy.portfolio
 
@@ -80,6 +70,10 @@ Strategies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: AbstractStrategy
     :members:
+.. autoclass:: UniV3Passive
+    :members:
+.. autoclass:: StrategyByAddress
+    :members:
 
 
 .. automodule:: strategy.uniswap_utils
@@ -88,17 +82,12 @@ UniswapUtils
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: UniswapLiquidityAligner
     :members:
-..
-    .. autoclass:: UniswapV3Utils
-        :members:
-    .. autoclass:: UniswapV2Utils
-        :members:
 
 .. automodule:: strategy.viewers
 
 Viewers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: PotrfolioViewer
+.. autoclass:: PortfolioViewer
     :members:
 .. autoclass:: UniswapViewer
     :members:

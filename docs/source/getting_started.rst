@@ -152,7 +152,7 @@ Next visualize results
 
     rv = RebalanceViewer(rebalance_history)
     uv = UniswapViewer(uni_history)
-    pv = PotrfolioViewer(portfolio_history, pool)
+    pv = PortfolioViewer(portfolio_history, pool)
 
     # Draw portfolio stats, like value, fees earned, apy
     fig1, fig2, fig3, fig4, fig5, fig6 = pv.draw_portfolio()

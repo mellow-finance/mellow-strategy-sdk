@@ -9,9 +9,9 @@ from strategy.data import PoolDataUniV3
 from strategy.primitives import Pool
 
 
-class PotrfolioViewer:
+class PortfolioViewer:
     """
-    ``PotrfolioViewer`` is class for backtesting result visualisation.
+    ``PortfolioViewer`` is class for backtesting result visualisation.
 
     Attributes:
         portfolio_history: ``PortfolioHistory`` instance returned from backtest.

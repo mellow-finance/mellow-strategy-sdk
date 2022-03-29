@@ -1,12 +1,11 @@
-from strategy.uniswap_utils import UniswapLiquidityAligner
-from strategy.positions import UniV3Position, BiCurrencyPosition
-from strategy.primitives import Pool
-
 from abc import ABC, abstractmethod
-import math
 import numpy as np
 import typing as tp
 import copy
+
+from strategy.uniswap_utils import UniswapLiquidityAligner
+from strategy.positions import UniV3Position, BiCurrencyPosition
+from strategy.primitives import Pool
 
 
 class AbstractStrategy(ABC):
@@ -234,7 +233,9 @@ class StrategyByAddress(AbstractStrategy):
         if name in portfolio.positions:
             univ3_pos_old = portfolio.get_position(name)
             univ3_pos_old.liquidity = univ3_pos_old.liquidity + liquidity
-            univ3_pos_old.bi_currency.deposit(amount_0, amount_1)
+            univ3_pos_old.x_hold += amount_0
+            univ3_pos_old.y_hold += amount_1
+            # univ3_pos_old.bi_currency.deposit(amount_0, amount_1)
         else:
             univ3_pos = UniV3Position(name, price_lower, price_upper, self.fee_percent, self.rebalance_cost)
             univ3_pos.liquidity = liquidity
