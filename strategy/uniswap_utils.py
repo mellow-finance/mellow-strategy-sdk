@@ -213,6 +213,7 @@ class UniswapLiquidityAligner:
 
     def get_amounts_for_swap_to_optimal(self, x, y, price, swap_fee) -> Tuple[float, float]:
         # return dx, dy
+        # TODO write docstring
         is_optimal, liq_x, liq_y = self.check_xy_is_optimal(x=x, y=y, price=price)
 
         if is_optimal:
@@ -235,6 +236,7 @@ class UniswapLiquidityAligner:
             return 0, num / den
 
     def get_amounts_after_optimal_swap(self, x, y, price, swap_fee):
+        # TODO write docstring
         dx, dy = self.get_amounts_for_swap_to_optimal(x, y, price, swap_fee)
 
         x -= dx

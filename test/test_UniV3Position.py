@@ -6,7 +6,8 @@
         charge_fees - YES
         swap_to_optimal - YES
 
-    cd tests_unittests && python -m unittest UniV3Position_test.py && cd ..
+    python -m unittest test/test_UniV3Position.py
+
 """
 
 
@@ -15,64 +16,6 @@ from parameterized import parameterized
 import numpy as np
 
 from strategy.positions import UniV3Position
-
-
-test_swap_to_optimal_arr = [
-    ({'x': 0, 'y': 0, 'price': 9}, (0, 0)),
-    ({'x': 0, 'y': 5, 'price': 9}, (0.5555555555555556, 0)),
-    ({'x': 0, 'y': 17, 'price': 9}, (1.8888888888888888, 0)),
-    ({'x': 1, 'y': 0, 'price': 9}, (1, 0)),
-    ({'x': 1, 'y': 5, 'price': 9}, (1.5555555555555556, 0)),
-    ({'x': 1, 'y': 17, 'price': 9}, (2.888888888888889, 0)),
-    ({'x': 10, 'y': 0, 'price': 9}, (10, 0)),
-    ({'x': 10, 'y': 5, 'price': 9}, (10.555555555555555, 0)),
-    ({'x': 10, 'y': 17, 'price': 9}, (11.88888888888889, 0)),
-    ({'x': 0, 'y': 0, 'price': 10}, (0, 0)),
-    ({'x': 0, 'y': 5, 'price': 10}, (0.5, 0)),
-    ({'x': 0, 'y': 17, 'price': 10}, (1.7, 0)),
-    ({'x': 1, 'y': 0, 'price': 10}, (1, 0)),
-    ({'x': 1, 'y': 5, 'price': 10}, (1.5, 0)),
-    ({'x': 1, 'y': 17, 'price': 10}, (2.7, 0)),
-    ({'x': 10, 'y': 0, 'price': 10}, (10, 0)),
-    ({'x': 10, 'y': 5, 'price': 10}, (10.5, 0)),
-    ({'x': 10, 'y': 17, 'price': 10}, (11.7, 0)),
-    ({'x': 0, 'y': 0, 'price': 15}, (0, 0)),
-    ({'x': 0, 'y': 5, 'price': 15}, (0.2049365280391343, 1.9259520794129852)),
-    ({'x': 0, 'y': 17, 'price': 15}, (0.6967841953330567, 6.54823707000415)),
-    ({'x': 1, 'y': 0, 'price': 15}, (0.6148095841174029, 5.7778562382389556)),
-    ({'x': 1, 'y': 5, 'price': 15}, (0.8197461121565373, 7.703808317651941)),
-    ({'x': 1, 'y': 17, 'price': 15}, (1.3115937794504595, 12.326093308243104)),
-    ({'x': 10, 'y': 0, 'price': 15}, (6.14809584117403, 57.77856238238956)),
-    ({'x': 10, 'y': 5, 'price': 15}, (6.353032369213164, 59.704514461802546)),
-    ({'x': 10, 'y': 17, 'price': 15}, (6.844880036507086, 64.32679945239371)),
-    ({'x': 0, 'y': 0, 'price': 20}, (0, 0)),
-    ({'x': 0, 'y': 5, 'price': 20}, (0.09629760397064924, 3.074047920587015)),
-    ({'x': 0, 'y': 17, 'price': 20}, (0.3274118535002074, 10.45176292999585)),
-    ({'x': 1, 'y': 0, 'price': 20}, (0.38519041588259695, 12.29619168234806)),
-    ({'x': 1, 'y': 5, 'price': 20}, (0.4814880198532462, 15.370239602935074)),
-    ({'x': 1, 'y': 17, 'price': 20}, (0.7126022693828044, 22.74795461234391)),
-    ({'x': 10, 'y': 0, 'price': 20}, (3.8519041588259695, 122.96191682348059)),
-    ({'x': 10, 'y': 5, 'price': 20}, (3.948201762796619, 126.03596474406761)),
-    ({'x': 10, 'y': 17, 'price': 20}, (4.1793160123261766, 133.41367975347643)),
-    ({'x': 0, 'y': 0, 'price': 30}, (0, 0)),
-    ({'x': 0, 'y': 5, 'price': 30}, (0, 5)),
-    ({'x': 0, 'y': 17, 'price': 30}, (0, 17)),
-    ({'x': 1, 'y': 0, 'price': 30}, (0, 30)),
-    ({'x': 1, 'y': 5, 'price': 30}, (0, 35)),
-    ({'x': 1, 'y': 17, 'price': 30}, (0, 47)),
-    ({'x': 10, 'y': 0, 'price': 30}, (0, 300)),
-    ({'x': 10, 'y': 5, 'price': 30}, (0, 305)),
-    ({'x': 10, 'y': 17, 'price': 30}, (0, 317)),
-    ({'x': 0, 'y': 0, 'price': 31}, (0, 0)),
-    ({'x': 0, 'y': 5, 'price': 31}, (0, 5)),
-    ({'x': 0, 'y': 17, 'price': 31}, (0, 17)),
-    ({'x': 1, 'y': 0, 'price': 31}, (0, 31)),
-    ({'x': 1, 'y': 5, 'price': 31}, (0, 36)),
-    ({'x': 1, 'y': 17, 'price': 31}, (0, 48)),
-    ({'x': 10, 'y': 0, 'price': 31}, (0, 310)),
-    ({'x': 10, 'y': 5, 'price': 31}, (0, 315)),
-    ({'x': 10, 'y': 17, 'price': 31}, (0, 327))
-]
 
 
 class TestUniswapLiquidityAligner(unittest.TestCase):
@@ -85,44 +28,8 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
             lower_price=10,
             upper_price=30,
             fee_percent=0.,
-            rebalance_cost=1,
+            gas_cost=1,
         )
-
-        self.pos.bi_currency.x_interest = 0
-        self.pos.bi_currency.y_interest = 0
-
-    @parameterized.expand(test_swap_to_optimal_arr)
-    def test_swap_to_optimal_arr_lite(self, input_val, expected):
-        """
-            run test
-        Returns:
-        """
-
-        ans = self.pos.swap_to_optimal(**input_val)
-        self.assertTrue(np.allclose(ans, expected, atol=1e-08, rtol=0))
-
-    @parameterized.expand(test_swap_to_optimal_arr)
-    def test_swap_to_optimal_arr_total(self, input_val, expected):
-        """
-            run test
-        Returns:
-        """
-
-        self.pos.mint(x=3.948201762796619, y=126.03596474406761, price=20)
-
-        ans = self.pos.swap_to_optimal(**input_val)
-        self.assertTrue(np.allclose(ans, expected, atol=1e-08, rtol=0))
-
-        self.assertAlmostEqual(self.pos.liquidity, 96.22106852429386, 8)
-        self.assertAlmostEqual(self.pos.bi_currency.x, 3.948201762796619, 8)
-        self.assertAlmostEqual(self.pos.bi_currency.y, 126.03596474406761, 8)
-
-        self.assertAlmostEqual(self.pos.total_rebalance_costs, self.pos.rebalance_cost, 8)
-
-        if np.allclose((input_val['x'], input_val['y']), expected, atol=1e-08, rtol=0):
-            self.assertAlmostEqual(self.pos.bi_currency.total_rebalance_costs, 0, 8)
-        else:
-            self.assertAlmostEqual(self.pos.bi_currency.total_rebalance_costs, self.pos.bi_currency.rebalance_cost, 8)
 
     test_mint_bounds_arr = [
         ({'x': 0, 'y': 0, 'price': 9}, False),
@@ -196,10 +103,10 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
         self.pos.mint(**input_val)
 
         self.assertAlmostEqual(self.pos.liquidity, expected, 8)
-        self.assertAlmostEqual(self.pos.bi_currency.x, input_val['x'])
-        self.assertAlmostEqual(self.pos.bi_currency.y, input_val['y'])
+        self.assertAlmostEqual(self.pos.x_hold, input_val['x'])
+        self.assertAlmostEqual(self.pos.y_hold, input_val['y'])
 
-        self.assertAlmostEqual(self.pos.total_rebalance_costs, self.pos.rebalance_cost)
+        self.assertAlmostEqual(self.pos.total_gas_costs, self.pos.gas_cost)
 
     @parameterized.expand(test_mint_arr)
     def test_double_mint(self, input_val, expected):
@@ -207,10 +114,10 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
         self.pos.mint(**input_val)
 
         self.assertAlmostEqual(self.pos.liquidity, 2*expected, 8)
-        self.assertAlmostEqual(self.pos.bi_currency.x, 2*input_val['x'])
-        self.assertAlmostEqual(self.pos.bi_currency.y, 2*input_val['y'])
+        self.assertAlmostEqual(self.pos.x_hold, 2*input_val['x'])
+        self.assertAlmostEqual(self.pos.y_hold, 2*input_val['y'])
 
-        self.assertAlmostEqual(self.pos.total_rebalance_costs, 2*self.pos.rebalance_cost)
+        self.assertAlmostEqual(self.pos.total_gas_costs, 2*self.pos.gas_cost)
 
     def test_burn_assert(self):
         self.pos.mint(x=100, y=0, price=10)
@@ -251,7 +158,7 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
 
         self.assertAlmostEqual(liq_total - self.pos.liquidity, input_val['liq'], 8)
 
-        self.assertAlmostEqual(self.pos.total_rebalance_costs, self.pos.rebalance_cost + self.pos.rebalance_cost, 8)
+        self.assertAlmostEqual(self.pos.total_gas_costs, self.pos.gas_cost + self.pos.gas_cost, 8)
 
 
     def test_burn_loss(self):
@@ -265,7 +172,7 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
             atol=1e-08, rtol=0)
         )
 
-        self.assertAlmostEqual(self.pos.total_rebalance_costs, self.pos.rebalance_cost + self.pos.rebalance_cost, 8)
+        self.assertAlmostEqual(self.pos.total_gas_costs, self.pos.gas_cost + self.pos.gas_cost, 8)
 
     test_charge_fees_arr = [
         ({'price_0': 9, 'price_1': 9}, (0.0, 0)),
@@ -302,7 +209,7 @@ class TestUniswapLiquidityAligner(unittest.TestCase):
             lower_price=10,
             upper_price=30,
             fee_percent=0.5,
-            rebalance_cost=1,
+            gas_cost=1,
         )
 
         self.pos.mint(x=100, y=0, price=10)
