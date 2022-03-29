@@ -210,9 +210,27 @@ class UniswapLiquidityAligner:
 
         return abs(liq_x - liq_y) < 1e-6, liq_x, liq_y
 
-    def get_amounts_for_swap_to_optimal(self, x, y, price, swap_fee) -> Tuple[float, float]:
-        # return dx, dy
-        # TODO write docstring
+    def get_amounts_for_swap_to_optimal(
+            self,
+            x: float,
+            y: float,
+            price: float,
+            swap_fee: float
+    ) -> Tuple[float, float]:
+        """
+        Calculate the amount of X or Y tokens that must be swapped to provide optimal liquidity at a given price.
+
+        Args:
+            x: Amount of X tokens.
+            y: Amount of Y tokens.
+            price: Current market price.
+            swap_fee: Swap fee.
+
+        Returns:
+            (x_swap, y_swap):
+                x_swap: Amount of X tokens that must be swapped to provide optimal liquidity at a given price.
+                y_swap: Amount of Y tokens that must be swapped to provide optimal liquidity at a given price.
+        """
         is_optimal, liq_x, liq_y = self.check_xy_is_optimal(x=x, y=y, price=price)
 
         if is_optimal:
@@ -234,8 +252,28 @@ class UniswapLiquidityAligner:
             den = self.x_to_liq(price=price, x=(1 - swap_fee) / price) + self.y_to_liq(price=price, y=1.)
             return 0, num / den
 
-    def get_amounts_after_optimal_swap(self, x, y, price, swap_fee):
-        # TODO write docstring
+    def get_amounts_after_optimal_swap(
+            self,
+            x: float,
+            y: float,
+            price: float,
+            swap_fee: float
+    ) -> Tuple[float, float]:
+        """
+        Calculate the amount of X and Y tokens after optimal swap.
+        The amount of X and Y tokens is optimal for a given price and a price range for minting them to UniV3.
+
+        Args:
+            x: Amount of X tokens.
+            y: Amount of Y tokens.
+            price: Current market price.
+            swap_fee: Swap fee.
+
+        Returns:
+            (x_after_swap, y_after_swap):
+                x_after_swap: Amount of X tokens after optimal swap.
+                y_after_swap: Amount of Y tokens after optimal swap.
+        """
         dx, dy = self.get_amounts_for_swap_to_optimal(x, y, price, swap_fee)
 
         x -= dx
