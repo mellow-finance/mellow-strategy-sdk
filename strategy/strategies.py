@@ -65,7 +65,7 @@ class UniV3Passive(AbstractStrategy):
     Attributes:
         lower_price: Lower bound of the interval
         upper_price: Upper bound of the interval
-        rebalance_cost: Rebalancing cost, expressed in currency
+        gas_cost: Gas costs, expressed in currency
         pool: UniswapV3 Pool instance
         name: Unique name for the instance
     """
@@ -73,7 +73,7 @@ class UniV3Passive(AbstractStrategy):
                  lower_price: float,
                  upper_price: float,
                  pool: Pool,
-                 rebalance_cost: float,
+                 gas_cost: float,
                  name: str = None,
                  ):
         super().__init__(name)
@@ -81,7 +81,7 @@ class UniV3Passive(AbstractStrategy):
         self.upper_price = upper_price
 
         self.fee_percent = pool.fee.percent
-        self.rebalance_cost = rebalance_cost
+        self.gas_cost = gas_cost
         self.swap_fee = pool.fee.percent
 
     def rebalance(self, *args, **kwargs) -> str:
@@ -108,7 +108,7 @@ class UniV3Passive(AbstractStrategy):
         bi_cur = BiCurrencyPosition(
             name=f'main_vault',
             swap_fee=self.swap_fee,
-            rebalance_cost=self.rebalance_cost,
+            gas_cost=self.gas_cost,
             x=x,
             y=y,
             x_interest=None,
@@ -119,7 +119,7 @@ class UniV3Passive(AbstractStrategy):
             lower_price=self.lower_price,
             upper_price=self.upper_price,
             fee_percent=self.fee_percent,
-            rebalance_cost=self.rebalance_cost,
+            gas_cost=self.gas_cost,
         )
 
         portfolio.append(bi_cur)
@@ -148,13 +148,13 @@ class StrategyByAddress(AbstractStrategy):
     Attributes:
         address: The address to follow.
         pool: UniswapV3 Pool instance.
-        rebalance_cost: Rebalancing cost, expressed in currency.
+        gas_cost: Gas costs, expressed in currency.
         name: Unique name for the instance.
     """
     def __init__(self,
                  address: str,
                  pool: Pool,
-                 rebalance_cost: float,
+                 gas_cost: float,
                  name: str = None,
                  ):
         super().__init__(name)
@@ -162,7 +162,7 @@ class StrategyByAddress(AbstractStrategy):
         self.address = address
         self.decimal_diff = -pool.decimals_diff
         self.fee_percent = pool.fee.percent
-        self.rebalance_cost = rebalance_cost
+        self.gas_cost = gas_cost
 
     def rebalance(self, *args, **kwargs):
         is_rebalanced = None
@@ -236,7 +236,7 @@ class StrategyByAddress(AbstractStrategy):
             univ3_pos_old.liquidity = univ3_pos_old.liquidity + liquidity
             univ3_pos_old.bi_currency.deposit(amount_0, amount_1)
         else:
-            univ3_pos = UniV3Position(name, price_lower, price_upper, self.fee_percent, self.rebalance_cost)
+            univ3_pos = UniV3Position(name, price_lower, price_upper, self.fee_percent, self.gas_cost)
             univ3_pos.liquidity = liquidity
             univ3_pos.x_hold += amount_0
             univ3_pos.y_hold += amount_1
