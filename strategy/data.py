@@ -110,7 +110,7 @@ class DownloadFromS3:
         self.check_dir()
         files = self.get_last_files()
         for file in files:
-            log.info(f'Downloaded {file} from S3')
+            log.info(f'Download {file} from S3')
             self.get_file_from_s3(file)
 
 
