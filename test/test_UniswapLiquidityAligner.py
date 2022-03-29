@@ -5,7 +5,7 @@
         liq_to_optimal_xy - Yes
         check_xy_is_optimal - Yes
 
-    python -m unittest test/tets_UniswapLiquidityAligner.py
+    python -m unittest test/test_UniswapLiquidityAligner.py
 """
 
 import numpy as np
