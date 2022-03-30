@@ -304,18 +304,6 @@ POOLS = [
         "token1": Token.USDT,
         "fee": Fee.HIGH,
     },
-    {
-        "address": "lidov1",
-        "token0": Token.WETH,
-        "token1": Token.stETH,
-        "fee": Fee.MIDDLE,
-    },
-    {
-        "address": "lidov2",
-        "token0": Token.WETH,
-        "token1": Token.stETH,
-        "fee": Fee.LOW,
-    },
 ]
 MIN_TICK = -887272
 MAX_TICK = 887272
