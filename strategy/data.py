@@ -8,6 +8,10 @@ import polars as pl
 import pandas as pd
 from binance import Client
 import boto3
+from botocore.handlers import disable_signing
+from botocore import UNSIGNED
+from botocore.client import Config
+
 from typing import List
 
 from strategy.primitives import Pool
@@ -76,6 +80,7 @@ class DownloadFromS3:
         """
         events = ['mint', 'burn', 'swap']
         s3 = boto3.resource('s3')
+        s3.meta.client.meta.events.register('choose-signer.s3.*', disable_signing)
         bucket = s3.Bucket(self.bucket_name)
         suffixes = []
         for file in bucket.objects.all():
@@ -98,8 +103,9 @@ class DownloadFromS3:
         Args:
             file: File name.
         """
+        s3client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
+
         file_name = '.'.join(file.split('.')[1:])
-        s3client = boto3.client('s3')
         path = self.data_dir + '/' + file_name
         s3client.download_file(self.bucket_name, file, path)
 
