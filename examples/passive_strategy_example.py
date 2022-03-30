@@ -1,10 +1,10 @@
 import sys
 import polars as pl
 
-from strategy.data import SyntheticData
-from strategy.backtest import Backtest
-from strategy.strategies import UniV3Passive
-from strategy.primitives import Pool, Token, Fee
+from mellow_sdk.data import SyntheticData
+from mellow_sdk.backtest import Backtest
+from mellow_sdk.strategies import UniV3Passive
+from mellow_sdk.primitives import Pool, Token, Fee
 
 
 def evaluate() -> pl.DataFrame:

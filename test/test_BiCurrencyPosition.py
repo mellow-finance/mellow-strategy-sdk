@@ -12,7 +12,7 @@ import numpy as np
 import unittest
 
 from datetime import datetime
-from strategy.positions import BiCurrencyPosition
+from mellow_sdk.positions import BiCurrencyPosition
 
 
 class TestBiCurrencyPosition(unittest.TestCase):

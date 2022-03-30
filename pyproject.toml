@@ -2,7 +2,7 @@
 name = "mellow_strategy_sdk"
 version = "0.1.3"
 description = "Framework for creating new Uniswap V3 strategies"
-readme = 'README.md'
+readme = 'docs/source/getting_started.rst'
 documentation = 'https://mellow-strategy-sdk.readthedocs.io/en/main/'
 
 authors = [
@@ -14,7 +14,7 @@ license = "MIT License"
 homepage = 'https://mellow.finance/'
 repository = 'https://github.com/mellow-finance/mellow-strategy-sdk'
 packages = [
-    {include = "strategy"}
+    {include = "mellow_sdk"}
 ]
 
 [tool.poetry.dependencies]

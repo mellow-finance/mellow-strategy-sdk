@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 import numpy as np
 
-from strategy.uniswap_utils import UniswapLiquidityAligner
+from mellow_sdk.uniswap_utils import UniswapLiquidityAligner
 
 
 class AbstractPosition(ABC):

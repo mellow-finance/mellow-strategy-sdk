@@ -14,9 +14,9 @@ from botocore.client import Config
 
 from typing import List
 
-from strategy.primitives import Pool
-from strategy.utils import ConfigParser
-from strategy.utils import log
+from mellow_sdk.primitives import Pool
+from mellow_sdk.utils import ConfigParser
+from mellow_sdk.utils import log
 
 
 class PoolDataUniV3:

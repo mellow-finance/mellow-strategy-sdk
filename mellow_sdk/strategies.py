@@ -3,9 +3,9 @@ import numpy as np
 import typing as tp
 import copy
 
-from strategy.uniswap_utils import UniswapLiquidityAligner
-from strategy.positions import UniV3Position, BiCurrencyPosition
-from strategy.primitives import Pool
+from mellow_sdk.uniswap_utils import UniswapLiquidityAligner
+from mellow_sdk.positions import UniV3Position, BiCurrencyPosition
+from mellow_sdk.primitives import Pool
 
 
 class AbstractStrategy(ABC):

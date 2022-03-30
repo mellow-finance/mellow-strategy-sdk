@@ -2,9 +2,9 @@ import copy
 from typing import Tuple
 import polars as pl
 
-from strategy.strategies import AbstractStrategy
-from strategy.portfolio import Portfolio
-from strategy.history import PortfolioHistory, RebalanceHistory, UniPositionsHistory
+from mellow_sdk.strategies import AbstractStrategy
+from mellow_sdk.portfolio import Portfolio
+from mellow_sdk.history import PortfolioHistory, RebalanceHistory, UniPositionsHistory
 
 
 class Backtest:

@@ -4,9 +4,9 @@ import datetime
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from strategy.history import PortfolioHistory, UniPositionsHistory, RebalanceHistory
-from strategy.data import PoolDataUniV3
-from strategy.primitives import Pool
+from mellow_sdk.history import PortfolioHistory, UniPositionsHistory, RebalanceHistory
+from mellow_sdk.data import PoolDataUniV3
+from mellow_sdk.primitives import Pool
 
 
 class PortfolioViewer:

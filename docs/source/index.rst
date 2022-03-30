@@ -36,5 +36,5 @@ Each pool is assumed to contain ``X`` and ``Y`` tokens and lower ``x`` and ``y``
    :maxdepth: 3
    :caption: API
 
-   strategy
+   mellow_sdk
 

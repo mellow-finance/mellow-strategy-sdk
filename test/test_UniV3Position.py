@@ -15,7 +15,7 @@ import unittest
 from parameterized import parameterized
 import numpy as np
 
-from strategy.positions import UniV3Position
+from mellow_sdk.positions import UniV3Position
 
 
 class TestUniswapLiquidityAligner(unittest.TestCase):

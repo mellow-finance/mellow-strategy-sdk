@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from datetime import datetime
 
-from strategy.positions import AbstractPosition
+from mellow_sdk.positions import AbstractPosition
 
 
 class Portfolio(AbstractPosition):

@@ -1,6 +1,6 @@
-strategy
+mellow_sdk
 --------
-.. automodule:: strategy.backtest
+.. automodule:: mellow_sdk.backtest
 
 Backtest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -8,7 +8,7 @@ Backtest
     :members:
 
 
-.. automodule:: strategy.data
+.. automodule:: mellow_sdk.data
 
 Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -23,7 +23,7 @@ Data
 .. autoclass:: DownloaderBinanceData
     :members:
 
-.. automodule:: strategy.history
+.. automodule:: mellow_sdk.history
 
 History
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,14 +35,14 @@ History
     :members:
 
 
-.. automodule:: strategy.portfolio
+.. automodule:: mellow_sdk.portfolio
 
 Portfolio
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: Portfolio
     :members:
 
-.. automodule:: strategy.positions
+.. automodule:: mellow_sdk.positions
 
 Positions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,7 +53,7 @@ Positions
 .. autoclass:: UniV3Position
     :members:
 
-.. automodule:: strategy.primitives
+.. automodule:: mellow_sdk.primitives
 
 Primitives
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -64,7 +64,7 @@ Primitives
 .. autoclass:: Pool
     :members:
 
-.. automodule:: strategy.strategies
+.. automodule:: mellow_sdk.strategies
 
 Strategies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,14 +76,14 @@ Strategies
     :members:
 
 
-.. automodule:: strategy.uniswap_utils
+.. automodule:: mellow_sdk.uniswap_utils
 
 UniswapUtils
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: UniswapLiquidityAligner
     :members:
 
-.. automodule:: strategy.viewers
+.. automodule:: mellow_sdk.viewers
 
 Viewers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

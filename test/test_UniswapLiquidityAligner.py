@@ -13,7 +13,7 @@ import unittest
 from parameterized import parameterized
 import sys
 
-from strategy.uniswap_utils import UniswapLiquidityAligner
+from mellow_sdk.uniswap_utils import UniswapLiquidityAligner
 
 
 # TODO - make it possible to call one test
