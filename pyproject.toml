@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "mellow_strategy_sdk"
-version = "0.1.3"
+version = "0.1.0"
 description = "Framework for creating new Uniswap V3 strategies"
-readme = 'docs/source/getting_started.rst'
+readme = 'README.rst'
 documentation = 'https://mellow-strategy-sdk.readthedocs.io/en/main/'
 
 authors = [

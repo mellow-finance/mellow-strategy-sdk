@@ -19,7 +19,7 @@ def evaluate() -> pl.DataFrame:
     data = SyntheticData(pool, init_price=10, mu=0.005).generate_data()
 
     # data = RawDataUniV3(pool).load_from_folder()
-    m_strat = UniV3Passive(
+    passive_strat = UniV3Passive(
         lower_price=data.swaps['price'].min(),
         upper_price=data.swaps['price'].max(),
         pool=pool,
@@ -27,7 +27,7 @@ def evaluate() -> pl.DataFrame:
         name='passive'
     )
 
-    portfolio_history, _, _ = Backtest(m_strat).backtest(data.swaps)
+    portfolio_history, _, _ = Backtest(passive_strat).backtest(data.swaps)
     metrics = portfolio_history.calculate_stats()
     return metrics.tail()
 
