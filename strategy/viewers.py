@@ -278,7 +278,6 @@ class PortfolioViewer:
 
 
 class UniswapViewer:
-    # TODO docs
     """
      ``UniswapViewer`` is class for visualizing UniswapV3 intervals in time.
 
