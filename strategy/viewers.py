@@ -136,7 +136,7 @@ class PortfolioViewer:
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text=f"Value to {self.pool.token1.name}", secondary_y=False)
-        fig.update_yaxes(title_text=f'Earned fees to {self.pool.token1.name}' + '<br>' + f' IL to {self.pool.token0.name}', secondary_y=True)
+        fig.update_yaxes(title_text=f'Earned fees to {self.pool.token1.name}' + '<br>' + f' IL to {self.pool.token1.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token1.name}', width=900, height=500)
         return fig
 
@@ -257,7 +257,7 @@ class PortfolioViewer:
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_y'],
-                name=f'Portfolio value',
+                name=f'Portfolio value to {self.pool.token1.name}',
             ),
             secondary_y=False)
 
@@ -270,9 +270,9 @@ class PortfolioViewer:
             secondary_y=True)
 
         fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text='Value', secondary_y=False)
+        fig.update_yaxes(title_text=f'Value to {self.pool.token1.name}', secondary_y=False)
         fig.update_yaxes(title_text="gAPY", secondary_y=True)
-        fig.update_layout(title=f'Portfolio value and gAPY in {self.pool.token0.name}. '
+        fig.update_layout(title=f'Portfolio value and gAPY. '
                                 f'Pool {self.pool._name}.', width=900, height=500)
         return fig
 
