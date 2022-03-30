@@ -1,7 +1,4 @@
 import sys
-
-sys.path.append('..')
-
 import polars as pl
 
 from strategy.data import SyntheticData
