@@ -302,7 +302,7 @@ class BiCurrencyPosition(AbstractPosition):
         snapshot = {
                 f'{self.name}_value_x': float(self.x),
                 f'{self.name}_value_y': float(self.y),
-                f'{self.name}_total_gas_costs': self.total_gas_costs
+                f'{self.name}_total_gas_costs': float(self.total_gas_costs)
             }
         return snapshot
 
@@ -639,7 +639,7 @@ class UniV3Position(AbstractPosition):
             f'{self.name}_il_to_x': float(il_to_x),
             f'{self.name}_il_to_y': float(il_to_y),
 
-            f'{self.name}_total_gas_costs': self.total_gas_costs,
+            f'{self.name}_total_gas_costs': float(self.total_gas_costs),
 
             # f'{self.name}_current_liquidity': self.liquidity
         }
