@@ -421,7 +421,7 @@ class LiquidityViewer:
             pl.col('liquidity').sum().alias('burn')
         ]).sort(by='date')
         df1 = daily_mints.join(daily_burns, on=['date'], how='outer')
-        df2 = spot_prices.join(df1, on=['date'], how='outer')
+        df2 = spot_prices.join(df1, on=['date'], how='outer').fill_null(0)
         df3 = df2.with_column(
             (pl.col('mint') - pl.col('burn')).cumsum().alias('liq')
         )
