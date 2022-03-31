@@ -271,7 +271,7 @@ class PortfolioViewer:
 
         fig.update_xaxes(title_text="Timeline")
         fig.update_yaxes(title_text=f'Value to {self.pool.token1.name}', secondary_y=False)
-        fig.update_yaxes(title_text="gAPY", secondary_y=True)
+        fig.update_yaxes(title_text="gAPY%", secondary_y=True)
         fig.update_layout(title=f'Portfolio value and gAPY. '
                                 f'Pool {self.pool._name}.', width=900, height=500)
         return fig
