@@ -25,9 +25,9 @@ Import
 
 .. code-block:: python
 
-    from mellow_sdk.primitives import Pool, POOLS
+    from mellow_sdk.primitives import Pool, Token, Fee
     from mellow_sdk.data import RawDataUniV3
-    from mellow_sdk.strategies import AbstractStrategy
+    from mellow_sdk.strategies import UniV3Passive
     from mellow_sdk.backtest import Backtest
     from mellow_sdk.viewers import RebalanceViewer, UniswapViewer, PortfolioViewer
     from mellow_sdk.positions import BiCurrencyPosition, UniV3Position
@@ -40,12 +40,7 @@ A typical notebook would start with downloading and preparing data for a specifi
 
 .. code-block:: python
 
-    pool_num = 1
-    my_pool = Pool(
-        tokenA=POOLS[pool_num]['token0'],
-        tokenB=POOLS[pool_num]['token1'],
-        fee=POOLS[pool_num]['fee']
-    )
+    pool = Pool(Token.WBTC, Token.WETH, Fee.MIDDLE)
 
 Get data
 ~~~~~~~~~~~~
