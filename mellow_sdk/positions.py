@@ -302,7 +302,7 @@ class BiCurrencyPosition(AbstractPosition):
         snapshot = {
                 f'{self.name}_value_x': float(self.x),
                 f'{self.name}_value_y': float(self.y),
-                f'{self.name}total_gas_costs': self.total_gas_costs
+                f'{self.name}_total_gas_costs': self.total_gas_costs
             }
         return snapshot
 
