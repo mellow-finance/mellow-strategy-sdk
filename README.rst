@@ -36,7 +36,7 @@ Choose a pool
 ~~~~~~~~~~~~~~~~
 
 A typical notebook would start with downloading and preparing data for a specific pool.
-``POOLS`` is a list of available pools, let's choose 1 it is WBTC/WETH, fee 0.3%
+Let's choose WBTC/WETH, fee 0.3% pool.
 
 .. code-block:: python
 

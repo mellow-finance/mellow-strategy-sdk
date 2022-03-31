@@ -401,8 +401,9 @@ class LiquidityViewer:
     Attributes:
         pool_data: ``PoolData`` object.
     """
-    def __init__(self, pool_data: PoolDataUniV3) -> None:
-        self.pool = pool_data
+    def __init__(self, pool: Pool, pool_data: PoolDataUniV3) -> None:
+        self.pool = pool
+        self.pool_data = pool_data
 
     def draw_plot(self) -> go.Figure:
         """
@@ -411,13 +412,13 @@ class LiquidityViewer:
         Returns:
             Plot with Pool liquidity and price.
         """
-        spot_prices = self.pool.swaps.groupby('date').agg([
+        spot_prices = self.pool_data.swaps.groupby('date').agg([
             pl.col('price').mean().alias('price')
         ]).sort(by='date')
-        daily_mints = self.pool.mints.groupby('date').agg([
+        daily_mints = self.pool_data.mints.groupby('date').agg([
             pl.col('liquidity').sum().alias('mint')
         ]).sort(by='date')
-        daily_burns = self.pool.burns.groupby('date').agg([
+        daily_burns = self.pool_data.burns.groupby('date').agg([
             pl.col('liquidity').sum().alias('burn')
         ]).sort(by='date')
         df1 = daily_mints.join(daily_burns, on=['date'], how='outer')
@@ -449,5 +450,5 @@ class LiquidityViewer:
         # Set y-axes titles
         fig.update_yaxes(title_text="Price", secondary_y=False)
         fig.update_yaxes(title_text='Liquidity', secondary_y=True)
-        fig.update_layout(title='Price and Liquidity')
+        fig.update_layout(title=f'Price and Liquidity. Pool {self.pool._name}.')
         return fig

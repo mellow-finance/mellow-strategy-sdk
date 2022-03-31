@@ -41,7 +41,7 @@ A typical notebook would start with downloading and preparing data for a specifi
 ::
 
     pool_num = 1
-    my_pool = Pool(
+    pool = Pool(
         tokenA=POOLS[pool_num]['token0'], 
         tokenB=POOLS[pool_num]['token1'], 
         fee=POOLS[pool_num]['fee']
