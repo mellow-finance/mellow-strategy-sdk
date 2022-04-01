@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mellow_strategy_sdk"
-version = "0.2.7"
+version = "0.2.9"
 description = "Framework for creating new Uniswap V3 strategies"
 readme = 'README.rst'
 documentation = 'https://mellow-strategy-sdk.readthedocs.io/en/main/'
@@ -26,7 +26,6 @@ PyYAML = "^3.13"
 parameterized = "0.8.1"
 pyarrow = "^6.0.1"
 boto3 = "^1.0.0"
-typing-extensions = "4.1.1"
 polars = "0.13.17"
 structlog = "21.5.0"
 python-binance = "1.0.15"
