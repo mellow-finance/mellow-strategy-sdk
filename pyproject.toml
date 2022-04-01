@@ -32,6 +32,7 @@ python-binance = "1.0.15"
 requests = "~2.23.0"
 six = "~1.15.0"
 folium = "0.2.1"
+myst-parser = "^0.17.0"
 
 [tool.poetry.dev-dependencies]
 sphinx-rtd-theme = "^1.0.0"
