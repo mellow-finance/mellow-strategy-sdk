@@ -101,36 +101,34 @@ Next visualize results
     # Calculate df with portfolio stats
     stats = portfolio_history.calculate_stats()
 
-If you have a powerful pc and a good connection you can remove render='svg'
-
 .. code-block:: python
 
-    intervals_plot.show(render='svg')
+    intervals_plot.show()
 
 .. image:: https://raw.githubusercontent.com/mellow-finance/mellow-strategy-sdk/main/examples/getting_started_intervals.png
 
 
 .. code-block:: python
 
-    rebalances_plot.show(render='svg')
+    rebalances_plot.show()
 
 .. image:: https://raw.githubusercontent.com/mellow-finance/mellow-strategy-sdk/main/examples/getting_started_rebalances.png
 
 .. code-block:: python
 
-    fig2.show(render='svg')
+    fig2.show()
 
 .. image:: https://raw.githubusercontent.com/mellow-finance/mellow-strategy-sdk/main/examples/getting_started_fig2.png
 
 .. code-block:: python
 
-    fig4.show(render='svg')
+    fig4.show()
 
 .. image:: https://raw.githubusercontent.com/mellow-finance/mellow-strategy-sdk/main/examples/getting_started_fig4.png
 
 .. code-block:: python
 
-    fig6.show(render='svg')
+    fig6.show()
 
 .. image:: https://raw.githubusercontent.com/mellow-finance/mellow-strategy-sdk/main/examples/getting_started_fig6.png
 

@@ -205,11 +205,10 @@ Next visualize results
     # Calculate df with portfolio stats
     stats = portfolio_history.calculate_stats()
 
-If you have a powerful pc and a good connection you can remove render='svg'
 
 ::
 
-    intervals_plot.show(render='svg')
+    intervals_plot.show()
 
 .. image:: ../../examples/getting_started_intervals.png
     :width: 800
@@ -219,7 +218,7 @@ If you have a powerful pc and a good connection you can remove render='svg'
 
 ::
 
-    rebalances_plot.show(render='svg')
+    rebalances_plot.show()
 
 .. image:: ../../examples/getting_started_rebalances.png
     :width: 800
@@ -228,7 +227,7 @@ If you have a powerful pc and a good connection you can remove render='svg'
 
 ::
 
-    fig2.show(render='svg')
+    fig2.show()
 
 .. image:: ../../examples/getting_started_fig2.png
     :width: 800
@@ -237,7 +236,7 @@ If you have a powerful pc and a good connection you can remove render='svg'
 
 ::
 
-    fig4.show(render='svg')
+    fig4.show()
 
 .. image:: ../../examples/getting_started_fig4.png
     :width: 800
@@ -246,7 +245,7 @@ If you have a powerful pc and a good connection you can remove render='svg'
 
 ::
 
-    fig6.show(render='svg')
+    fig6.show()
 
 .. image:: ../../examples/getting_started_fig6.png
     :width: 800
