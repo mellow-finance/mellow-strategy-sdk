@@ -65,13 +65,13 @@ class PortfolioViewer:
         Returns:
             Plotly plot.
         """
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig = make_subplots(specs=[[{'secondary_y': True}]])
 
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_x'],
-                name=f"Portfolio value in {self.pool.token0.name}",
+                name=f'Portfolio value in {self.pool.token0.name}',
             ), secondary_y=False)
 
         fig.add_trace(
@@ -87,12 +87,12 @@ class PortfolioViewer:
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_il_to_x'],
-                name=f"IL in {self.pool.token0.name}",
-                yaxis="y2"
+                name=f'IL in {self.pool.token0.name}',
+                yaxis='y2'
             ), secondary_y=True)
 
-        fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text=f"Value to {self.pool.token0.name}", secondary_y=False)
+        fig.update_xaxes(title_text='Timeline')
+        fig.update_yaxes(title_text=f'Value to {self.pool.token0.name}', secondary_y=False)
         fig.update_yaxes(title_text=f'Earned fees to {self.pool.token0.name}' + '<br>' + f' IL to {self.pool.token0.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token0.name}', width=900, height=500)
         return fig
@@ -106,13 +106,13 @@ class PortfolioViewer:
 
         Returns: Plotly plot.
         """
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig = make_subplots(specs=[[{'secondary_y': True}]])
 
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_y'],
-                name=f"Portfolio value in {self.pool.token1.name}",
+                name=f'Portfolio value in {self.pool.token1.name}',
             ),
             secondary_y=False)
 
@@ -129,13 +129,13 @@ class PortfolioViewer:
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_il_to_y'],
-                name=f"IL in {self.pool.token1.name}",
-                yaxis="y2"
+                name=f'IL in {self.pool.token1.name}',
+                yaxis='y2'
             ),  secondary_y=True
         )
 
-        fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text=f"Value to {self.pool.token1.name}", secondary_y=False)
+        fig.update_xaxes(title_text='Timeline')
+        fig.update_yaxes(title_text=f'Value to {self.pool.token1.name}', secondary_y=False)
         fig.update_yaxes(title_text=f'Earned fees to {self.pool.token1.name}' + '<br>' + f' IL to {self.pool.token1.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value, Fees and IL in {self.pool.token1.name}', width=900, height=500)
         return fig
@@ -149,12 +149,12 @@ class PortfolioViewer:
 
         Returns: Plotly plot.
         """
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig = make_subplots(specs=[[{'secondary_y': True}]])
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_x'],
-                name=f"Portfolio value in {self.pool.token0.name}",
+                name=f'Portfolio value in {self.pool.token0.name}',
             ),
             secondary_y=False)
 
@@ -162,14 +162,14 @@ class PortfolioViewer:
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['portfolio_apy_x'],
-                name=f"APY in {self.pool.token0.name}",
-                yaxis="y2"
+                name=f'APY in {self.pool.token0.name}',
+                yaxis='y2'
             ),
             secondary_y=True
         )
 
-        fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text=f"Value to {self.pool.token0.name}", secondary_y=False)
+        fig.update_xaxes(title_text='Timeline')
+        fig.update_yaxes(title_text=f'Value to {self.pool.token0.name}', secondary_y=False)
         fig.update_yaxes(title_text=f'APY in {self.pool.token0.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token0.name}', width=900, height=500)
         return fig
@@ -183,25 +183,25 @@ class PortfolioViewer:
 
         Returns: Plotly plot.
         """
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig = make_subplots(specs=[[{'secondary_y': True}]])
 
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_to_y'],
-                name=f"Portfolio value in {self.pool.token1.name}",
+                name=f'Portfolio value in {self.pool.token1.name}',
             ), secondary_y=False)
 
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['portfolio_apy_y'],
-                name=f"APY in {self.pool.token1.name}",
-                yaxis="y2"
+                name=f'APY in {self.pool.token1.name}',
+                yaxis='y2'
             ), secondary_y=True)
 
-        fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text=f"Value to {self.pool.token1.name}", secondary_y=False)
+        fig.update_xaxes(title_text='Timeline')
+        fig.update_yaxes(title_text=f'Value to {self.pool.token1.name}', secondary_y=False)
         fig.update_yaxes(title_text=f'APY in {self.pool.token1.name}', secondary_y=True)
 
         fig.update_layout(title=f'Portfolio Value and APY in {self.pool.token1.name}', width=900, height=500)
@@ -216,13 +216,13 @@ class PortfolioViewer:
 
         Returns: Plotly plot.
         """
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig = make_subplots(specs=[[{'secondary_y': True}]])
 
         fig.add_trace(
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['total_value_x'],
-                name=f"Portfolio value in {self.pool.token0.name}",
+                name=f'Portfolio value in {self.pool.token0.name}',
             ),
             secondary_y=False)
 
@@ -235,8 +235,8 @@ class PortfolioViewer:
 
             ), secondary_y=True)
 
-        fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text=f"Value in {self.pool.token0.name}", secondary_y=False)
+        fig.update_xaxes(title_text='Timeline')
+        fig.update_yaxes(title_text=f'Value in {self.pool.token0.name}', secondary_y=False)
         fig.update_yaxes(title_text=f'Value in {self.pool.token1.name}', secondary_y=True)
         fig.update_layout(title=f'Portfolio Value in {self.pool.token0.name}, {self.pool.token1.name}', width=900, height=500)
         return fig
@@ -251,7 +251,7 @@ class PortfolioViewer:
         Returns:
             Plotly plot.
         """
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig = make_subplots(specs=[[{'secondary_y': True}]])
 
         fig.add_trace(
             go.Scatter(
@@ -265,14 +265,14 @@ class PortfolioViewer:
             go.Scatter(
                 x=portfolio_df['timestamp'].to_list(),
                 y=portfolio_df['g_apy'],
-                name=f"Portfolio gAPY",
+                name=f'Portfolio gAPY',
             ),
             secondary_y=True)
 
-        fig.update_xaxes(title_text="Timeline")
+        fig.update_xaxes(title_text='Timeline')
         fig.update_yaxes(title_text=f'Value to {self.pool.token1.name}', secondary_y=False)
-        fig.update_yaxes(title_text="gAPY%", secondary_y=True)
-        fig.update_layout(title=f'Portfolio value and gAPY. '
+        fig.update_yaxes(title_text='gAPY', secondary_y=True)
+        fig.update_layout(title=f'Portfolio value and gAPY.'
                                 f'Pool {self.pool._name}.', width=900, height=500)
         return fig
 
@@ -336,8 +336,8 @@ class UniswapViewer:
             mode='lines',
             line=dict(color='rgb(0, 200, 0)'),
         ))
-        fig.update_xaxes(title_text="Timeline")
-        fig.update_yaxes(title_text="Price")
+        fig.update_xaxes(title_text='Timeline')
+        fig.update_yaxes(title_text='Price')
         fig.update_layout(title='UniV3 positions', width=900, height=400)
         return fig
 
@@ -369,7 +369,7 @@ class RebalanceViewer:
                     go.Scatter(
                         x=swaps_df['timestamp'].to_list(),
                         y=swaps_df['price'],
-                        name="Price",
+                        name='Price',
                         )
                     )
 
@@ -386,10 +386,10 @@ class RebalanceViewer:
                             marker_size=7,
                             marker_symbol='circle-open',
                             marker_line_width=2,
-                            name=f"{event}",
+                            name=f'{event}',
                             )
                         )
-        fig.update_xaxes(title_text="Timeline")
+        fig.update_xaxes(title_text='Timeline')
         fig.update_layout(title='Rebalances')
         return fig
 
@@ -427,13 +427,13 @@ class LiquidityViewer:
             (pl.col('mint') - pl.col('burn')).cumsum().alias('liq')
         )
 
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig = make_subplots(specs=[[{'secondary_y': True}]])
 
         fig.add_trace(
             go.Scatter(
                 x=df3['date'].to_list(),
                 y=df3['price'].to_list(),
-                name="Price",
+                name='Price',
             ),
             secondary_y=False)
 
@@ -446,9 +446,9 @@ class LiquidityViewer:
 
             ), secondary_y=True)
         # Set x-axis title
-        fig.update_xaxes(title_text="Timeline")
+        fig.update_xaxes(title_text='Timeline')
         # Set y-axes titles
-        fig.update_yaxes(title_text="Price", secondary_y=False)
+        fig.update_yaxes(title_text='Price', secondary_y=False)
         fig.update_yaxes(title_text='Liquidity', secondary_y=True)
         fig.update_layout(title=f'Price and Liquidity. Pool {self.pool._name}.')
         return fig
