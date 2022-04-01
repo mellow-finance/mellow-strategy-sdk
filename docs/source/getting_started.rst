@@ -7,7 +7,6 @@ Getting Started
 
 Setup
 ~~~~~~~~~~~~
-Follow the installation instructions from the ``README.md`` file
 
 ::
     
