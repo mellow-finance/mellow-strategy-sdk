@@ -13,6 +13,8 @@ or
 
 .. code-block:: bash
 
+    python3 -m venv .venv
+    source .venv/bin/activate
     pip install mellow_strategy_sdk
 
 
