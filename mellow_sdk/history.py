@@ -144,7 +144,7 @@ class PortfolioHistory:
                 ((pl.col('timestamp') - pl.col('timestamp').first()).dt.days()).alias('days')
             ])
         df_apy = df_performance.apply(lambda x: 100 * (x[0] ** (365 / x[1]) - 1) if x[1] != 0 else 0.)
-        df_apy = df_apy.rename({"apply": to_col})
+        df_apy = df_apy.rename({'apply': to_col})
         return df_apy
 
     def calculate_g_apy(self, df: pl.DataFrame) -> pl.DataFrame:
