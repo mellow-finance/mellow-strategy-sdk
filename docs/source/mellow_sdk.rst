@@ -1,5 +1,5 @@
 mellow_sdk
---------
+-------------
 .. automodule:: mellow_sdk.backtest
 
 Backtest
