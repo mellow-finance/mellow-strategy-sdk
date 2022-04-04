@@ -529,8 +529,8 @@ test = ["hypothesis (>=3.58)", "pytest (>=6.0)", "pytest-xdist"]
 name = "parameterized"
 version = "0.8.1"
 description = "Parameterized testing with any Python test framework"
-category = "main"
-optional = true
+category = "dev"
+optional = false
 python-versions = "*"
 
 [package.extras]
@@ -1107,12 +1107,12 @@ docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)"]
 testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-docs = ["sphinx", "parameterized", "sphinx-rtd-theme", "autodoc", "sphinx-autodocgen", "sphinxcontrib-napoleon", "myst-parser", "sphinx-autodoc-typehints"]
+docs = ["sphinx", "sphinx-rtd-theme", "autodoc", "sphinx-autodocgen", "sphinxcontrib-napoleon", "myst-parser", "sphinx-autodoc-typehints"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.13"
-content-hash = "415744db3196853add87a0b791a9a728b3504052ae6fbe9601dd4c6678f086c4"
+content-hash = "2faab972dd05ccc7aec47c07c09940b906202b4b182b8a017465fa83f3f1b30b"
 
 [metadata.files]
 aiohttp = [
