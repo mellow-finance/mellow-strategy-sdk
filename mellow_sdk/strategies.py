@@ -1,12 +1,11 @@
-from strategy.uniswap_utils import UniswapLiquidityAligner
-from strategy.positions import UniV3Position, BiCurrencyPosition
-from strategy.primitives import Pool
-
 from abc import ABC, abstractmethod
-import math
 import numpy as np
 import typing as tp
 import copy
+
+from mellow_sdk.uniswap_utils import UniswapLiquidityAligner
+from mellow_sdk.positions import UniV3Position, BiCurrencyPosition
+from mellow_sdk.primitives import Pool
 
 
 class AbstractStrategy(ABC):
@@ -26,9 +25,11 @@ class AbstractStrategy(ABC):
     def rebalance(self, *args, **kwargs) -> tp.Optional[str]:
         """
         Rebalance implementation.
+
         Args:
             args: Any args.
             kwargs: Any kwargs.
+
         Returns:
             Name of event or None if there was no event.
         """
@@ -58,28 +59,29 @@ class Hold(AbstractStrategy):
 
 class UniV3Passive(AbstractStrategy):
     """
-    ``UniV3Passive`` is the passive strategy on UniswapV3 without rebalances.
-        i.e. mint interval and wait.
+    ``UniV3Passive`` is the passive strategy on UniswapV3, i.e. mint one interval and wait.
+
+    Attributes:
         lower_price: Lower bound of the interval
         upper_price: Upper bound of the interval
-        rebalance_cost: Rebalancing cost, expressed in currency
+        gas_cost: Gas costs, expressed in currency
         pool: UniswapV3 Pool instance
         name: Unique name for the instance
     """
-
     def __init__(self,
                  lower_price: float,
                  upper_price: float,
                  pool: Pool,
-                 rebalance_cost: float,
+                 gas_cost: float,
                  name: str = None,
                  ):
         super().__init__(name)
         self.lower_price = lower_price
         self.upper_price = upper_price
-        self.decimal_diff = -pool.decimals_diff
+
         self.fee_percent = pool.fee.percent
-        self.rebalance_cost = rebalance_cost
+        self.gas_cost = gas_cost
+        self.swap_fee = pool.fee.percent
 
     def rebalance(self, *args, **kwargs) -> str:
         record = kwargs['record']
@@ -89,8 +91,7 @@ class UniV3Passive(AbstractStrategy):
         is_rebalanced = None
 
         if len(portfolio.positions) == 0:
-            univ3_pos = self.create_uni_position(price)
-            portfolio.append(univ3_pos)
+            self.create_uni_position(portfolio=portfolio, price=price)
             is_rebalanced = 'mint'
 
         if 'UniV3Passive' in portfolio.positions:
@@ -99,18 +100,60 @@ class UniV3Passive(AbstractStrategy):
 
         return is_rebalanced
 
-    def create_uni_position(self, price):
-        univ3_pos = UniV3Position('UniV3Passive', self.lower_price, self.upper_price, self.fee_percent, self.rebalance_cost)
-        x_uni_aligned, y_uni_aligned = univ3_pos.swap_to_optimal(x=1 / price, y=1, price=price)
-        univ3_pos.deposit(x=x_uni_aligned, y=y_uni_aligned, price=price)
-        return univ3_pos
+    def create_uni_position(self, portfolio, price):
+        x = 1 / price
+        y = 1
+
+        bi_cur = BiCurrencyPosition(
+            name=f'main_vault',
+            swap_fee=self.swap_fee,
+            gas_cost=self.gas_cost,
+            x=x,
+            y=y,
+            x_interest=None,
+            y_interest=None
+        )
+        uni_pos = UniV3Position(
+            name=f'UniV3Passive',
+            lower_price=self.lower_price,
+            upper_price=self.upper_price,
+            fee_percent=self.fee_percent,
+            gas_cost=self.gas_cost,
+        )
+
+        portfolio.append(bi_cur)
+        portfolio.append(uni_pos)
+
+        dx, dy = uni_pos.aligner.get_amounts_for_swap_to_optimal(
+            x, y, swap_fee=bi_cur.swap_fee, price=price
+        )
+
+        if dx > 0:
+            bi_cur.swap_x_to_y(dx, price=price)
+        if dy > 0:
+            bi_cur.swap_y_to_x(dy, price=price)
+
+        x_uni, y_uni = uni_pos.aligner.get_amounts_after_optimal_swap(
+            x, y, swap_fee=bi_cur.swap_fee, price=price
+        )
+        bi_cur.withdraw(x_uni, y_uni)
+        uni_pos.deposit(x_uni, y_uni, price=price)
 
 
 class StrategyByAddress(AbstractStrategy):
+    """
+    ``StrategyByAddress`` is the strategy on UniswapV3 that follows the actions of certain address.
+
+    Attributes:
+        address: The address to follow.
+        pool: UniswapV3 Pool instance.
+        gas_cost: Gas costs, expressed in currency.
+        name: Unique name for the instance.
+    """
     def __init__(self,
-                 address,
+                 address: str,
                  pool: Pool,
-                 rebalance_cost: float,
+                 gas_cost: float,
                  name: str = None,
                  ):
         super().__init__(name)
@@ -118,10 +161,9 @@ class StrategyByAddress(AbstractStrategy):
         self.address = address
         self.decimal_diff = -pool.decimals_diff
         self.fee_percent = pool.fee.percent
-        self.rebalance_cost = rebalance_cost
+        self.gas_cost = gas_cost
 
     def rebalance(self, *args, **kwargs):
-        # prepare data for strategy
         is_rebalanced = None
 
         record = kwargs['record']
@@ -191,11 +233,15 @@ class StrategyByAddress(AbstractStrategy):
         if name in portfolio.positions:
             univ3_pos_old = portfolio.get_position(name)
             univ3_pos_old.liquidity = univ3_pos_old.liquidity + liquidity
-            univ3_pos_old.bi_currency.deposit(amount_0, amount_1)
+            univ3_pos_old.x_hold += amount_0
+            univ3_pos_old.y_hold += amount_1
+            # univ3_pos_old.bi_currency.deposit(amount_0, amount_1)
         else:
-            univ3_pos = UniV3Position(name, price_lower, price_upper, self.fee_percent, self.rebalance_cost)
+            univ3_pos = UniV3Position(name, price_lower, price_upper, self.fee_percent, self.gas_cost)
             univ3_pos.liquidity = liquidity
-            univ3_pos.bi_currency.deposit(amount_0, amount_1)
+            univ3_pos.x_hold += amount_0
+            univ3_pos.y_hold += amount_1
+            # univ3_pos.bi_currency.deposit(amount_0, amount_1)
             portfolio.append(univ3_pos)
 
     def perform_burn(self, portfolio, amount_0, amount_1, tick_lower, tick_upper, liquidity, price):

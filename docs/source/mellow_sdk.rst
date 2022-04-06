@@ -1,33 +1,29 @@
-strategy
---------
-.. automodule:: strategy.backtest
+mellow_sdk
+-------------
+.. automodule:: mellow_sdk.backtest
 
 Backtest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: Backtest
     :members:
 
-.. automodule:: strategy.cross_validation
 
-CrossValidation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: FolderSimple
-    :members:
-.. autoclass:: CrossValidation
-    :members:
-
-.. automodule:: strategy.data
+.. automodule:: mellow_sdk.data
 
 Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: PoolDataUniV3
     :members:
+.. autoclass:: DownloadFromS3
+    :members:
 .. autoclass:: RawDataUniV3
     :members:
 .. autoclass:: SyntheticData
     :members:
+.. autoclass:: DownloaderBinanceData
+    :members:
 
-.. automodule:: strategy.history
+.. automodule:: mellow_sdk.history
 
 History
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -38,21 +34,15 @@ History
 .. autoclass:: UniPositionsHistory
     :members:
 
-.. automodule:: strategy.multi_strategy
 
-Data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: MultiStrategy
-    :members:
-
-.. automodule:: strategy.portfolio
+.. automodule:: mellow_sdk.portfolio
 
 Portfolio
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: Portfolio
     :members:
 
-.. automodule:: strategy.positions
+.. automodule:: mellow_sdk.positions
 
 Positions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,7 +53,7 @@ Positions
 .. autoclass:: UniV3Position
     :members:
 
-.. automodule:: strategy.primitives
+.. automodule:: mellow_sdk.primitives
 
 Primitives
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,31 +64,30 @@ Primitives
 .. autoclass:: Pool
     :members:
 
-.. automodule:: strategy.strategies
+.. automodule:: mellow_sdk.strategies
 
 Strategies
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: AbstractStrategy
     :members:
+.. autoclass:: UniV3Passive
+    :members:
+.. autoclass:: StrategyByAddress
+    :members:
 
 
-.. automodule:: strategy.uniswap_utils
+.. automodule:: mellow_sdk.uniswap_utils
 
 UniswapUtils
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: UniswapLiquidityAligner
     :members:
-..
-    .. autoclass:: UniswapV3Utils
-        :members:
-    .. autoclass:: UniswapV2Utils
-        :members:
 
-.. automodule:: strategy.viewers
+.. automodule:: mellow_sdk.viewers
 
 Viewers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autoclass:: PotrfolioViewer
+.. autoclass:: PortfolioViewer
     :members:
 .. autoclass:: UniswapViewer
     :members:

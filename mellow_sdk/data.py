@@ -6,11 +6,17 @@ from datetime import datetime
 import numpy as np
 import polars as pl
 import pandas as pd
-from strategy.primitives import Pool
-from strategy.utils import ConfigParser
 from binance import Client
 import boto3
-from strategy.utils import log
+from botocore.handlers import disable_signing
+from botocore import UNSIGNED
+from botocore.client import Config
+
+from typing import List
+
+from mellow_sdk.primitives import Pool
+from mellow_sdk.utils import ConfigParser
+from mellow_sdk.utils import log
 
 
 class PoolDataUniV3:
@@ -18,11 +24,11 @@ class PoolDataUniV3:
     ``PoolDataUniV3`` contains data for backtesting.
 
     Attributes:
-        pool: UniswapV3 ``Pool`` data
+        pool: UniswapV3 ``Pool`` data.
         mints: UniswapV3 mints data.
         burns: UniswapV3 burns data.
         swaps: UniswapV3 swaps data.
-        swaps: UniswapV3 all events data.
+        full_df: All UniswapV3 events data.
 
     """
     def __init__(self,
@@ -41,19 +47,40 @@ class PoolDataUniV3:
 
 
 class DownloadFromS3:
-    def __init__(self, data_dir, bucket_name='mellow-public-data'):
+    """
+    ``DownloadFromS3`` downloads data from S3 bucket.
+
+    Attributes:
+        data_dir: Directory where data will be downloaded.
+        bucket_name: S3 bucket name.
+    """
+    def __init__(
+            self,
+            data_dir: str,
+            bucket_name: str = 'mellow-public-data'
+    )-> None:
         self.data_dir = data_dir
         self.bucket_name = bucket_name
 
-    def check_dir(self):
+    def check_dir(self) -> None:
+        """
+        Check if data directory exists. If not, create it.
+        """
         path_dir = Path(self.data_dir)
         if not path_dir.is_dir():
             log.info('Created directory', directory=self.data_dir)
             path_dir.mkdir(parents=True, exist_ok=True)
 
-    def get_last_files(self):
+    def get_last_files(self) -> List[str]:
+        """
+        Get last files from S3 bucket.
+
+        Returns:
+            List of latest files.
+        """
         events = ['mint', 'burn', 'swap']
         s3 = boto3.resource('s3')
+        s3.meta.client.meta.events.register('choose-signer.s3.*', disable_signing)
         bucket = s3.Bucket(self.bucket_name)
         suffixes = []
         for file in bucket.objects.all():
@@ -69,29 +96,56 @@ class DownloadFromS3:
             files.append(file)
         return files
 
-    def get_file_from_s3(self, file):
+    def get_file_from_s3(self, file: str) -> None:
+        """
+        Download file from S3 bucket and save it to directory.
+
+        Args:
+            file: File name.
+        """
+        s3client = boto3.client('s3', config=Config(signature_version=UNSIGNED))
+
         file_name = '.'.join(file.split('.')[1:])
-        s3client = boto3.client('s3')
         path = self.data_dir + '/' + file_name
         s3client.download_file(self.bucket_name, file, path)
 
-    def download_files(self):
+    def download_files(self) -> None:
+        """
+        Download all files from S3 bucket.
+        """
         self.check_dir()
         files = self.get_last_files()
         for file in files:
-            log.info(f'Downloaded {file} from S3')
+            log.info(f'Download {file} from S3')
             self.get_file_from_s3(file)
 
 
 class RawDataUniV3:
     """
         Load data from folder, preprocess and Return ``PoolDataUniV3`` instance.
+
+        Attributes:
+            pool: UniswapV3 ``Pool`` meta information.
+            data_dir: Directory of data.
+            reload_data: If True, reload data from S3.
     """
-    def __init__(self, pool: Pool, data_dir):
+    def __init__(
+            self,
+            pool: Pool,
+            data_dir: str,
+            reload_data: bool = False
+    )-> None:
         self.pool = pool
         self.data_dir = data_dir
+        self.reload_data = reload_data
 
-    def check_files(self):
+    def check_files(self) -> bool:
+        """
+        Check if all files are in the directory.
+
+        Returns:
+            True if all files are in the directory.
+        """
         path_mint = Path(f'{self.data_dir}/mint.csv')
         path_burn = Path(f'{self.data_dir}/burn.csv')
         path_swap = Path(f'{self.data_dir}/swap.csv')
@@ -100,10 +154,10 @@ class RawDataUniV3:
 
     def load_mints(self) -> pl.DataFrame:
         """
-            Read mints from csv and preprocess
+            Read mints events from csv and preprocess.
 
         Returns:
-            mints df
+            Preprocessed mints events data as dataframe.
         """
         mints_converters = {
             'pool': pl.Utf8,
@@ -147,10 +201,10 @@ class RawDataUniV3:
 
     def load_burns(self) -> pl.DataFrame:
         """
-            Read burns from csv and preprocess
+            Read burns events from csv and preprocess.
 
         Returns:
-            burns df
+            Preprocessed burns events data as dataframe.
         """
         burns_converters = {
             'pool': pl.Utf8,
@@ -194,10 +248,10 @@ class RawDataUniV3:
 
     def load_swaps(self) -> pl.DataFrame:
         """
-            Read swaps from csv, preprocess, create sqrt_price_x96 column.
+            Read burns events from csv and preprocess.
 
         Returns:
-            swaps df
+            Preprocessed swaps events data as dataframe.
         """
         swaps_converters = {
             'pool': pl.Utf8,
@@ -233,27 +287,27 @@ class RawDataUniV3:
             pl.col('tick') + self.pool.tick_diff,
             pl.col('sqrt_price_x96'),
         ]).sort(by=['block_number', 'log_index']).with_column(
-            pl.col('timestamp').dt.truncate("1d").alias('date')
-        ).with_column(
             pl.col("sqrt_price_x96").apply(
                 lambda x: float((Decimal(x) * Decimal(x)) / (Decimal(2 ** 192) / Decimal(10 ** self.pool.decimals_diff)))).alias('price')
         ).with_columns([
             pl.col('price').shift_and_fill(1, pl.col('price').first()).alias('price_before'),
-            pl.col('price').shift_and_fill(-1, pl.col('price').last()).alias('price_next')
-        ]).with_column(
+            pl.col('price').shift_and_fill(-1, pl.col('price').last()).alias('price_next'),
+            pl.col('timestamp').dt.truncate("1d").alias('date'),
             pl.Series(name='event', values=['swap'])
-        ).drop("sqrt_price_x96").sort(by=['block_number', 'log_index'])
+        ]).drop("sqrt_price_x96").sort(by=['block_number', 'log_index'])
         return df_prep
 
     def load_from_folder(self) -> PoolDataUniV3:
         """
-            Load mints, burns, swaps from folder, preprocess and create ``PoolDataUniV3`` object and
-            create all events df.
+            Check if directory exists and load data from it. If not, create it.
+            Load mints, burns, swaps events from folder and preprocess them.
+            Create all UniV3 events dataframe.
+            Create ``PoolDataUniV3`` object.
 
         Returns:
-            `PoolDataUniV3`` object
+            `PoolDataUniV3`` object.
         """
-        if not self.check_files():
+        if self.reload_data or (not self.check_files()):
             downloader = DownloadFromS3(self.data_dir)
             downloader.download_files()
 
@@ -281,11 +335,13 @@ class SyntheticData:
 
     Attributes:
         pool:
-            UniswapV3 ``Pool`` instance.
+            UniswapV3 ``Pool`` meta information.
         start_date:
             Generating starting date. (example '1-1-2022')
-        n_points:
-            Amount samples to generate.
+        end_date:
+            Generating ending date. (example '31-12-2022')
+        frequency:
+            Generating frequency. (example '1d')
         init_price:
             Initial price.
         mu:
@@ -296,11 +352,21 @@ class SyntheticData:
             Seed for random generator.
    """
     def __init__(
-            self, pool, start_date: str = '1-1-2022', n_points: int = 365,
-            init_price: float = 1, mu: float = 0, sigma: float = 0.1, seed=42):
+            self,
+            pool: Pool,
+            start_date: datetime = datetime(2022, 1, 1),
+            end_date: datetime = datetime(2022, 12, 31),
+            frequency: str = '1d',
+            init_price: float = 1.,
+            mu: float = 0,
+            sigma: float = 0.1,
+            seed: int = 42
+    )-> None:
+
         self.pool = pool
         self.start_date = start_date
-        self.n_points = n_points
+        self.end_date = end_date
+        self.frequency = frequency
 
         self.init_price = init_price
         self.mu = mu
@@ -313,72 +379,69 @@ class SyntheticData:
         Generate synthetic UniswapV3 exchange data.
 
         Returns:
-            ``PoolDataUniV3`` instance with synthetic swaps data, mint is None, burn is None.
+            ``PoolDataUniV3`` instance with synthetic swaps data.
         """
-        timestamps = pd.date_range(start=self.start_date, periods=self.n_points, freq='D', normalize=True)
-        # np.random.seed(self.seed)
-        price_log_returns = np.random.normal(loc=self.mu, scale=self.sigma, size=self.n_points)
+        timestamps = pl.date_range(self.start_date, self.end_date, self.frequency).to_list()
+
+        price_log_returns = np.random.normal(loc=self.mu, scale=self.sigma, size=len(timestamps))
         price_returns = np.exp(price_log_returns)
         price_returns[0] = self.init_price
-
         prices = np.cumprod(price_returns)
 
-        df = pd.DataFrame(zip(timestamps, prices), columns=['timestamp', 'price']).set_index('timestamp')
+        timestamps = pl.Series(name='timestamp', values=timestamps)
+        prices = pl.Series(name='price', values=prices, dtype=pl.Float64)
 
-        df["price_before"] = df["price"].shift(1)
-        df["price_before"] = df["price_before"].bfill()
+        df = pl.DataFrame([timestamps, prices]).with_column(pl.col('timestamp').cast(pl.Datetime))
 
-        df["price_next"] = df["price"].shift(-1)
-        df["price_next"] = df["price_next"].ffill()
+        df = df.with_columns([
+            pl.col('price').shift_and_fill(1, pl.col('price').first()).alias('price_before'),
+            pl.col('price').shift_and_fill(-1, pl.col('price').last()).alias('price_after'),
+        ])
+        df = df.with_column((np.trunc(np.log(pl.col('price')) / np.log(1.0001))).alias('tick'))
 
-        df = pl.from_pandas(df.reset_index())
-
-        return PoolDataUniV3(self.pool, mints=None, burns=None, swaps=df, full_df=df)
+        return PoolDataUniV3(self.pool, swaps=df)
 
 
 class DownloaderBinanceData:
     """
-        Download pair data from binance and write csv to /data folder.
-    Args:
+        Download pair data from binance and write csv to data folder.
+
+    Attributes:
         pair_name: 'ethusdc' or other
         interval: Binance interval string, e.g.:
             '1m', '3m', '5m', '15m', '30m', '1h', '2h', '4h', '6h', '8h', '12h', '1d', '3d', '1w'
-        start_str: string in format '%d-%M-%Y' (utc time format), (example '05-12-2018')
-        end_str: string in format '%d-%M-%Y' (utc time format)
+        start_date: String in format '%d-%M-%Y' (utc time format), (example '05-12-2018')
+        end_date: String in format '%d-%M-%Y' (utc time format)
         config_path: path to yml config with config['binance']['api_key'], config['binance']['api_secret']
-    Returns:
-        pandas dataframe that was written to the /data/f'{pair_name}_{interval}_{start_str}_{end_str}.csv'
+        data_dir: path to data folder
     """
 
-    # Note
-    # get_historical_klines
-    # [
-    #   [
-    #     1499040000000,      // Open time - 0
-    #     "0.01634790",       // Open
-    #     "0.80000000",       // High
-    #     "0.01575800",       // Low
-    #     "0.01577100",       // Close - 4
-    #     "148976.11427815",  // Volume
-    #     1499644799999,      // Close time
-    #     "2434.19055334",    // Quote asset volume
-    #     308,                // Number of trades
-    #     "1756.87402397",    // Taker buy base asset volume
-    #     "28.46694368",      // Taker buy quote asset volume
-    #     "17928899.62484339" // Ignore
-    #   ]
-    # ]
-    def __init__(self, pair_name, interval, start_str, end_str, config_path, data_dir):
+    def __init__(
+        self,
+        pair_name: str,
+        interval: str,
+        start_date: str,
+        end_date: str,
+        config_path: str,
+        data_dir: str
+    ) -> None:
+
         self.pair_name = str.upper(pair_name)
         self.interval = interval
-        self.start_str = start_str
-        self.end_str = end_str
+        self.start_date = start_date
+        self.end_date = end_date
         self.config_path = config_path
         self.data_dir = data_dir
 
         subprocess.run(['mkdir', '-p', self.data_dir])
 
     def get(self) -> pd.DataFrame:
+        """
+        Get market data from Binance.
+
+        Returns:
+            pandas dataframe that was written to the /data/f'{pair_name}_{interval}_{start_str}_{end_str}.csv'
+        """
         # in - ms
         # in * 1000 - us
         # we need to get the num of sec in the interval
@@ -399,8 +462,8 @@ class DownloaderBinanceData:
             klines = client.get_historical_klines(
                 symbol=self.pair_name,
                 interval=self.interval,
-                start_str=self.start_str,
-                end_str=self.end_str
+                start_str=self.start_date,
+                end_str=self.end_date
             )
         except:
             assert False, 'using the api failed'
@@ -432,7 +495,7 @@ class DownloaderBinanceData:
         df = df.iloc[1:]
         df = df.reset_index()
 
-        file_name = f'{self.pair_name}_{self.interval}_{self.start_str}_{self.end_str}.csv'
+        file_name = f'{self.pair_name}_{self.interval}_{self.start_date}_{self.end_date}.csv'
         file_path = os.path.join(self.data_dir, file_name)
 
         df.to_csv(file_path, index=False, date_format='%Y-%m-%d %H:%M:%S:%f')

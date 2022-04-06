@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from datetime import datetime
 
-from strategy.positions import AbstractPosition
+from mellow_sdk.positions import AbstractPosition
 
 
 class Portfolio(AbstractPosition):
@@ -102,10 +102,10 @@ class Portfolio(AbstractPosition):
         Get total value of portfolio denominated to X.
 
         Args:
-            price: Current price of X in Y currency
+            price: Current price of X in Y currency.
 
         Returns:
-            Total value of portfolio denominated in X
+            Total value of portfolio denominated in X.
         """
         total_x = 0
         for _, pos in self.positions.items():
@@ -114,13 +114,13 @@ class Portfolio(AbstractPosition):
 
     def to_y(self, price: float) -> float:
         """
-        Get total value of portfolio expressed in Y
+        Get total value of portfolio expressed in Y.
 
         Args:
-            price: Current price of X in Y currency
+            price: Current price of X in Y currency.
 
         Returns:
-            Total value of portfolio denominated in Y
+            Total value of portfolio denominated in Y.
         """
         total_y = 0
         for _, pos in self.positions.items():
@@ -129,7 +129,7 @@ class Portfolio(AbstractPosition):
 
     def to_xy(self, price: float) -> Tuple[float, float]:
         """
-        Get amount of X and amount of Y in portfolio
+        Get amount of X and amount of Y in portfolio.
 
         Args:
             price: Current price of X in Y currency.
@@ -152,10 +152,10 @@ class Portfolio(AbstractPosition):
         | Used in PortfolioHistory.add_snapshot() to collect backtest data.
 
         Args:
-            timestamp: Timestamp of snapshot
-            price: Current price of X in Y currency
+            timestamp: Timestamp of snapshot.
+            price: Current price of X in Y currency.
 
-        Returns: Position snapshot
+        Returns: Positions snapshot.
         """
         snapshot = {'timestamp': timestamp, 'price': price}
         for _, pos in self.positions.items():

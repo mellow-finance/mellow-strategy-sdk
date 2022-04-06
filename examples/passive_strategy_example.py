@@ -1,13 +1,10 @@
 import sys
-
-sys.path.append('..')
-
 import polars as pl
 
-from strategy.data import SyntheticData, RawDataUniV3
-from strategy.backtest import Backtest
-from strategy.strategies import UniV3Passive
-from strategy.primitives import Pool, Token, Fee
+from mellow_sdk.data import SyntheticData
+from mellow_sdk.backtest import Backtest
+from mellow_sdk.strategies import UniV3Passive
+from mellow_sdk.primitives import Pool, Token, Fee
 
 
 def evaluate() -> pl.DataFrame:
@@ -22,15 +19,15 @@ def evaluate() -> pl.DataFrame:
     data = SyntheticData(pool, init_price=10, mu=0.005).generate_data()
 
     # data = RawDataUniV3(pool).load_from_folder()
-    m_strat = UniV3Passive(
+    passive_strat = UniV3Passive(
         lower_price=data.swaps['price'].min(),
         upper_price=data.swaps['price'].max(),
         pool=pool,
-        rebalance_cost=0.,
+        gas_cost=0.,
         name='passive'
     )
 
-    portfolio_history, _, _ = Backtest(m_strat).backtest(data.swaps)
+    portfolio_history, _, _ = Backtest(passive_strat).backtest(data.swaps)
     metrics = portfolio_history.calculate_stats()
     return metrics.tail()
 

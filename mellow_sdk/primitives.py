@@ -68,7 +68,7 @@ class Token(Enum):
         Checks if Token is valid.
 
         Args:
-            other: Other Token
+            other: Other Token.
 
         Returns:
             Valid or not.
@@ -80,7 +80,7 @@ class Token(Enum):
         Checks if Tokens are equal.
 
         Args:
-            other: Other Token
+            other: Other Token.
 
         Returns:
             Equal or not.
@@ -92,7 +92,7 @@ class Token(Enum):
     def __lt__(self, other: 'Token') -> bool:
         """
         Args:
-            other: Other Token
+            other: Other Token.
         """
         if not self._is_valid_operand(other):
             return NotImplemented
@@ -166,6 +166,8 @@ class Pool:
     @property
     def name(self) -> str:
         """
+        Unique name for the pool.
+
         Returns:
             Pool unique name for the pool.
         """
@@ -302,18 +304,7 @@ POOLS = [
         "token1": Token.USDT,
         "fee": Fee.HIGH,
     },
-    {
-        "address": "lidov1",
-        "token0": Token.WETH,
-        "token1": Token.stETH,
-        "fee": Fee.MIDDLE,
-    },
-    {
-        "address": "lidov2",
-        "token0": Token.WETH,
-        "token1": Token.stETH,
-        "fee": Fee.LOW,
-    },
 ]
-
+MIN_TICK = -887272
+MAX_TICK = 887272
 SPACING = {Fee.LOW: 10, Fee.MIDDLE: 60, Fee.HIGH: 200}
