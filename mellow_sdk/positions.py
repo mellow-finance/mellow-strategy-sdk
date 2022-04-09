@@ -5,7 +5,7 @@ import numpy as np
 
 from mellow_sdk.uniswap_utils import UniswapLiquidityAligner
 
-from strategy.history import PortfolioHistory
+from mellow_sdk.history import PortfolioHistory
 
 class AbstractPosition(ABC):
     """

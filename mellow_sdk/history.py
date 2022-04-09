@@ -3,7 +3,7 @@ import polars as pl
 import datetime
 import typing as tp
 
-from strategy.utils import Singleton
+from mellow_sdk.utils import Singleton
 
 
 class PortfolioHistory(metaclass=Singleton):
