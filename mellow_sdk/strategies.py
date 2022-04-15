@@ -51,6 +51,18 @@ class Hold(AbstractStrategy):
         if self.prev_gain_date is None:
             self.prev_gain_date = timestamp.date()
 
+            bi_cur = BiCurrencyPosition(
+                name=f'Vault',
+                swap_fee=0,
+                gas_cost=0,
+                x=1,
+                y=1,
+                x_interest=0,
+                y_interest=0
+            )
+
+            portfolio.append(bi_cur)
+
         if timestamp.date() > self.prev_gain_date:
             vault = portfolio.get_position('Vault')
             vault.interest_gain(timestamp.date())
