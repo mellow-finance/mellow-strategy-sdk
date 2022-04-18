@@ -428,7 +428,7 @@ POOLS = [
         'token1': Token.USDT,
         'fee': Fee.HIGH,
     },
-
+    # New
     {
         'address': '0x8ce5796ef6B0c5918025bCf4f9CA908201B030b3',
         'token0': Token.agEUR,
@@ -514,7 +514,7 @@ POOLS = [
         'fee': Fee.MIDDLE,
     },
     {
-        'address': '0xdf50fbde8180c8785842c8e316ebe06f542d3443',
+        'address': '0xdf50Fbde8180c8785842C8E316EBe06F542D3443',
         'token0': Token.FEI,
         'token1': Token.USDC,
         'fee': Fee.ULTRA_LOW,
