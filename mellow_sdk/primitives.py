@@ -11,7 +11,7 @@ class Fee(Enum):
     Currently 3 values are available: 0.05%, 0.3%, 1%.
     The actual enum values are fee * 1_000_000, i.e. 0.05% enum value is integer 500.
     """
-
+    ULTRA_LOW = 100
     LOW = 500
     MIDDLE = 3000
     HIGH = 10000
@@ -20,9 +20,17 @@ class Fee(Enum):
     def percent(self) -> float:
         """
         Returns:
-            UniswapV3 fee in form of 0.0005, 0.003, 0.01.
+            UniswapV3 fee in form of 0.01%, 0.05%, 0.3%, 1%
         """
-        return self.value / 1000000
+        return self.value / 10000
+
+    @property
+    def fraction(self) -> float:
+        """
+        Returns:
+            UniswapV3 fee in form of 0.0001, 0.0005, 0.003, 0.01.
+        """
+        return self.percent / 100
 
     @property
     def spacing(self) -> int:
@@ -46,6 +54,24 @@ class Token(Enum):
     stETH = "stETH"
     USDC = "USDC"
     USDT = "USDT"
+
+    agEUR = "agEUR"
+    FRAX = "FRAX"
+    DAI = "DAI"
+    RAI = "RAI"
+    ETH2x_FLI = "ETH2x-FLI"
+    UNI = "UNI"
+    MATIC = "MATIC"
+    LOOKS = "LOOKS"
+    LINK = "LINK"
+    APE = "APE"
+    sETH2 = "sETH2"
+    FEI = "FEI"
+    rETH2 = "rETH2"
+    BUSD = "BUSD"
+    EURT = "EURT"
+    UST = "UST"
+
 
     @property
     def address(self) -> str:
@@ -181,7 +207,7 @@ class Pool:
         Returns:
             Pool name.
         """
-        return f"{self._token0.value}/{self._token1.value} {100 * self._fee.percent}%"
+        return f"{self._token0.value}/{self._token1.value} {self._fee.percent}%"
 
     @property
     def address(self) -> str:
@@ -247,6 +273,103 @@ TOKEN_DETAILS = {
         "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
         "decimals": 6,
     },
+
+    Token.agEUR.value: {
+        "name": "agEUR",
+        "description": "",
+        "address": "0x1a7e4e63778B4f12a199C062f3eFdD288afCBce8",
+        "decimals": 18
+    },
+    Token.FRAX.value: {
+        "name": "FRAX",
+        "description": "",
+        "address": "0x853d955aCEf822Db058eb8505911ED77F175b99e",
+        "decimals": 18
+    },
+    Token.DAI.value: {
+        "name": "DAI",
+        "description": "",
+        "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        "decimals": 18
+    },
+    Token.RAI.value: {
+        "name": "RAI",
+        "description": "",
+        "address": "0x03ab458634910AaD20eF5f1C8ee96F1D6ac54919",
+        "decimals": 18
+    },
+    Token.ETH2x_FLI.value: {
+        "name": "ETH2x-FLI",
+        "description": "",
+        "address": "0xAa6E8127831c9DE45ae56bB1b0d4D4Da6e5665BD",
+        "decimals": 18
+    },
+    Token.UNI.value: {
+        "name": "UNI",
+        "description": "",
+        "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+        "decimals": 18
+    },
+    Token.MATIC.value: {
+        "name": "MATIC",
+        "description": "",
+        "address": "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0",
+        "decimals": 18
+    },
+    Token.LOOKS.value: {
+        "name": "LOOKS",
+        "description": "",
+        "address": "0xf4d2888d29D722226FafA5d9B24F9164c092421E",
+        "decimals": 18
+    },
+    Token.LINK.value: {
+        "name": "LINK",
+        "description": "",
+        "address": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+        "decimals": 18
+    },
+    Token.APE.value: {
+        "name": "APE",
+        "description": "",
+        "address": "0x4d224452801ACEd8B2F0aebE155379bb5D594381",
+        "decimals": 18
+    },
+    Token.sETH2.value: {
+        "name": "sETH2",
+        "description": "",
+        "address": "0xFe2e637202056d30016725477c5da089Ab0A043A",
+        "decimals": 18
+    },
+    Token.FEI.value: {
+        "name": "FEI",
+        "description": "",
+        "address": "0x956F47F50A910163D8BF957Cf5846D573E7f87CA",
+        "decimals": 18
+    },
+    Token.rETH2.value: {
+        "name": "rETH2",
+        "description": "",
+        "address": "0x20BC832ca081b91433ff6c17f85701B6e92486c5",
+        "decimals": 18
+    },
+    Token.BUSD.value: {
+        "name": "BUSD",
+        "description": "",
+        "address": "0x4Fabb145d64652a948d72533023f6E7A623C7C53",
+        "decimals": 18
+    },
+    Token.EURT.value: {
+        "name": "EURT",
+        "description": "",
+        "address": "0xC581b735A1688071A1746c968e0798D642EDE491",
+        "decimals": 6
+    },
+    Token.UST.value: {
+        "name": "UST",
+        "description": "",
+        "address": "0xa47c8bf37f92aBed4A126BDA807A7b7498661acD",
+        "decimals": 18
+    }
 }
 
 POOLS = [
@@ -304,6 +427,139 @@ POOLS = [
         "token1": Token.USDT,
         "fee": Fee.HIGH,
     },
+
+    {
+        "address": "0x8ce5796ef6B0c5918025bCf4f9CA908201B030b3",
+        "token0": Token.agEUR,
+        "token1": Token.FRAX,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168",
+        "token0": Token.DAI,
+        "token1": Token.USDC,
+        "fee": Fee.ULTRA_LOW,
+    },
+    {
+        "address": "0x60594a405d53811d3BC4766596EFD80fd545A270",
+        "token0": token.DAI,
+        "token1": token.ETH,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x6c6Bc977E13Df9b0de53b251522280BB72383700",
+        "token0": token.DAI,
+        "token1": token.USDC,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x97e7d56A0408570bA1a7852De36350f7713906ec",
+        "token0": token.DAI,
+        "token1": token.FRAX,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0xC2e9F25Be6257c210d7Adf0D4Cd6E3E881ba25f8",
+        "token0": Token.DAI,
+        "token1": Token.ETH,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "0xcB0C5d9D92f4F2F80cce7aa271a1E148c226e19D",
+        "token0": Token.RAI,
+        "token1": Token.DAI,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x151CcB92bc1eD5c6D0F9Adb5ceC4763cEb66AC7f",
+        "token0": Token.ETH2x_FLI,
+        "token1": Token.ETH,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "0x1d42064Fc4Beb5F8aAF85F4617AE8b3b5B8Bd801",
+        "token0": Token.UNI,
+        "token1": Token.ETH,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "0x290A6a7460B308ee3F19023D2D00dE604bcf5B42",
+        "token0": Token.MATIC,
+        "token1": Token.ETH,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "0x4b5Ab61593A2401B1075b90c04cBCDD3F87CE011",
+        "token0": Token.ETH,
+        "token1": Token.LOOKS,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "0xa6Cc3C2531FdaA6Ae1A3CA84c2855806728693e8",
+        "token0": Token.LINK,
+        "token1": Token.ETH,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "0xAc4b3DacB91461209Ae9d41EC517c2B9Cb1B7DAF",
+        "token0": Token.APE,
+        "token1": Token.ETH,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "0x7379e81228514a1D2a6Cf7559203998E20598346",
+        "token0": Token.ETH,
+        "token1": Token.sETH2,
+        "fee": Fee.MIDDLE,
+    },
+    {
+        "address": "0xdf50fbde8180c8785842c8e316ebe06f542d3443",
+        "token0": Token.FEI,
+        "token1": Token.USDC,
+        "fee": Fee.ULTRA_LOW,
+    },
+    {
+        "address": "0xa9ffb27d36901F87f1D0F20773f7072e38C5bfbA",
+        "token0": Token.rETH2,
+        "token1": Token.sETH2,
+        "fee": Fee.,
+    },
+    {
+        "address": "0x00cEf0386Ed94d738c8f8A74E8BFd0376926d24C",
+        "token0": Token.BUSD,
+        "token1": Token.USDC,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x7ED3F364668cd2b9449a8660974a26A092C64849",
+        "token0": Token.agEUR,
+        "token1": Token.USDC,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0xc63B0708E2F7e69CB8A1df0e1389A98C35A76D52",
+        "token0": Token.FRAX,
+        "token1": Token.USDC,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x07f3D316630719F4Fc69c152F397c150f0831071",
+        "token0": Token.EURT,
+        "token1": Token.USDT,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0x18D96B617a3e5C42a2Ada4bC5d1B48e223f17D0D",
+        "token0": Token.USDC,
+        "token1": Token.UST,
+        "fee": Fee.ULTRA_LOW,
+    },
+    {
+        "address": "0x92995D179a5528334356cB4Dc5c6cbb1c068696C",
+        "token0": Token.USDC,
+        "token1": Token.UST,
+        "fee": Fee.LOW,
+    }
 ]
 MIN_TICK = -887272
 MAX_TICK = 887272

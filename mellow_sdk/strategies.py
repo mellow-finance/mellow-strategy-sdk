@@ -91,9 +91,9 @@ class UniV3Passive(AbstractStrategy):
         self.lower_price = lower_price
         self.upper_price = upper_price
 
-        self.fee_percent = pool.fee.percent
+        self.fee_percent = pool.fee.fraction
         self.gas_cost = gas_cost
-        self.swap_fee = pool.fee.percent
+        self.swap_fee = pool.fee.fraction
 
     def rebalance(self, *args, **kwargs) -> str:
         record = kwargs['record']
@@ -172,7 +172,7 @@ class StrategyByAddress(AbstractStrategy):
 
         self.address = address
         self.decimal_diff = -pool.decimals_diff
-        self.fee_percent = pool.fee.percent
+        self.fee_percent = pool.fee.fraction
         self.gas_cost = gas_cost
 
     def rebalance(self, *args, **kwargs):
