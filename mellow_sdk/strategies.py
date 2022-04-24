@@ -51,6 +51,18 @@ class Hold(AbstractStrategy):
         if self.prev_gain_date is None:
             self.prev_gain_date = timestamp.date()
 
+            bi_cur = BiCurrencyPosition(
+                name=f'Vault',
+                swap_fee=0,
+                gas_cost=0,
+                x=1,
+                y=1,
+                x_interest=0,
+                y_interest=0
+            )
+
+            portfolio.append(bi_cur)
+
         if timestamp.date() > self.prev_gain_date:
             vault = portfolio.get_position('Vault')
             vault.interest_gain(timestamp.date())
@@ -79,9 +91,9 @@ class UniV3Passive(AbstractStrategy):
         self.lower_price = lower_price
         self.upper_price = upper_price
 
-        self.fee_percent = pool.fee.percent
+        self.fee_percent = pool.fee.fraction
         self.gas_cost = gas_cost
-        self.swap_fee = pool.fee.percent
+        self.swap_fee = pool.fee.fraction
 
     def rebalance(self, *args, **kwargs) -> str:
         record = kwargs['record']
@@ -160,7 +172,7 @@ class StrategyByAddress(AbstractStrategy):
 
         self.address = address
         self.decimal_diff = -pool.decimals_diff
-        self.fee_percent = pool.fee.percent
+        self.fee_percent = pool.fee.fraction
         self.gas_cost = gas_cost
 
     def rebalance(self, *args, **kwargs):
