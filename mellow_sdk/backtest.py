@@ -19,6 +19,8 @@ class Backtest:
         self,
         strategy: AbstractStrategy,
         portfolio: Portfolio = None,
+        by_block=False,
+        every_block=False,
     ) -> None:
 
         if portfolio is None:
@@ -26,13 +28,14 @@ class Backtest:
         else:
             self.portfolio = portfolio
 
+        self.by_block = by_block
+        self.every_block = every_block
+
         self.strategy = strategy
 
     def backtest(
             self,
             df: pl.DataFrame,
-            by_block=False,
-            every_block=False,
     ) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
         """
         | 1) Calls ``AbstractStrategy.rebalance`` for every market action with.
@@ -60,13 +63,13 @@ class Backtest:
         rebalance_history = RebalanceHistory()
         uni_history = UniPositionsHistory()
 
-        if by_block or every_block:
+        if (self.by_block or self.every_block) and ('block_number' in df.columns):
             maxs = df.groupby(['block_number']).agg({'timestamp': 'max'})
 
             df = df.join(maxs, on=['block_number'])
             df = df[df['timestamp'] == df['timestamp_max']].drop('timestamp_max')
 
-        if every_block:
+        if self.every_block and ('block_number' in df.columns):
             all_blocks = pl.DataFrame({'block_number': range(df['block_number'].min(), df['block_number'].max())})
 
             df = all_blocks.join(df, on=['block_number'], how='left')
@@ -97,12 +100,17 @@ class BacktestTimeCV:
             self,
             strategy: AbstractStrategy,
             portfolio: Portfolio = None,
+            by_block=False,
+            every_block=False
         ) -> None:
 
             if portfolio is None:
                 self.portfolio = Portfolio('main')
             else:
                 self.portfolio = portfolio
+
+            self.by_block = by_block
+            self.every_block = every_block
 
             self.strategy = strategy
 
@@ -155,7 +163,9 @@ class BacktestTimeCV:
             for fold_num, test_idx in enumerate(tqdm(folds)):
                 df_test = df[test_idx]
                 bt = Backtest(
-                    strategy=copy.copy(self.strategy)
+                    strategy=copy.copy(self.strategy),
+                    by_block=self.by_block,
+                    every_block=self.every_block
                 )
 
                 if df_test.shape[0] == 0:
@@ -193,12 +203,17 @@ class BacktestBlockCV:
             self,
             strategy: AbstractStrategy,
             portfolio: Portfolio = None,
+            by_block = False,
+            every_block = False
     ) -> None:
 
         if portfolio is None:
             self.portfolio = Portfolio('main')
         else:
             self.portfolio = portfolio
+
+        self.by_block = by_block
+        self.every_block = every_block
 
         self.strategy = strategy
 
@@ -247,7 +262,9 @@ class BacktestBlockCV:
         for fold_num, test_idx in enumerate(tqdm(folds)):
             df_test = df[test_idx]
             bt = Backtest(
-                strategy=copy.copy(self.strategy)
+                strategy=copy.copy(self.strategy),
+                by_block = self.by_block,
+                every_block = self.every_block
             )
 
             if df_test.shape[0] == 0:
