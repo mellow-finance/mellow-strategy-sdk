@@ -66,8 +66,11 @@ class Backtest:
             df = df.join(maxs, on=['block_number'])
             df = df[df['timestamp'] == df['timestamp_max']].drop('timestamp_max')
 
-        # if every_block:
+        if every_block:
+            all_blocks = pl.DataFrame({'block_number': range(df['block_number'].min(), df['block_number'].max())})
 
+            df = all_blocks.join(df, on=['block_number'], how='left')
+            df = df.with_column(df['event'].fill_null(0).alias('event')).fill_null(strategy='forward')
 
         for record in df.to_dicts():
             is_rebalanced = self.strategy.rebalance(record=record, portfolio=self.portfolio)
