@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 from abc import ABC, abstractmethod
 from datetime import datetime
 import numpy as np
@@ -65,7 +65,7 @@ class AbstractPosition(ABC):
         raise Exception(NotImplemented)
 
     @abstractmethod
-    def snapshot(self, timestamp: datetime, price: float) -> dict:
+    def snapshot(self, timestamp: datetime, price: float, block_number: Optional[int]) -> dict:
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.
@@ -288,7 +288,7 @@ class BiCurrencyPosition(AbstractPosition):
         self.total_gas_costs += self.gas_cost
         return dx
 
-    def snapshot(self, timestamp: datetime, price: float) -> dict:
+    def snapshot(self, timestamp: datetime, price: float, block_number: Optional[int]) -> dict:
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.
@@ -615,7 +615,7 @@ class UniV3Position(AbstractPosition):
 
         return x, y
 
-    def snapshot(self, timestamp: datetime, price: float) -> dict:
+    def snapshot(self, timestamp: datetime, price: float, block_number: Optional[int]) -> dict:
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.

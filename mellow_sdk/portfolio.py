@@ -1,8 +1,7 @@
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from datetime import datetime
 
 from mellow_sdk.positions import AbstractPosition
-
 
 class Portfolio(AbstractPosition):
     """
@@ -145,7 +144,7 @@ class Portfolio(AbstractPosition):
             total_y += y
         return total_x, total_y
 
-    def snapshot(self, timestamp: datetime, price: float) -> dict:
+    def snapshot(self, timestamp: datetime, price: float, block_number: Optional[int]) -> dict:
 
         """
         | Get portfolio snapshot.
@@ -157,7 +156,7 @@ class Portfolio(AbstractPosition):
 
         Returns: Positions snapshot.
         """
-        snapshot = {'timestamp': timestamp, 'price': price}
+        snapshot = {'timestamp': timestamp, 'price': price, 'block_number': block_number}
         for _, pos in self.positions.items():
-            snapshot.update(pos.snapshot(timestamp, price))
+            snapshot.update(pos.snapshot(timestamp, price, block_number))
         return snapshot
