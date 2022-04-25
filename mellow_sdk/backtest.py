@@ -70,7 +70,7 @@ class Backtest:
             df = df[df['timestamp'] == df['timestamp_max']].drop('timestamp_max')
 
         if self.every_block and ('block_number' in df.columns):
-            all_blocks = pl.DataFrame({'block_number': range(df['block_number'].min(), df['block_number'].max())})
+            all_blocks = pl.DataFrame({'block_number': range(df['block_number'].min(), df['block_number'].max() + 1)})
 
             df = all_blocks.join(df, on=['block_number'], how='left')
             df = df.with_column(df['event'].fill_null(0).alias('event')).fill_null(strategy='forward')
