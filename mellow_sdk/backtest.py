@@ -15,6 +15,7 @@ class Backtest:
     | Collects and process portfolio state for each event in historical data.
     | Returns in a convenient form for analyzing the results
     """
+
     def __init__(
         self,
         strategy: AbstractStrategy,
@@ -22,17 +23,17 @@ class Backtest:
     ) -> None:
 
         if portfolio is None:
-            self.portfolio = Portfolio('main')
+            self.portfolio = Portfolio("main")
         else:
             self.portfolio = portfolio
 
         self.strategy = strategy
 
     def backtest(
-            self,
-            df: pl.DataFrame,
-            by_block=False,
-            every_block=False,
+        self,
+        df: pl.DataFrame,
+        by_block=False,
+        every_block=False,
     ) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
         """
         | 1) Calls ``AbstractStrategy.rebalance`` for every market action with.
@@ -61,122 +62,125 @@ class Backtest:
         uni_history = UniPositionsHistory()
 
         if by_block or every_block:
-            maxs = df.groupby(['block_number']).agg({'timestamp': 'max'})
+            maxs = df.groupby(["block_number"]).agg({"timestamp": "max"})
 
-            df = df.join(maxs, on=['block_number'])
-            df = df[df['timestamp'] == df['timestamp_max']].drop('timestamp_max')
+            df = df.join(maxs, on=["block_number"])
+            df = df[df["timestamp"] == df["timestamp_max"]].drop("timestamp_max")
 
         # if every_block:
 
-
         for record in df.to_dicts():
-            is_rebalanced = self.strategy.rebalance(record=record, portfolio=self.portfolio)
+            is_rebalanced = self.strategy.rebalance(
+                record=record, portfolio=self.portfolio
+            )
             portfolio_snapshot = self.portfolio.snapshot(
-                timestamp=record['timestamp'],
-                price=record['price'],
-                block_number=record.get('price', None)
+                timestamp=record["timestamp"],
+                price=record["price"],
+                block_number=record.get("price", None),
             )
             portfolio_history.add_snapshot(portfolio_snapshot)
-            rebalance_history.add_snapshot(record['timestamp'], is_rebalanced)
-            uni_history.add_snapshot(record['timestamp'], copy.copy(self.portfolio.positions))
+            rebalance_history.add_snapshot(record["timestamp"], is_rebalanced)
+            uni_history.add_snapshot(
+                record["timestamp"], copy.copy(self.portfolio.positions)
+            )
 
         return portfolio_history, rebalance_history, uni_history
 
 
 class BacktestTimeCV:
-        """
-        | ``Backtest`` emulate portfolio behavior on historical data.
-        | Collects and process portfolio state for each event in historical data.
-        | Returns in a convenient form for analyzing the results
-        """
+    """
+    | ``Backtest`` emulate portfolio behavior on historical data.
+    | Collects and process portfolio state for each event in historical data.
+    | Returns in a convenient form for analyzing the results
+    """
 
-        def __init__(
-            self,
-            strategy: AbstractStrategy,
-            portfolio: Portfolio = None,
-        ) -> None:
+    def __init__(
+        self,
+        strategy: AbstractStrategy,
+        portfolio: Portfolio = None,
+    ) -> None:
 
-            if portfolio is None:
-                self.portfolio = Portfolio('main')
+        if portfolio is None:
+            self.portfolio = Portfolio("main")
+        else:
+            self.portfolio = portfolio
+
+        self.strategy = strategy
+
+    def get_splits(self, df, test_sec, step_sec):
+        idx_column = df.with_row_count()["row_nr"]
+        ts_col = df["timestamp"].cast(int)
+
+        test_idx = []
+        test_sec *= 10**6
+        step_sec *= 10**6
+
+        left_bound = ts_col.min()
+        right_bound = ts_col.min() + test_sec
+
+        while right_bound < ts_col.max():
+            idx = idx_column[(ts_col >= left_bound) & (ts_col < right_bound)]
+            test_idx.append(idx)
+
+            left_bound += step_sec
+            right_bound += step_sec
+        return test_idx
+
+    def get_tail_splits(self, df, min_test_sec, step_sec):
+        idx_column = df.with_row_count()["row_nr"]
+        ts_col = df["timestamp"].cast(int)
+
+        test_idx = []
+        min_test_sec *= 10**6
+        step_sec *= 10**6
+
+        right_bound = ts_col.min() + min_test_sec
+
+        while right_bound < ts_col.max():
+            idx = idx_column[ts_col < right_bound]
+            test_idx.append(idx)
+
+            right_bound += step_sec
+        return test_idx
+
+    def backtest(self, df, test_sec, step_sec, tail_type_cv=False):
+        metrics = None
+        if tail_type_cv:
+            folds = self.get_tail_splits(df, min_test_sec=test_sec, step_sec=step_sec)
+        else:
+            folds = self.get_splits(df, test_sec=test_sec, step_sec=step_sec)
+
+        assert len(folds) > 0, "there is no folds, change yours parameters"
+
+        realized_folds = []
+        for fold_num, test_idx in enumerate(tqdm(folds)):
+            df_test = df[test_idx]
+            bt = Backtest(strategy=copy.copy(self.strategy))
+
+            if df_test.shape[0] == 0:
+                print(f"fold {fold_num} is empty, fold will be skipped")
             else:
-                self.portfolio = portfolio
+                portfolio_history, rebalance_history, uni_history = bt.backtest(
+                    df=df_test
+                )
+                stats = portfolio_history.calculate_stats()
 
-            self.strategy = strategy
-
-        def get_splits(self, df, test_sec, step_sec):
-            idx_column = df.with_row_count()['row_nr']
-            ts_col = df['timestamp'].cast(int)
-
-            test_idx = []
-            test_sec *= 10 ** 6
-            step_sec *= 10 ** 6
-
-            left_bound = ts_col.min()
-            right_bound = ts_col.min() + test_sec
-
-            while right_bound < ts_col.max():
-                idx = idx_column[(ts_col >= left_bound) & (ts_col < right_bound)]
-                test_idx.append(idx)
-
-                left_bound += step_sec
-                right_bound += step_sec
-            return test_idx
-
-        def get_tail_splits(self, df, min_test_sec, step_sec):
-            idx_column = df.with_row_count()['row_nr']
-            ts_col = df['timestamp'].cast(int)
-
-            test_idx = []
-            min_test_sec *= 10 ** 6
-            step_sec *= 10 ** 6
-
-            right_bound = ts_col.min() + min_test_sec
-
-            while right_bound < ts_col.max():
-                idx = idx_column[ts_col < right_bound]
-                test_idx.append(idx)
-
-                right_bound += step_sec
-            return test_idx
-
-        def backtest(self, df, test_sec, step_sec, tail_type_cv=False):
-            metrics = None
-            if tail_type_cv:
-                folds = self.get_tail_splits(df, min_test_sec=test_sec, step_sec=step_sec)
-            else:
-                folds = self.get_splits(df, test_sec=test_sec, step_sec=step_sec)
-
-            assert len(folds) > 0, 'there is no folds, change yours parameters'
-
-            realized_folds = []
-            for fold_num, test_idx in enumerate(tqdm(folds)):
-                df_test = df[test_idx]
-                bt = Backtest(
-                    strategy=copy.copy(self.strategy)
+                stats = stats.with_columns(
+                    [
+                        pl.col("timestamp").first().alias("fold_from"),
+                        pl.col("timestamp").last().alias("fold_to"),
+                    ]
                 )
 
-                if df_test.shape[0] == 0:
-                    print(f'fold {fold_num} is empty, fold will be skipped')
+                if metrics is None:
+                    metrics = stats[-1]
                 else:
-                    portfolio_history, rebalance_history, uni_history = bt.backtest(df=df_test)
-                    stats = portfolio_history.calculate_stats()
+                    metrics = metrics.vstack(stats[-1])
 
-                    stats = stats.with_columns([
-                        pl.col('timestamp').first().alias('fold_from'),
-                        pl.col('timestamp').last().alias('fold_to'),
-                    ])
+                realized_folds.append(fold_num)
 
-                    if metrics is None:
-                        metrics = stats[-1]
-                    else:
-                        metrics = metrics.vstack(stats[-1])
-
-                    realized_folds.append(fold_num)
-
-            metrics = metrics.with_column(
-                pl.Series(realized_folds).alias('fold_num')
-            )
-            return metrics
+        metrics = metrics.with_column(pl.Series(realized_folds).alias("fold_num"))
+        return metrics
 
 
 class BacktestBlockCV:
@@ -187,21 +191,21 @@ class BacktestBlockCV:
     """
 
     def __init__(
-            self,
-            strategy: AbstractStrategy,
-            portfolio: Portfolio = None,
+        self,
+        strategy: AbstractStrategy,
+        portfolio: Portfolio = None,
     ) -> None:
 
         if portfolio is None:
-            self.portfolio = Portfolio('main')
+            self.portfolio = Portfolio("main")
         else:
             self.portfolio = portfolio
 
         self.strategy = strategy
 
     def get_splits(self, df, test_blocks, step_blocks):
-        idx_column = df.with_row_count()['row_nr']
-        ts_col = df['block_number']
+        idx_column = df.with_row_count()["row_nr"]
+        ts_col = df["block_number"]
 
         test_idx = []
 
@@ -217,8 +221,8 @@ class BacktestBlockCV:
         return test_idx
 
     def get_tail_splits(self, df, min_test_blocks, step_blocks):
-        idx_column = df.with_row_count()['row_nr']
-        ts_col = df['block_number']
+        idx_column = df.with_row_count()["row_nr"]
+        ts_col = df["block_number"]
 
         test_idx = []
 
@@ -234,29 +238,35 @@ class BacktestBlockCV:
     def backtest(self, df, test_blocks, step_blocks, tail_type_cv=False):
         metrics = None
         if tail_type_cv:
-            folds = self.get_tail_splits(df, min_test_blocks=test_blocks, step_blocks=step_blocks)
+            folds = self.get_tail_splits(
+                df, min_test_blocks=test_blocks, step_blocks=step_blocks
+            )
         else:
-            folds = self.get_splits(df, test_blocks=test_blocks, step_blocks=step_blocks)
+            folds = self.get_splits(
+                df, test_blocks=test_blocks, step_blocks=step_blocks
+            )
 
-        assert len(folds) > 0, 'there is no folds, change yours parameters'
+        assert len(folds) > 0, "there is no folds, change yours parameters"
 
         realized_folds = []
         for fold_num, test_idx in enumerate(tqdm(folds)):
             df_test = df[test_idx]
-            bt = Backtest(
-                strategy=copy.copy(self.strategy)
-            )
+            bt = Backtest(strategy=copy.copy(self.strategy))
 
             if df_test.shape[0] == 0:
-                print(f'fold {fold_num} is empty, fold will be skipped')
+                print(f"fold {fold_num} is empty, fold will be skipped")
             else:
-                portfolio_history, rebalance_history, uni_history = bt.backtest(df=df_test)
+                portfolio_history, rebalance_history, uni_history = bt.backtest(
+                    df=df_test
+                )
                 stats = portfolio_history.calculate_stats()
 
-                stats = stats.with_columns([
-                    pl.col('timestamp').first().alias('fold_from'),
-                    pl.col('timestamp').last().alias('fold_to'),
-                ])
+                stats = stats.with_columns(
+                    [
+                        pl.col("timestamp").first().alias("fold_from"),
+                        pl.col("timestamp").last().alias("fold_to"),
+                    ]
+                )
 
                 if metrics is None:
                     metrics = stats[-1]
@@ -265,7 +275,5 @@ class BacktestBlockCV:
 
                 realized_folds.append(fold_num)
 
-        metrics = metrics.with_column(
-            pl.Series(realized_folds).alias('fold_num')
-        )
+        metrics = metrics.with_column(pl.Series(realized_folds).alias("fold_num"))
         return metrics

@@ -3,6 +3,7 @@ from datetime import datetime
 
 from mellow_sdk.positions import AbstractPosition
 
+
 class Portfolio(AbstractPosition):
     """
     ``Portfolio`` is a container for several open positions.
@@ -12,9 +13,7 @@ class Portfolio(AbstractPosition):
         positions: List of initial positions.
     """
 
-    def __init__(
-            self, name: str, positions: List[AbstractPosition] = None
-    ):
+    def __init__(self, name: str, positions: List[AbstractPosition] = None):
         super().__init__(name)
 
         if positions is None:
@@ -49,7 +48,7 @@ class Portfolio(AbstractPosition):
             name: Position name.
         """
         if name not in self.positions:
-            raise Exception(f'Invalid name = {name}')
+            raise Exception(f"Invalid name = {name}")
         del self.positions[name]
 
     def get_position(self, name: str) -> AbstractPosition:
@@ -76,7 +75,7 @@ class Portfolio(AbstractPosition):
             pos = self.get_position(last_key)
             return pos
         else:
-            raise Exception('Position not found')
+            raise Exception("Position not found")
 
     def positions_list(self) -> List[AbstractPosition]:
         """
@@ -144,7 +143,9 @@ class Portfolio(AbstractPosition):
             total_y += y
         return total_x, total_y
 
-    def snapshot(self, timestamp: datetime, price: float, block_number: Optional[int]) -> dict:
+    def snapshot(
+        self, timestamp: datetime, price: float, block_number: Optional[int]
+    ) -> dict:
 
         """
         | Get portfolio snapshot.
@@ -156,7 +157,11 @@ class Portfolio(AbstractPosition):
 
         Returns: Positions snapshot.
         """
-        snapshot = {'timestamp': timestamp, 'price': price, 'block_number': block_number}
+        snapshot = {
+            "timestamp": timestamp,
+            "price": price,
+            "block_number": block_number,
+        }
         for _, pos in self.positions.items():
             snapshot.update(pos.snapshot(timestamp, price, block_number))
         return snapshot

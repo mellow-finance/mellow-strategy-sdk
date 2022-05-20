@@ -11,9 +11,10 @@ class UniswapLiquidityAligner:
         lower_price: Left bound for the UniswapV3 interval.
         upper_price: Right bound for the UniswapV3 interval.
     """
+
     def __init__(self, lower_price, upper_price):
-        assert lower_price > 0, f'Incorect lower_price {lower_price}.'
-        assert upper_price > 0, f'Incorect upper_price {upper_price}.'
+        assert lower_price > 0, f"Incorect lower_price {lower_price}."
+        assert upper_price > 0, f"Incorect upper_price {upper_price}."
         self.lower_price = lower_price
         self.upper_price = upper_price
 
@@ -34,9 +35,14 @@ class UniswapLiquidityAligner:
             return np.inf
 
         elif sqrt_lower >= sqrt_price:
-            return 0.
+            return 0.0
 
-        return (sqrt_price - sqrt_lower) * sqrt_upper * sqrt_price / (sqrt_upper - sqrt_price)
+        return (
+            (sqrt_price - sqrt_lower)
+            * sqrt_upper
+            * sqrt_price
+            / (sqrt_upper - sqrt_price)
+        )
 
     def x_to_liq(self, price, x):
         """
@@ -55,7 +61,7 @@ class UniswapLiquidityAligner:
         sqrt_price = np.sqrt(price)
 
         if sqrt_price >= sqrt_upper:
-            return 0.
+            return 0.0
 
         left_bound = max(sqrt_lower, sqrt_price)
 
@@ -78,7 +84,7 @@ class UniswapLiquidityAligner:
         sqrt_price = np.sqrt(price)
 
         if sqrt_price <= sqrt_lower:
-            return 0.
+            return 0.0
 
         right_bound = min(sqrt_price, sqrt_upper)
 
@@ -96,9 +102,9 @@ class UniswapLiquidityAligner:
         Returns:
             Maximum liquidity that can be obtained for amounts, interval and current price, without swap.
         """
-        assert price > 1e-16, f'Incorrect price = {price}'
-        assert x >= 0,  f'Incorrect x = {x}'
-        assert y >= 0, f'Incorrect y = {y}'
+        assert price > 1e-16, f"Incorrect price = {price}"
+        assert x >= 0, f"Incorrect x = {x}"
+        assert y >= 0, f"Incorrect y = {y}"
 
         liq_x = self.x_to_liq(price=price, x=x)
         liq_y = self.y_to_liq(price=price, y=y)
@@ -127,7 +133,7 @@ class UniswapLiquidityAligner:
         sqrt_price = np.sqrt(price)
 
         if sqrt_price >= sqrt_upper:
-            return 0.
+            return 0.0
 
         left_bound = max(sqrt_lower, sqrt_price)
 
@@ -149,7 +155,7 @@ class UniswapLiquidityAligner:
         sqrt_price = np.sqrt(price)
 
         if sqrt_price <= sqrt_lower:
-            return 0.
+            return 0.0
         right_bound = min(sqrt_price, sqrt_upper)
         return liq * (right_bound - sqrt_lower)
 
@@ -165,8 +171,8 @@ class UniswapLiquidityAligner:
             The amount of X tokens and the amount of Y tokens that must be allocated to provide required amount of
             liquidity at a given interval and price.
         """
-        assert liq >= 0, f'Incorrect liquidity {liq}'
-        assert price > 1e-16, f'Incorrect price = {price}'
+        assert liq >= 0, f"Incorrect liquidity {liq}"
+        assert price > 1e-16, f"Incorrect price = {price}"
         amount_x = self.liq_to_x(price, liq)
         amount_y = self.liq_to_y(price, liq)
         return amount_x, amount_y
@@ -191,9 +197,9 @@ class UniswapLiquidityAligner:
                 y_liq:
                     The amount of liquidity for the given price range and amount of tokens Y.
         """
-        assert price > 1e-16, f'Incorrect price = {price}'
-        assert x >= 0, f'Incorrect x = {x}'
-        assert y >= 0, f'Incorrect y = {y}'
+        assert price > 1e-16, f"Incorrect price = {price}"
+        assert x >= 0, f"Incorrect x = {x}"
+        assert y >= 0, f"Incorrect y = {y}"
 
         sqrt_lower = np.sqrt(self.lower_price)
         sqrt_upper = np.sqrt(self.upper_price)
@@ -211,11 +217,7 @@ class UniswapLiquidityAligner:
         return abs(liq_x - liq_y) < 1e-6, liq_x, liq_y
 
     def get_amounts_for_swap_to_optimal(
-            self,
-            x: float,
-            y: float,
-            price: float,
-            swap_fee: float
+        self, x: float, y: float, price: float, swap_fee: float
     ) -> Tuple[float, float]:
         """
         Calculate the amount of X or Y tokens that must be swapped to provide optimal liquidity at a given price.
@@ -234,7 +236,7 @@ class UniswapLiquidityAligner:
         is_optimal, liq_x, liq_y = self.check_xy_is_optimal(x=x, y=y, price=price)
 
         if is_optimal:
-            return 0., 0.
+            return 0.0, 0.0
 
         if price <= self.lower_price:
             return 0, y
@@ -244,20 +246,20 @@ class UniswapLiquidityAligner:
 
         if liq_x > liq_y:
             num = self.x_to_liq(price=price, x=x) - self.y_to_liq(price=price, y=y)
-            den = self.x_to_liq(price=price, x=1.) + self.y_to_liq(price=price, y=(1 - swap_fee) * price)
+            den = self.x_to_liq(price=price, x=1.0) + self.y_to_liq(
+                price=price, y=(1 - swap_fee) * price
+            )
             return num / den, 0
 
         if liq_x < liq_y:
             num = self.y_to_liq(price=price, y=y) - self.x_to_liq(price=price, x=x)
-            den = self.x_to_liq(price=price, x=(1 - swap_fee) / price) + self.y_to_liq(price=price, y=1.)
+            den = self.x_to_liq(price=price, x=(1 - swap_fee) / price) + self.y_to_liq(
+                price=price, y=1.0
+            )
             return 0, num / den
 
     def get_amounts_after_optimal_swap(
-            self,
-            x: float,
-            y: float,
-            price: float,
-            swap_fee: float
+        self, x: float, y: float, price: float, swap_fee: float
     ) -> Tuple[float, float]:
         """
         Calculate the amount of X and Y tokens after optimal swap.

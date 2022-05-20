@@ -13,6 +13,7 @@ class AbstractPosition(ABC):
     Attributes:
         name: Unique name for the position.
     """
+
     def __init__(self, name: str) -> None:
         self.name = name
 
@@ -65,7 +66,9 @@ class AbstractPosition(ABC):
         raise Exception(NotImplemented)
 
     @abstractmethod
-    def snapshot(self, timestamp: datetime, price: float, block_number: Optional[int]) -> dict:
+    def snapshot(
+        self, timestamp: datetime, price: float, block_number: Optional[int]
+    ) -> dict:
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.
@@ -91,7 +94,8 @@ class BiCurrencyPosition(AbstractPosition):
         y: Amount of asset Y.
         x_interest: Interest on currency X deposit expressed as a daily percentage yield.
         y_interest: Interest on currency Y deposit expressed as a daily percentage yield.
-   """
+    """
+
     def __init__(
         self,
         name: str,
@@ -104,8 +108,8 @@ class BiCurrencyPosition(AbstractPosition):
     ) -> None:
         super().__init__(name)
 
-        assert x >= 0, f'Can not init position with negative X = {x}'
-        assert y >= 0, f'Can not init position with negative Y = {y}'
+        assert x >= 0, f"Can not init position with negative X = {x}"
+        assert y >= 0, f"Can not init position with negative Y = {y}"
 
         self.x = x if x is not None else 0
         self.y = y if y is not None else 0
@@ -126,8 +130,8 @@ class BiCurrencyPosition(AbstractPosition):
             x: Value of X currency.
             y: Value of Y currency.
         """
-        assert x >= 0, f'Can not deposit negative X = {x}'
-        assert y >= 0, f'Can not deposit negative Y = {y}'
+        assert x >= 0, f"Can not deposit negative X = {x}"
+        assert y >= 0, f"Can not deposit negative Y = {y}"
 
         self.x += x
         self.y += y
@@ -143,11 +147,11 @@ class BiCurrencyPosition(AbstractPosition):
         Returns:
              x amount withdrawn, y amount withdrawn.
         """
-        assert x >= 0, f'Can not withdraw negative X = {x}'
-        assert y >= 0, f'Can not withdraw negative Y = {y}'
+        assert x >= 0, f"Can not withdraw negative X = {x}"
+        assert y >= 0, f"Can not withdraw negative Y = {y}"
 
-        assert x <= self.x, f'Too much to withdraw X = {x} / {self.x}'
-        assert y <= self.y, f'Too much to withdraw Y = {y} / {self.y}'
+        assert x <= self.x, f"Too much to withdraw X = {x} / {self.x}"
+        assert y <= self.y, f"Too much to withdraw Y = {y} / {self.y}"
         self.x -= x
         self.y -= y
 
@@ -163,7 +167,7 @@ class BiCurrencyPosition(AbstractPosition):
         Returns:
              X amount withdrawn, Y amount withdrawn.
         """
-        assert 0 <= fraction <= 1, f'Incorrect Fraction = {fraction}'
+        assert 0 <= fraction <= 1, f"Incorrect Fraction = {fraction}"
         x_out, y_out = self.withdraw(self.x * fraction, self.y * fraction)
 
         return x_out, y_out
@@ -178,10 +182,14 @@ class BiCurrencyPosition(AbstractPosition):
             y_fraction: Fraction of Y after rebalance. from 0 to 1.
             price: Current price of X in Y currency.
         """
-        assert 0 <= x_fraction <= 1, f'Incorrect Fraction X = {x_fraction}'
-        assert 0 <= y_fraction <= 1, f'Incorrect Fraction Y = {y_fraction}'
-        assert self.x > 1e-6 or self.y > 1e-6, f'Cant rebalance empty portfolio x={self.x}, y={self.y}'
-        assert abs(x_fraction + y_fraction - 1) <= 1e-6, f'Incorrect fractions {x_fraction}, {y_fraction}'
+        assert 0 <= x_fraction <= 1, f"Incorrect Fraction X = {x_fraction}"
+        assert 0 <= y_fraction <= 1, f"Incorrect Fraction Y = {y_fraction}"
+        assert (
+            self.x > 1e-6 or self.y > 1e-6
+        ), f"Cant rebalance empty portfolio x={self.x}, y={self.y}"
+        assert (
+            abs(x_fraction + y_fraction - 1) <= 1e-6
+        ), f"Incorrect fractions {x_fraction}, {y_fraction}"
         d_v = y_fraction * price * self.x - x_fraction * self.y
         if d_v > 0:
             dx = d_v / price
@@ -217,7 +225,7 @@ class BiCurrencyPosition(AbstractPosition):
         Returns:
             Total value of vault expessed in X
         """
-        assert price > 1e-16, f'Incorrect price = {price}'
+        assert price > 1e-16, f"Incorrect price = {price}"
         res = self.x + self.y / price
         return res
 
@@ -231,7 +239,7 @@ class BiCurrencyPosition(AbstractPosition):
         Returns:
             Total value of vault expessed in Y.
         """
-        assert price > 1e-16, f'Incorrect price = {price}'
+        assert price > 1e-16, f"Incorrect price = {price}"
         res = self.x * price + self.y
         return res
 
@@ -258,8 +266,8 @@ class BiCurrencyPosition(AbstractPosition):
         Returns:
             Amount of Y was got.
         """
-        assert price > 1e-16, f'Incorrect price = {price}'
-        assert dx >= 0, f'Incorrect dX = {dx}'
+        assert price > 1e-16, f"Incorrect price = {price}"
+        assert dx >= 0, f"Incorrect dX = {dx}"
 
         self.x -= dx
         dy = price * (1 - self.swap_fee) * dx
@@ -279,8 +287,8 @@ class BiCurrencyPosition(AbstractPosition):
         Returns:
             Amount of X was got.
         """
-        assert price > 1e-16, f'Incorrect price = {price}'
-        assert dy >= 0, f'Incorrect dY = {dy}'
+        assert price > 1e-16, f"Incorrect price = {price}"
+        assert dy >= 0, f"Incorrect dY = {dy}"
 
         self.y -= dy
         dx = (1 - self.swap_fee) * dy / price
@@ -288,7 +296,9 @@ class BiCurrencyPosition(AbstractPosition):
         self.total_gas_costs += self.gas_cost
         return dx
 
-    def snapshot(self, timestamp: datetime, price: float, block_number: Optional[int]) -> dict:
+    def snapshot(
+        self, timestamp: datetime, price: float, block_number: Optional[int]
+    ) -> dict:
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.
@@ -300,10 +310,10 @@ class BiCurrencyPosition(AbstractPosition):
         Returns: Position snapshot.
         """
         snapshot = {
-                f'{self.name}_value_x': float(self.x),
-                f'{self.name}_value_y': float(self.y),
-                f'{self.name}_total_gas_costs': float(self.total_gas_costs)
-            }
+            f"{self.name}_value_x": float(self.x),
+            f"{self.name}_value_y": float(self.y),
+            f"{self.name}_total_gas_costs": float(self.total_gas_costs),
+        }
         return snapshot
 
 
@@ -319,7 +329,8 @@ class UniV3Position(AbstractPosition):
         upper_price:  Upper bound of the interval (price).
         fee_percent: Amount of fee expressed as a percentage.
         gas_cost: Gas costs, expressed in Y currency.
-   """
+    """
+
     def __init__(
         self,
         name: str,
@@ -357,7 +368,6 @@ class UniV3Position(AbstractPosition):
 
         self.aligner = UniswapLiquidityAligner(self.lower_price, self.upper_price)
 
-
     def deposit(self, x: float, y: float, price: float) -> None:
         """
         Deposit X and Y to position.
@@ -368,8 +378,8 @@ class UniV3Position(AbstractPosition):
             price: Current price of X in Y currency.
         """
 
-        assert x >= 0, f'Can not deposit negative X = {x}'
-        assert y >= 0, f'Can not deposit negative Y = {y}'
+        assert x >= 0, f"Can not deposit negative X = {x}"
+        assert y >= 0, f"Can not deposit negative Y = {y}"
 
         self.mint(x, y, price)
 
@@ -383,7 +393,7 @@ class UniV3Position(AbstractPosition):
         Returns:
             X amount withdrawn, Y amount withdrawn.
         """
-        assert price > 1e-16, f'Incorrect Price = {price}'
+        assert price > 1e-16, f"Incorrect Price = {price}"
 
         x_out, y_out = self.burn(self.liquidity, price)
         x_fees, y_fees = self.collect_fees()
@@ -400,11 +410,13 @@ class UniV3Position(AbstractPosition):
             y: Value of Y currency.
             price: Current price of X in Y currency.
         """
-        assert x >= 0, f'Can not mint negative X = {x}'
-        assert y >= 0, f'Can not mint negative Y = {y}'
-        assert price > 1e-16, f'Incorrect Price = {price}'
+        assert x >= 0, f"Can not mint negative X = {x}"
+        assert y >= 0, f"Can not mint negative Y = {y}"
+        assert price > 1e-16, f"Incorrect Price = {price}"
 
-        is_optimal, x_liq, y_liq = self.aligner.check_xy_is_optimal(x=x, y=y, price=price)
+        is_optimal, x_liq, y_liq = self.aligner.check_xy_is_optimal(
+            x=x, y=y, price=price
+        )
 
         assert is_optimal, f"""
                     x={x}, y={y}, Lx={x_liq}, Ly={y_liq}, 
@@ -435,9 +447,11 @@ class UniV3Position(AbstractPosition):
         Returns:
             (X received after burn, Y received after burn).
         """
-        assert liq <= self.liquidity, f'Too much liquidity too withdraw = {liq} / {self.liquidity}'
-        assert liq > 1e-16, f'Too small liquidity too withdraw = {liq}'
-        assert price > 1e-16, f'Incorrect Price = {price}'
+        assert (
+            liq <= self.liquidity
+        ), f"Too much liquidity too withdraw = {liq} / {self.liquidity}"
+        assert liq > 1e-16, f"Too small liquidity too withdraw = {liq}"
+        assert price > 1e-16, f"Incorrect Price = {price}"
 
         il_x_0 = self.impermanent_loss_to_x(price)
         il_y_0 = self.impermanent_loss_to_y(price)
@@ -452,8 +466,8 @@ class UniV3Position(AbstractPosition):
         il_x_1 = self.impermanent_loss_to_x(price)
         il_y_1 = self.impermanent_loss_to_y(price)
 
-        self.realized_loss_to_x += (il_x_0 - il_x_1)
-        self.realized_loss_to_y += (il_y_0 - il_y_1)
+        self.realized_loss_to_x += il_x_0 - il_x_1
+        self.realized_loss_to_y += il_y_0 - il_y_1
 
         self.total_gas_costs += self.gas_cost
 
@@ -469,8 +483,8 @@ class UniV3Position(AbstractPosition):
         """
 
         # TODO: research how to charge fees in better way (check UniV3 docs)
-        assert price_0 > 1e-16, f'Incorrect Price = {price_0}'
-        assert price_1 > 1e-16, f'Incorrect Price = {price_1}'
+        assert price_0 > 1e-16, f"Incorrect Price = {price_0}"
+        assert price_1 > 1e-16, f"Incorrect Price = {price_1}"
 
         x_0, y_0 = self.to_xy(price_0)
         x_1, y_1 = self.to_xy(price_1)
@@ -479,11 +493,11 @@ class UniV3Position(AbstractPosition):
         if y_0 >= y_1:
             fee_x = (x_1 - x_0) * self.fee_percent
             if fee_x < 0:
-                raise Exception(f'Negative X fees earned: {fee_x}')
+                raise Exception(f"Negative X fees earned: {fee_x}")
         else:
             fee_y = (y_1 - y_0) * self.fee_percent
             if fee_y < 0:
-                raise Exception(f'Negative Y fees earned: {fee_y}')
+                raise Exception(f"Negative Y fees earned: {fee_y}")
 
         self.fees_x += fee_x
         self._fees_x_earned_ += fee_x
@@ -527,7 +541,7 @@ class UniV3Position(AbstractPosition):
         Returns:
             Value of X il, value of Y il.
         """
-        assert price > 1e-16, f'Incorrect Price = {price}'
+        assert price > 1e-16, f"Incorrect Price = {price}"
 
         x_stake, y_stake = self.to_xy(price)
         il_x = self.x_hold - x_stake
@@ -544,7 +558,7 @@ class UniV3Position(AbstractPosition):
         Returns:
             Value of X il.
         """
-        assert price > 1e-16, f'Incorrect Price = {price}'
+        assert price > 1e-16, f"Incorrect Price = {price}"
         v_hold = self.x_hold + self.y_hold / price
         v_stake = self.to_x(price)
         il_x = v_hold - v_stake
@@ -560,7 +574,7 @@ class UniV3Position(AbstractPosition):
         Returns:
             Value of Y il.
         """
-        assert price > 1e-16, f'Incorrect Price = {price}'
+        assert price > 1e-16, f"Incorrect Price = {price}"
 
         v_hold = self.x_hold * price + self.y_hold
         v_stake = self.to_y(price)
@@ -577,7 +591,7 @@ class UniV3Position(AbstractPosition):
         Returns:
             Total value of UniswapV3 position expressed in X.
         """
-        assert price > 1e-16, f'Incorrect Price = {price}'
+        assert price > 1e-16, f"Incorrect Price = {price}"
 
         x, y = self.to_xy(price)
         value_x = x + y / price
@@ -593,7 +607,7 @@ class UniV3Position(AbstractPosition):
         Returns:
             Total value of UniswapV3 position expressed in Y.
         """
-        assert price > 1e-16, f'Incorrect Price = {price}'
+        assert price > 1e-16, f"Incorrect Price = {price}"
 
         x, y = self.to_xy(price)
         value_y = x * price + y
@@ -609,13 +623,15 @@ class UniV3Position(AbstractPosition):
         Returns:
             amount of X and amount of Y in position.
         """
-        assert price > 1e-16, f'Incorrect Price = {price}'
+        assert price > 1e-16, f"Incorrect Price = {price}"
 
         x, y = self.aligner.liq_to_xy(price=price, liq=self.liquidity)
 
         return x, y
 
-    def snapshot(self, timestamp: datetime, price: float, block_number: Optional[int]) -> dict:
+    def snapshot(
+        self, timestamp: datetime, price: float, block_number: Optional[int]
+    ) -> dict:
         """
         | Get a snapshot of the position. Used in ``Portfolio.snapshot`` to create a snapshot
         | of the entire portfolio when backtesting.
@@ -627,20 +643,18 @@ class UniV3Position(AbstractPosition):
         Returns: Position snapshot
         """
         x, y = self.to_xy(price)
-        il_to_x, il_to_y = self.impermanent_loss_to_x(price), self.impermanent_loss_to_y(price)
+        il_to_x, il_to_y = self.impermanent_loss_to_x(
+            price
+        ), self.impermanent_loss_to_y(price)
 
         snapshot = {
-            f'{self.name}_value_x': float(x + self.fees_x),
-            f'{self.name}_value_y': float(y + self.fees_y),
-
-            f'{self.name}_fees_x': float(self.fees_x),
-            f'{self.name}_fees_y': float(self.fees_y),
-
-            f'{self.name}_il_to_x': float(il_to_x),
-            f'{self.name}_il_to_y': float(il_to_y),
-
-            f'{self.name}_total_gas_costs': float(self.total_gas_costs),
-
+            f"{self.name}_value_x": float(x + self.fees_x),
+            f"{self.name}_value_y": float(y + self.fees_y),
+            f"{self.name}_fees_x": float(self.fees_x),
+            f"{self.name}_fees_y": float(self.fees_y),
+            f"{self.name}_il_to_x": float(il_to_x),
+            f"{self.name}_il_to_y": float(il_to_y),
+            f"{self.name}_total_gas_costs": float(self.total_gas_costs),
             # f'{self.name}_current_liquidity': self.liquidity
         }
         return snapshot

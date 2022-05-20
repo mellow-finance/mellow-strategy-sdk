@@ -10,6 +10,7 @@ class PortfolioHistory:
     | Each time ``add_snapshot`` method is called it remembers current state in time.
     | All tracked values then can be accessed via ``to_df`` method that will return a ``pl.Dataframe``.
     """
+
     def __init__(self):
         self.snapshots = []
 
@@ -31,25 +32,25 @@ class PortfolioHistory:
             Portfolio history data frame.
         """
         df = pd.DataFrame(self.snapshots)
-        df2 = pl.from_pandas(df).sort(by=['timestamp'])
+        df2 = pl.from_pandas(df).sort(by=["timestamp"])
         return df2
 
     def calculate_values(self, df: pl.DataFrame) -> pl.DataFrame:
         """
-            Calculate amount of X and amount of Y in ``Portfolio``.
+        Calculate amount of X and amount of Y in ``Portfolio``.
 
-            Args:
-                df: Portfolio history DataFrame.
+        Args:
+            df: Portfolio history DataFrame.
 
-            Returns:
-                dataframe consisting of two columns total_value_x, total_value_y.
+        Returns:
+            dataframe consisting of two columns total_value_x, total_value_y.
         """
 
-        value_of_x_cols = [col for col in df.columns if 'value_x' in col]
-        value_of_y_cols = [col for col in df.columns if 'value_y' in col]
+        value_of_x_cols = [col for col in df.columns if "value_x" in col]
+        value_of_y_cols = [col for col in df.columns if "value_y" in col]
 
-        df_x = df[value_of_x_cols].sum(axis=1).alias('total_value_x')
-        df_y = df[value_of_y_cols].sum(axis=1).alias('total_value_y')
+        df_x = df[value_of_x_cols].sum(axis=1).alias("total_value_x")
+        df_y = df[value_of_y_cols].sum(axis=1).alias("total_value_y")
         return pl.DataFrame([df_x, df_y])
 
     def calculate_ils(self, df: pl.DataFrame) -> pl.DataFrame:
@@ -63,16 +64,20 @@ class PortfolioHistory:
             Dataframe consisting of two columns total_il_x, total_il_y.
         """
         # log.info('Starting to calculate ils')
-        il_to_x_cols = [col for col in df.columns if 'il_to_x' in col]
-        il_to_y_cols = [col for col in df.columns if 'il_to_y' in col]
+        il_to_x_cols = [col for col in df.columns if "il_to_x" in col]
+        il_to_y_cols = [col for col in df.columns if "il_to_y" in col]
 
         if il_to_x_cols:
-            df_x = df[il_to_x_cols].fill_null('forward').sum(axis=1).alias('total_il_to_x')
-            df_y = df[il_to_y_cols].fill_null('forward').sum(axis=1).alias('total_il_to_y')
+            df_x = (
+                df[il_to_x_cols].fill_null("forward").sum(axis=1).alias("total_il_to_x")
+            )
+            df_y = (
+                df[il_to_y_cols].fill_null("forward").sum(axis=1).alias("total_il_to_y")
+            )
         else:
             data = [0] * df.shape[0]
-            df_x = pl.Series('total_il_to_x', data, dtype=pl.Float64)
-            df_y = pl.Series('total_il_to_y', data, dtype=pl.Float64)
+            df_x = pl.Series("total_il_to_x", data, dtype=pl.Float64)
+            df_y = pl.Series("total_il_to_y", data, dtype=pl.Float64)
         return pl.DataFrame([df_x, df_y])
 
     def calculate_fees(self, df: pl.DataFrame) -> pl.DataFrame:
@@ -86,15 +91,25 @@ class PortfolioHistory:
             Dataframe consisting of two columns total_fees_x, total_fees_y.
         """
         # log.info('Starting to calculate fees')
-        fees_to_x_cols = [col for col in df.columns if 'fees_x' in col]
-        fees_to_y_cols = [col for col in df.columns if 'fees_y' in col]
+        fees_to_x_cols = [col for col in df.columns if "fees_x" in col]
+        fees_to_y_cols = [col for col in df.columns if "fees_y" in col]
         if fees_to_x_cols:
-            df_x = df[fees_to_x_cols].fill_null('forward').sum(axis=1).alias('total_fees_x')
-            df_y = df[fees_to_y_cols].fill_null('forward').sum(axis=1).alias('total_fees_y')
+            df_x = (
+                df[fees_to_x_cols]
+                .fill_null("forward")
+                .sum(axis=1)
+                .alias("total_fees_x")
+            )
+            df_y = (
+                df[fees_to_y_cols]
+                .fill_null("forward")
+                .sum(axis=1)
+                .alias("total_fees_y")
+            )
         else:
             data = [0] * df.shape[0]
-            df_x = pl.Series('total_fees_x', data, dtype=pl.Float64)
-            df_y = pl.Series('total_fees_y', data, dtype=pl.Float64)
+            df_x = pl.Series("total_fees_x", data, dtype=pl.Float64)
+            df_y = pl.Series("total_fees_y", data, dtype=pl.Float64)
         return pl.DataFrame([df_x, df_y])
 
     def calculate_value_to(self, df: pl.DataFrame) -> pl.DataFrame:
@@ -116,17 +131,35 @@ class PortfolioHistory:
             Dataframe consisting of 'total_value_...' columns.
         """
         # log.info('Starting to calculate portfolio values')
-        df_to = df.select([
-            (pl.col('total_value_x') + pl.col('total_value_y') / pl.col('price')).alias('total_value_to_x'),
-            (pl.col('total_value_x') * pl.col('price') + pl.col('total_value_y')).alias('total_value_to_y'),
-            (pl.col('total_fees_x') + pl.col('total_fees_y') / pl.col('price')).alias('total_fees_to_x'),
-            (pl.col('total_fees_x') * pl.col('price') + pl.col('total_fees_y')).alias('total_fees_to_y'),
-            (pl.col('total_value_x').first() + pl.col('total_value_y').first() / pl.col('price')).alias('hold_to_x'),
-            (pl.col('total_value_x').first() * pl.col('price') + pl.col('total_value_y').first()).alias('hold_to_y'),
-        ])
+        df_to = df.select(
+            [
+                (
+                    pl.col("total_value_x") + pl.col("total_value_y") / pl.col("price")
+                ).alias("total_value_to_x"),
+                (
+                    pl.col("total_value_x") * pl.col("price") + pl.col("total_value_y")
+                ).alias("total_value_to_y"),
+                (
+                    pl.col("total_fees_x") + pl.col("total_fees_y") / pl.col("price")
+                ).alias("total_fees_to_x"),
+                (
+                    pl.col("total_fees_x") * pl.col("price") + pl.col("total_fees_y")
+                ).alias("total_fees_to_y"),
+                (
+                    pl.col("total_value_x").first()
+                    + pl.col("total_value_y").first() / pl.col("price")
+                ).alias("hold_to_x"),
+                (
+                    pl.col("total_value_x").first() * pl.col("price")
+                    + pl.col("total_value_y").first()
+                ).alias("hold_to_y"),
+            ]
+        )
         return df_to
 
-    def calculate_apy_for_col(self, df: pl.DataFrame, from_col: str, to_col: str) -> pl.DataFrame:
+    def calculate_apy_for_col(
+        self, df: pl.DataFrame, from_col: str, to_col: str
+    ) -> pl.DataFrame:
         """
             Calculate APY for metric.
 
@@ -139,12 +172,18 @@ class PortfolioHistory:
             Dataframe consisting APY metric.
         """
 
-        df_performance = df.select([
-                (pl.col(from_col) / pl.col(from_col).first()).alias('performance'),
-                ((pl.col('timestamp') - pl.col('timestamp').first()).dt.days()).alias('days')
-            ])
-        df_apy = df_performance.apply(lambda x: 100 * (x[0] ** (365 / x[1]) - 1) if x[1] != 0 else 0.)
-        df_apy = df_apy.rename({'apply': to_col})
+        df_performance = df.select(
+            [
+                (pl.col(from_col) / pl.col(from_col).first()).alias("performance"),
+                ((pl.col("timestamp") - pl.col("timestamp").first()).dt.days()).alias(
+                    "days"
+                ),
+            ]
+        )
+        df_apy = df_performance.apply(
+            lambda x: 100 * (x[0] ** (365 / x[1]) - 1) if x[1] != 0 else 0.0
+        )
+        df_apy = df_apy.rename({"apply": to_col})
         return df_apy
 
     def calculate_g_apy(self, df: pl.DataFrame) -> pl.DataFrame:
@@ -161,13 +200,19 @@ class PortfolioHistory:
             Dataframe consisting gAPY metric.
         """
 
-        df2 = df.select([
-                (pl.col('total_value_to_x') / pl.col('hold_to_x')).alias('coef'),
-                ((pl.col('timestamp') - pl.col('timestamp').first()).dt.days()).alias('days'),
-        ])
+        df2 = df.select(
+            [
+                (pl.col("total_value_to_x") / pl.col("hold_to_x")).alias("coef"),
+                ((pl.col("timestamp") - pl.col("timestamp").first()).dt.days()).alias(
+                    "days"
+                ),
+            ]
+        )
 
-        df_apy = df2.apply(lambda x: 100 * (x[0] ** (365 / x[1]) - 1) if x[1] != 0 else 0.)
-        df_apy = df_apy.rename({"apply": 'g_apy'})
+        df_apy = df2.apply(
+            lambda x: 100 * (x[0] ** (365 / x[1]) - 1) if x[1] != 0 else 0.0
+        )
+        df_apy = df_apy.rename({"apply": "g_apy"})
         return df_apy
 
     def calculate_stats(self) -> pl.DataFrame:
@@ -182,17 +227,25 @@ class PortfolioHistory:
         ils = self.calculate_ils(df)
         fees = self.calculate_fees(df)
 
-        df_prep = pl.concat([df[['timestamp', 'price']], values, ils, fees], how='horizontal')
+        df_prep = pl.concat(
+            [df[["timestamp", "price"]], values, ils, fees], how="horizontal"
+        )
         df_to = self.calculate_value_to(df_prep)
-        df_to_ext = pl.concat([df[['timestamp']], df_to], how='horizontal')
+        df_to_ext = pl.concat([df[["timestamp"]], df_to], how="horizontal")
 
-        prt_x = self.calculate_apy_for_col(df_to_ext, 'total_value_to_x', 'portfolio_apy_x')
-        prt_y = self.calculate_apy_for_col(df_to_ext, 'total_value_to_y', 'portfolio_apy_y')
-        hld_x = self.calculate_apy_for_col(df_to_ext, 'hold_to_x', 'hold_apy_x')
-        hld_y = self.calculate_apy_for_col(df_to_ext, 'hold_to_y', 'hold_apy_y')
+        prt_x = self.calculate_apy_for_col(
+            df_to_ext, "total_value_to_x", "portfolio_apy_x"
+        )
+        prt_y = self.calculate_apy_for_col(
+            df_to_ext, "total_value_to_y", "portfolio_apy_y"
+        )
+        hld_x = self.calculate_apy_for_col(df_to_ext, "hold_to_x", "hold_apy_x")
+        hld_y = self.calculate_apy_for_col(df_to_ext, "hold_to_y", "hold_apy_y")
         g_apy = self.calculate_g_apy(df_to_ext)
 
-        return pl.concat([df_prep, df_to, prt_x, prt_y, hld_x, hld_y, g_apy], how='horizontal')
+        return pl.concat(
+            [df_prep, df_to, prt_x, prt_y, hld_x, hld_y, g_apy], how="horizontal"
+        )
 
 
 class RebalanceHistory:
@@ -205,7 +258,9 @@ class RebalanceHistory:
     def __init__(self):
         self.rebalances = []
 
-    def add_snapshot(self, timestamp: datetime.datetime, portfolio_action: tp.Optional[str]):
+    def add_snapshot(
+        self, timestamp: datetime.datetime, portfolio_action: tp.Optional[str]
+    ):
         """
         Add portfolio action to memory.
 
@@ -213,7 +268,7 @@ class RebalanceHistory:
             timestamp: Timestamp of snapshot.
             portfolio_action: Name of portfolio action or None. Usually it takes from ''AbstractStrategy.rebalance`` output.
         """
-        self.rebalances += [{'timestamp': timestamp, 'rebalance': portfolio_action}]
+        self.rebalances += [{"timestamp": timestamp, "rebalance": portfolio_action}]
 
     def to_df(self) -> pd.DataFrame:
         """
@@ -222,10 +277,23 @@ class RebalanceHistory:
         Returns:
             Data frame of strategy actions, except None actions.
         """
-        df = pl.DataFrame([
-            pl.Series(name='timestamp', values=[x['timestamp'] for x in self.rebalances]),
-            pl.Series(name='rebalance', values=[x['rebalance'] for x in self.rebalances], dtype=pl.Utf8),
-        ]).drop_nulls().with_column(pl.col('timestamp').cast(pl.Datetime))
+        df = (
+            pl.DataFrame(
+                [
+                    pl.Series(
+                        name="timestamp",
+                        values=[x["timestamp"] for x in self.rebalances],
+                    ),
+                    pl.Series(
+                        name="rebalance",
+                        values=[x["rebalance"] for x in self.rebalances],
+                        dtype=pl.Utf8,
+                    ),
+                ]
+            )
+            .drop_nulls()
+            .with_column(pl.col("timestamp").cast(pl.Datetime))
+        )
         return df
 
 
@@ -248,13 +316,13 @@ class UniPositionsHistory:
             positions: List of Uniswap positions.
         """
         for name, position in positions.items():
-            if 'Uni' in name:
+            if "Uni" in name:
                 record = {
-                    'name': name,
-                    'timestamp': timestamp,
-                    'lower_bound': position.lower_price,
-                    'upper_bound': position.upper_price,
-                    'liq': position.liquidity,
+                    "name": name,
+                    "timestamp": timestamp,
+                    "lower_bound": position.lower_price,
+                    "upper_bound": position.upper_price,
+                    "liq": position.liquidity,
                 }
                 self.positions.append(record)
 
@@ -267,7 +335,13 @@ class UniPositionsHistory:
         """
         if len(self.positions) == 0:
             intervals_df = pl.DataFrame(
-                {'name': [], 'timestamp': [], 'lower_bound': [], 'upper_bound': [], 'liq': []}
+                {
+                    "name": [],
+                    "timestamp": [],
+                    "lower_bound": [],
+                    "upper_bound": [],
+                    "liq": [],
+                }
             )
         else:
             intervals_df = pl.from_records(self.positions)
