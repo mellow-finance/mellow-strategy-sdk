@@ -186,6 +186,49 @@ class PortfolioHistory:
         df_apy = df_apy.rename({"apply": to_col})
         return df_apy
 
+    def calculate_information_ratio(self, df: pl.DataFrame) -> pl.DataFrame:
+        """
+            calculate
+        Args:
+            df:
+
+        Returns:
+        """
+        df_daily = df.sort('timestamp').groupby('date').last().sort('date')
+
+        df_daily['days_diff'] = df_daily['date'].diff().dt.days()
+
+        df_daily['daily_ret_x'] = 1 - (df_daily['total_value_to_x'] / df_daily['total_value_to_x'].shift()) ** (
+                    1 / df_daily['days_diff'])
+        df_daily['daily_ret_y'] = 1 - (df_daily['total_value_to_y'] / df_daily['total_value_to_y'].shift()) ** (
+                    1 / df_daily['days_diff'])
+
+        df_daily['daily_hold_ret_x'] = 1 - (df_daily['hold_to_x'] / df_daily['hold_to_x'].shift()) ** (
+                    1 / df_daily['days_diff'])
+        df_daily['daily_hold_ret_y'] = 1 - (df_daily['hold_to_y'] / df_daily['hold_to_y'].shift()) ** (
+                    1 / df_daily['days_diff'])
+
+        df_full = df_daily.upsample("date", "1d").fill_null("backward")
+
+        diff_x = df_full['daily_ret_x'] - df_full['daily_hold_ret_x']
+        diff_y = df_full['daily_ret_y'] - df_full['daily_hold_ret_y']
+
+        df_full['ir_x'] = 365 ** 0.5 * diff_x.rolling_mean(window_size=0) / diff_x.rolling_std(window_size=0)
+        df_full['ir_y'] = 365 ** 0.5 * diff_y.rolling_mean(window_size=0) / diff_y.rolling_std(window_size=0)
+
+        res_df = df.join(df_full[['date', 'ir_x', 'ir_y']], on='date', how='left')[['ir_x', 'ir_y']]
+
+        return res_df
+
+    def calculate_mdd(self, df: pl.DataFrame, from_col: str, to_col: str) -> pl.DataFrame:
+        peak_value = df[from_col].cummax()
+        draw_down = (df[from_col] / peak_value - 1) * 100
+        mdd = draw_down.cummin()
+
+        mdd = pl.DataFrame(mdd.alias(to_col))
+        return mdd
+
+
     def calculate_g_apy(self, df: pl.DataFrame) -> pl.DataFrame:
         """
             Calculate gAPY. gAPY is a strategy profitability metric,
@@ -232,6 +275,7 @@ class PortfolioHistory:
         )
         df_to = self.calculate_value_to(df_prep)
         df_to_ext = pl.concat([df[["timestamp"]], df_to], how="horizontal")
+        df_to_ext = df_to_ext.with_column(pl.col('timestamp').cast(pl.Date).alias('date'))
 
         prt_x = self.calculate_apy_for_col(
             df_to_ext, "total_value_to_x", "portfolio_apy_x"
@@ -242,9 +286,15 @@ class PortfolioHistory:
         hld_x = self.calculate_apy_for_col(df_to_ext, "hold_to_x", "hold_apy_x")
         hld_y = self.calculate_apy_for_col(df_to_ext, "hold_to_y", "hold_apy_y")
         g_apy = self.calculate_g_apy(df_to_ext)
+        ir_df = self.calculate_information_ratio(df_to_ext)
+
+        mdd_x = self.calculate_mdd(df_to_ext, from_col='total_value_to_x', to_col='mdd_x')
+        mdd_y = self.calculate_mdd(df_to_ext, from_col='total_value_to_y', to_col='mdd_y')
+        mdd_g_apy = self.calculate_mdd(df_to_ext, from_col='g_apy', to_col='mdd_g_apy')
+
 
         return pl.concat(
-            [df_prep, df_to, prt_x, prt_y, hld_x, hld_y, g_apy], how="horizontal"
+            [df_prep, df_to, prt_x, prt_y, hld_x, hld_y, g_apy, ir_df, mdd_x, mdd_y, mdd_g_apy], how="horizontal"
         )
 
 
