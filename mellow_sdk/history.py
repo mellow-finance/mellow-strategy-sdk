@@ -237,9 +237,6 @@ class PortfolioHistory:
         df_daily = (
             df
             .sort('timestamp')
-            .with_column(
-                (pl.col('date').dt.year().cast(str) + '_' + (pl.col('date').dt.week()).cast(str)).alias('week')
-            )
             .groupby('week')
             .last()
             .sort('week')
@@ -250,8 +247,6 @@ class PortfolioHistory:
         df_daily['daily_hold_ret_x'] = df_daily['hold_to_x'].pct_change()
         df_daily['daily_hold_ret_y'] = df_daily['hold_to_y'].pct_change()
 
-        # df_full = df_daily.upsample("date", "1d").fill_null("backward")
-
         diff_x = df_daily['daily_ret_x'] - df_daily['daily_hold_ret_x']
         diff_y = df_daily['daily_ret_y'] - df_daily['daily_hold_ret_y']
 
@@ -260,15 +255,61 @@ class PortfolioHistory:
 
         res_df = (
             df
-            .with_column(
-                (pl.col('date').dt.year().cast(str) + '_' + (pl.col('date').dt.week()).cast(str)).alias('week')
-            )
             .join(
                 df_daily[['week', 'ir_weekly_total_value_to_x', 'ir_weekly_total_value_to_y']],
                 on='week',
                 how='left'
             )
-            .select(['week', 'ir_weekly_total_value_to_x', 'ir_weekly_total_value_to_y'])
+            .select(['ir_weekly_total_value_to_x', 'ir_weekly_total_value_to_y'])
+        )
+
+        return res_df
+
+    def calculate_sharpe(self, df: pl.DataFrame, risk_free_x=1, risk_free_y=1):
+        """
+            risk_free in percentage
+        """
+        df_daily = (
+            df
+            .sort('timestamp')
+            .groupby('date')
+            .last()
+            .sort('date')
+        )
+
+        df_daily['daily_hold_ret_x'] = df_daily['hold_to_x'].pct_change()
+        df_daily['daily_hold_ret_y'] = df_daily['hold_to_y'].pct_change()
+        df_daily['daily_total_value_to_x_ret'] = df_daily['total_value_to_x'].pct_change()
+        df_daily['daily_total_value_to_y_ret'] = df_daily['total_value_to_y'].pct_change()
+
+        risk_free_x_daily_ret = (1 + risk_free_x / 100) ** (1 / 365) - 1
+        risk_free_y_daily_ret = (1 + risk_free_y / 100) ** (1 / 365) - 1
+
+        diff_x_hold = df_daily['daily_hold_ret_x'] - risk_free_x_daily_ret
+        diff_y_hold = df_daily['daily_hold_ret_y'] - risk_free_y_daily_ret
+        diff_x = df_daily['daily_total_value_to_x_ret'] - risk_free_x_daily_ret
+        diff_y = df_daily['daily_total_value_to_y_ret'] - risk_free_y_daily_ret
+
+        df_daily['sharpe_hold_to_x'] = 365 ** 0.5 * diff_x_hold.rolling_mean(window_size=0) / diff_x_hold.rolling_std(
+            window_size=0)
+        df_daily['sharpe_hold_to_y'] = 365 ** 0.5 * diff_y_hold.rolling_mean(window_size=0) / diff_y_hold.rolling_std(
+            window_size=0)
+        df_daily['sharpe_total_value_to_x'] = 365 ** 0.5 * diff_x.rolling_mean(window_size=0) / diff_x.rolling_std(
+            window_size=0)
+        df_daily['sharpe_total_value_to_y'] = 365 ** 0.5 * diff_y.rolling_mean(window_size=0) / diff_y.rolling_std(
+            window_size=0)
+
+        res_df = (
+            df
+            .join(
+                df_daily[['date', 'sharpe_hold_to_x', 'sharpe_hold_to_y', 'sharpe_total_value_to_x',
+                          'sharpe_total_value_to_y']],
+                on='date',
+                how='left'
+            )
+            .select(
+                ['sharpe_hold_to_x', 'sharpe_hold_to_y', 'sharpe_total_value_to_x', 'sharpe_total_value_to_y']
+            )
         )
 
         return res_df
@@ -320,15 +361,21 @@ class PortfolioHistory:
             Portfolio statistics dataframe.
         """
         df = self.to_df()
-        df = df.with_column(pl.col('timestamp').cast(pl.Date).alias('date'))
-
+        df = (
+            df
+            .with_column(
+                pl.col('timestamp').cast(pl.Date).alias('date')
+            )
+            .with_column(
+                (pl.col('date').dt.year().cast(str) + '_' + (pl.col('date').dt.week()).cast(str)).alias('week')
+            )
+        )
         values = self.calculate_values(df)
         ils = self.calculate_ils(df)
         fees = self.calculate_fees(df)
         df_prep = pl.concat(
-            [df[['date', "timestamp", "price"]], values, ils, fees], how="horizontal"
+            [df[['week', 'date', "timestamp", "price"]], values, ils, fees], how="horizontal"
         )
-
         df_to = self.calculate_value_to(df_prep)
         df_to_ext = pl.concat([df_prep, df_to], how="horizontal")
 
@@ -348,8 +395,10 @@ class PortfolioHistory:
         mdd_hold_x = self.calculate_mdd(df_apy, from_col='hold_to_x', to_col='mdd_hold_to_x')
         mdd_hold_y = self.calculate_mdd(df_apy, from_col='hold_to_y', to_col='mdd_hold_to_y')
         mdd_g_apy = self.calculate_mdd(df_apy, from_col='g_apy', to_col='mdd_g_apy')
+        sharpe_df = self.calculate_sharpe(df_apy, risk_free_x=1, risk_free_y=1)
+
         df_metrics = pl.concat(
-            [df_apy, ir_df, ir_weekly_df, mdd_x, mdd_y, mdd_hold_x, mdd_hold_y, mdd_g_apy], how="horizontal"
+            [df_apy, ir_df, ir_weekly_df, mdd_x, mdd_y, mdd_hold_x, mdd_hold_y, mdd_g_apy, sharpe_df], how="horizontal"
         )
         return df_metrics
 
