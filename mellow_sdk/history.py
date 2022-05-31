@@ -1,5 +1,6 @@
 import pandas as pd
 import polars as pl
+import numpy as np
 import datetime
 import typing as tp
 
@@ -290,11 +291,13 @@ class PortfolioHistory:
         )
 
         ir_df = self.calculate_information_ratio(df_apy)
-        mdd_x = self.calculate_mdd(df_apy, from_col='total_value_to_x', to_col='mdd_x')
-        mdd_y = self.calculate_mdd(df_apy, from_col='total_value_to_y', to_col='mdd_y')
+        mdd_x = self.calculate_mdd(df_apy, from_col='total_value_to_x', to_col='mdd_total_value_to_x')
+        mdd_y = self.calculate_mdd(df_apy, from_col='total_value_to_y', to_col='mdd_total_value_to_y')
+        mdd_hold_x = self.calculate_mdd(df_apy, from_col='hold_to_x', to_col='mdd_hold_to_x')
+        mdd_hold_y = self.calculate_mdd(df_apy, from_col='hold_to_y', to_col='mdd_hold_to_y')
         mdd_g_apy = self.calculate_mdd(df_apy, from_col='g_apy', to_col='mdd_g_apy')
         df_metrics = pl.concat(
-            [df_apy, ir_df, mdd_x, mdd_y, mdd_g_apy], how="horizontal"
+            [df_apy, ir_df, mdd_x, mdd_y, mdd_hold_x, mdd_hold_y, mdd_g_apy], how="horizontal"
         )
         return df_metrics
 
