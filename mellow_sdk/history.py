@@ -223,7 +223,7 @@ class PortfolioHistory:
     def calculate_mdd(self, df: pl.DataFrame, from_col: str, to_col: str) -> pl.DataFrame:
         peak_value = df[from_col].cummax()
         peak_value[peak_value.abs() < 1e-3] = np.nan
-        
+
         draw_down = (df[from_col] / peak_value - 1) * 100
         mdd = draw_down.cummin()
 
@@ -297,10 +297,6 @@ class PortfolioHistory:
             [df_apy, ir_df, mdd_x, mdd_y, mdd_g_apy], how="horizontal"
         )
         return df_metrics
-
-        # return pl.concat(
-        #     [df_prep, prt_x, prt_y, hld_x, hld_y, g_apy, ir_df, mdd_x, mdd_y, mdd_g_apy], how="horizontal"
-        # )
 
 
 class RebalanceHistory:
