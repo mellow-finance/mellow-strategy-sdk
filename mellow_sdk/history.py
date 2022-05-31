@@ -214,10 +214,15 @@ class PortfolioHistory:
         diff_x = df_full['daily_ret_x'] - df_full['daily_hold_ret_x']
         diff_y = df_full['daily_ret_y'] - df_full['daily_hold_ret_y']
 
-        df_full['ir_x'] = 365 ** 0.5 * diff_x.rolling_mean(window_size=0) / diff_x.rolling_std(window_size=0)
-        df_full['ir_y'] = 365 ** 0.5 * diff_y.rolling_mean(window_size=0) / diff_y.rolling_std(window_size=0)
+        df_full['ir_total_value_to_x'] = 365 ** 0.5 * diff_x.rolling_mean(window_size=0) / diff_x.rolling_std(window_size=0)
+        df_full['ir_total_value_to_y'] = 365 ** 0.5 * diff_y.rolling_mean(window_size=0) / diff_y.rolling_std(window_size=0)
 
-        res_df = df.join(df_full[['date', 'ir_x', 'ir_y']], on='date', how='left')[['ir_x', 'ir_y']]
+        res_df = (
+            df.join(
+                df_full[['date', 'ir_total_value_to_x', 'ir_total_value_to_y']], on='date', how='left'
+            )
+            .select(['ir_total_value_to_x', 'ir_total_value_to_y'])
+        )
 
         return res_df
 
