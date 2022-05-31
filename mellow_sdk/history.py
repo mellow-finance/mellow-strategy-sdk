@@ -266,36 +266,39 @@ class PortfolioHistory:
             Portfolio statistics dataframe.
         """
         df = self.to_df()
+        df = df.with_column(pl.col('timestamp').cast(pl.Date).alias('date'))
+
         values = self.calculate_values(df)
         ils = self.calculate_ils(df)
         fees = self.calculate_fees(df)
-
         df_prep = pl.concat(
-            [df[["timestamp", "price"]], values, ils, fees], how="horizontal"
+            [df[['date', "timestamp", "price"]], values, ils, fees], how="horizontal"
         )
-        df_to = self.calculate_value_to(df_prep)
-        df_to_ext = pl.concat([df[["timestamp"]], df_to], how="horizontal")
-        df_to_ext = df_to_ext.with_column(pl.col('timestamp').cast(pl.Date).alias('date'))
 
-        prt_x = self.calculate_apy_for_col(
-            df_to_ext, "total_value_to_x", "portfolio_apy_x"
-        )
-        prt_y = self.calculate_apy_for_col(
-            df_to_ext, "total_value_to_y", "portfolio_apy_y"
-        )
+        df_to = self.calculate_value_to(df_prep)
+        df_to_ext = pl.concat([df_prep, df_to], how="horizontal")
+
+        prt_x = self.calculate_apy_for_col(df_to_ext, "total_value_to_x", "portfolio_apy_x")
+        prt_y = self.calculate_apy_for_col(df_to_ext, "total_value_to_y", "portfolio_apy_y")
         hld_x = self.calculate_apy_for_col(df_to_ext, "hold_to_x", "hold_apy_x")
         hld_y = self.calculate_apy_for_col(df_to_ext, "hold_to_y", "hold_apy_y")
         g_apy = self.calculate_g_apy(df_to_ext)
-        ir_df = self.calculate_information_ratio(df_to_ext)
-
-        mdd_x = self.calculate_mdd(df_to_ext, from_col='total_value_to_x', to_col='mdd_x')
-        mdd_y = self.calculate_mdd(df_to_ext, from_col='total_value_to_y', to_col='mdd_y')
-        mdd_g_apy = self.calculate_mdd(df_to_ext, from_col='g_apy', to_col='mdd_g_apy')
-
-
-        return pl.concat(
-            [df_prep, df_to, prt_x, prt_y, hld_x, hld_y, g_apy, ir_df, mdd_x, mdd_y, mdd_g_apy], how="horizontal"
+        df_apy = pl.concat(
+            [df_to_ext, prt_x, prt_y, hld_x, hld_y, g_apy], how="horizontal"
         )
+
+        ir_df = self.calculate_information_ratio(df_apy)
+        mdd_x = self.calculate_mdd(df_apy, from_col='total_value_to_x', to_col='mdd_x')
+        mdd_y = self.calculate_mdd(df_apy, from_col='total_value_to_y', to_col='mdd_y')
+        mdd_g_apy = self.calculate_mdd(df_apy, from_col='g_apy', to_col='mdd_g_apy')
+        df_metrics = pl.concat(
+            [df_apy, ir_df, mdd_x, mdd_y, mdd_g_apy], how="horizontal"
+        )
+        return df_metrics
+
+        # return pl.concat(
+        #     [df_prep, prt_x, prt_y, hld_x, hld_y, g_apy, ir_df, mdd_x, mdd_y, mdd_g_apy], how="horizontal"
+        # )
 
 
 class RebalanceHistory:
