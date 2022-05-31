@@ -199,15 +199,15 @@ class PortfolioHistory:
 
         df_daily['days_diff'] = df_daily['date'].diff().dt.days()
 
-        df_daily['daily_ret_x'] = 1 - (df_daily['total_value_to_x'] / df_daily['total_value_to_x'].shift()) ** (
-                    1 / df_daily['days_diff'])
-        df_daily['daily_ret_y'] = 1 - (df_daily['total_value_to_y'] / df_daily['total_value_to_y'].shift()) ** (
-                    1 / df_daily['days_diff'])
+        df_daily['daily_ret_x'] = (df_daily['total_value_to_x'] / df_daily['total_value_to_x'].shift()) ** (
+                    1 / df_daily['days_diff']) - 1
+        df_daily['daily_ret_y'] = (df_daily['total_value_to_y'] / df_daily['total_value_to_y'].shift()) ** (
+                    1 / df_daily['days_diff']) - 1
 
-        df_daily['daily_hold_ret_x'] = 1 - (df_daily['hold_to_x'] / df_daily['hold_to_x'].shift()) ** (
-                    1 / df_daily['days_diff'])
-        df_daily['daily_hold_ret_y'] = 1 - (df_daily['hold_to_y'] / df_daily['hold_to_y'].shift()) ** (
-                    1 / df_daily['days_diff'])
+        df_daily['daily_hold_ret_x'] = (df_daily['hold_to_x'] / df_daily['hold_to_x'].shift()) ** (
+                    1 / df_daily['days_diff']) - 1
+        df_daily['daily_hold_ret_y'] = (df_daily['hold_to_y'] / df_daily['hold_to_y'].shift()) ** (
+                    1 / df_daily['days_diff']) - 1
 
         df_full = df_daily.upsample("date", "1d").fill_null("backward")
 
@@ -226,6 +226,53 @@ class PortfolioHistory:
 
         return res_df
 
+    def calculate_information_ratio_weekly(self, df: pl.DataFrame) -> pl.DataFrame:
+        """
+            calculate
+        Args:
+            df:
+
+        Returns:
+        """
+        df_daily = (
+            df
+            .sort('timestamp')
+            .with_column(
+                (pl.col('date').dt.year().cast(str) + '_' + (pl.col('date').dt.week()).cast(str)).alias('week')
+            )
+            .groupby('week')
+            .last()
+            .sort('week')
+        )
+        df_daily['daily_ret_x'] = df_daily['total_value_to_x'].pct_change()
+        df_daily['daily_ret_y'] = df_daily['total_value_to_y'].pct_change()
+
+        df_daily['daily_hold_ret_x'] = df_daily['hold_to_x'].pct_change()
+        df_daily['daily_hold_ret_y'] = df_daily['hold_to_y'].pct_change()
+
+        # df_full = df_daily.upsample("date", "1d").fill_null("backward")
+
+        diff_x = df_daily['daily_ret_x'] - df_daily['daily_hold_ret_x']
+        diff_y = df_daily['daily_ret_y'] - df_daily['daily_hold_ret_y']
+
+        df_daily['ir_weekly_total_value_to_x'] = 52 ** 0.5 * diff_x.rolling_mean(window_size=0) / diff_x.rolling_std(window_size=0)
+        df_daily['ir_weekly_total_value_to_y'] = 52 ** 0.5 * diff_y.rolling_mean(window_size=0) / diff_y.rolling_std(window_size=0)
+
+        res_df = (
+            df
+            .with_column(
+                (pl.col('date').dt.year().cast(str) + '_' + (pl.col('date').dt.week()).cast(str)).alias('week')
+            )
+            .join(
+                df_daily[['week', 'ir_weekly_total_value_to_x', 'ir_weekly_total_value_to_y']],
+                on='week',
+                how='left'
+            )
+            .select(['week', 'ir_weekly_total_value_to_x', 'ir_weekly_total_value_to_y'])
+        )
+
+        return res_df
+
     def calculate_mdd(self, df: pl.DataFrame, from_col: str, to_col: str) -> pl.DataFrame:
         peak_value = df[from_col].cummax()
         peak_value[peak_value.abs() < 1e-3] = np.nan
@@ -235,7 +282,6 @@ class PortfolioHistory:
 
         mdd = pl.DataFrame(mdd.alias(to_col))
         return mdd
-
 
     def calculate_g_apy(self, df: pl.DataFrame) -> pl.DataFrame:
         """
@@ -296,13 +342,14 @@ class PortfolioHistory:
         )
 
         ir_df = self.calculate_information_ratio(df_apy)
+        ir_weekly_df = self.calculate_information_ratio_weekly(df_apy)
         mdd_x = self.calculate_mdd(df_apy, from_col='total_value_to_x', to_col='mdd_total_value_to_x')
         mdd_y = self.calculate_mdd(df_apy, from_col='total_value_to_y', to_col='mdd_total_value_to_y')
         mdd_hold_x = self.calculate_mdd(df_apy, from_col='hold_to_x', to_col='mdd_hold_to_x')
         mdd_hold_y = self.calculate_mdd(df_apy, from_col='hold_to_y', to_col='mdd_hold_to_y')
         mdd_g_apy = self.calculate_mdd(df_apy, from_col='g_apy', to_col='mdd_g_apy')
         df_metrics = pl.concat(
-            [df_apy, ir_df, mdd_x, mdd_y, mdd_hold_x, mdd_hold_y, mdd_g_apy], how="horizontal"
+            [df_apy, ir_df, ir_weekly_df, mdd_x, mdd_y, mdd_hold_x, mdd_hold_y, mdd_g_apy], how="horizontal"
         )
         return df_metrics
 
