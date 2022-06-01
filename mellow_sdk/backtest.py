@@ -1,5 +1,7 @@
 import copy
 from typing import Tuple
+
+import pandas as pd
 import polars as pl
 from tqdm import tqdm
 
@@ -7,6 +9,7 @@ from tqdm import tqdm
 from mellow_sdk.strategies import AbstractStrategy
 from mellow_sdk.portfolio import Portfolio
 from mellow_sdk.history import PortfolioHistory, RebalanceHistory, UniPositionsHistory
+from mellow_sdk.viewers import UniswapViewer, RebalanceViewer, LiquidityViewer, PortfolioViewer
 
 
 class Backtest:
@@ -107,6 +110,8 @@ class BacktestTimeCV:
 
         self.strategy = strategy
 
+        self.metrics = []
+
     def get_splits(self, df, test_sec, step_sec):
         idx_column = df.with_row_count()["row_nr"]
         ts_col = df["timestamp"].cast(int)
@@ -144,7 +149,6 @@ class BacktestTimeCV:
         return test_idx
 
     def backtest(self, df, test_sec, step_sec, tail_type_cv=False):
-        metrics = None
         if tail_type_cv:
             folds = self.get_tail_splits(df, min_test_sec=test_sec, step_sec=step_sec)
         else:
@@ -152,7 +156,6 @@ class BacktestTimeCV:
 
         assert len(folds) > 0, "there is no folds, change yours parameters"
 
-        realized_folds = []
         for fold_num, test_idx in enumerate(tqdm(folds)):
             df_test = df[test_idx]
             bt = Backtest(strategy=copy.copy(self.strategy))
@@ -163,24 +166,28 @@ class BacktestTimeCV:
                 portfolio_history, rebalance_history, uni_history = bt.backtest(
                     df=df_test
                 )
-                stats = portfolio_history.calculate_stats()
 
-                stats = stats.with_columns(
-                    [
-                        pl.col("timestamp").first().alias("fold_from"),
-                        pl.col("timestamp").last().alias("fold_to"),
-                    ]
-                )
+                self.metrics.append({
+                    'fold_num': fold_num,
+                    'portfolio_history': portfolio_history,
+                    'rebalance_history': rebalance_history,
+                    'uni_history': uni_history
+                })
 
-                if metrics is None:
-                    metrics = stats[-1]
-                else:
-                    metrics = metrics.vstack(stats[-1])
+        return self.metrics
 
-                realized_folds.append(fold_num)
+    def get_score_table(self):
+        table = []
+        for fold_metrics in self.metrics:
+            stats = fold_metrics['portfolio_history'].calculate_stats()
+            table.append({
+                'fold_num': fold_metrics['fold_num'],
+                'from': stats['date'][0],
+                'to': stats['date'][-1],
+                'g_apy': stats['g_apy'][-1]
+            })
 
-        metrics = metrics.with_column(pl.Series(realized_folds).alias("fold_num"))
-        return metrics
+        return pd.DataFrame(table)
 
 
 class BacktestBlockCV:
