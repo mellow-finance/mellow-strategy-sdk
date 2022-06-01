@@ -88,7 +88,7 @@ class BiCurrencyPosition(AbstractPosition):
 
     Attributes:
         name: Unique name for the position.
-        swap_fee: Exchange fee expressed as a percentage.
+        swap_fee: Exchange fee expressed as a fraction.
         gas_cost: Gas costs, expressed in Y currency.
         x: Amount of asset X.
         y: Amount of asset Y.
