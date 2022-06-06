@@ -53,6 +53,7 @@ class Token(Enum):
     WBTC = "WBTC"
     WETH = "WETH"
     stETH = "stETH"
+    wstETH = "wstETH"
     USDC = "USDC"
     USDT = "USDT"
 
@@ -265,6 +266,12 @@ TOKEN_DETAILS = {
         "name": "stETH",
         "description": "Staked Ether",
         "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        "decimals": 18,
+    },
+    Token.wstETH.value: {
+        "name": "wstETH",
+        "description": "Wrapped Staked Ether",
+        "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
         "decimals": 18,
     },
     Token.USDT.value: {
@@ -557,6 +564,12 @@ POOLS = [
         "address": "0x92995D179a5528334356cB4Dc5c6cbb1c068696C",
         "token0": Token.USDC,
         "token1": Token.UST,
+        "fee": Fee.LOW,
+    },
+    {
+        "address": "0xD340B57AAcDD10F96FC1CF10e15921936F41E29c",
+        "token0": Token.wstETH,
+        "token1": Token.WETH,
         "fee": Fee.LOW,
     },
 ]
