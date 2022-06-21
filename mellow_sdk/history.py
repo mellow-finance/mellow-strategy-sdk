@@ -374,7 +374,7 @@ class PortfolioHistory:
         ils = self.calculate_ils(df)
         fees = self.calculate_fees(df)
         df_prep = pl.concat(
-            [df[['week', 'date', "timestamp", "price"]], values, ils, fees], how="horizontal"
+            [df[['week', 'date', "timestamp", "price", "block_number"]], values, ils, fees], how="horizontal"
         )
         df_to = self.calculate_value_to(df_prep)
         df_to_ext = pl.concat([df_prep, df_to], how="horizontal")
