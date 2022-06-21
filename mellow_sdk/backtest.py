@@ -35,8 +35,6 @@ class Backtest:
     def backtest(
         self,
         df: pl.DataFrame,
-        by_block=False,
-        every_block=False,
     ) -> Tuple[PortfolioHistory, RebalanceHistory, UniPositionsHistory]:
         """
         | 1) Calls ``AbstractStrategy.rebalance`` for every market action with.
@@ -51,8 +49,6 @@ class Backtest:
 
         Attributes:
             df: df with pool events, or df with market data. df format is [('timestamp': datetime, 'price' : float)]
-            by_block: False - backtest on every action in mempool, True - backtest every block
-            every_block: False - skip blocks without actions, otherwise bt return last action for every block.
         Returns:
             | History classes that store different portfolio stapshots.
             |
@@ -64,14 +60,6 @@ class Backtest:
         rebalance_history = RebalanceHistory()
         uni_history = UniPositionsHistory()
 
-        if by_block or every_block:
-            maxs = df.groupby(["block_number"]).agg({"timestamp": "max"})
-
-            df = df.join(maxs, on=["block_number"])
-            df = df[df["timestamp"] == df["timestamp_max"]].drop("timestamp_max")
-
-        # if every_block:
-
         for record in df.to_dicts():
             is_rebalanced = self.strategy.rebalance(
                 record=record, portfolio=self.portfolio
@@ -79,7 +67,7 @@ class Backtest:
             portfolio_snapshot = self.portfolio.snapshot(
                 timestamp=record["timestamp"],
                 price=record["price"],
-                block_number=record.get("price", None),
+                block_number=record.get("block_number", None),
             )
             portfolio_history.add_snapshot(portfolio_snapshot)
             rebalance_history.add_snapshot(record["timestamp"], is_rebalanced)
