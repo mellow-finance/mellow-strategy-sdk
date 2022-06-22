@@ -82,6 +82,49 @@ class AbstractPosition(ABC):
         raise Exception(NotImplemented)
 
 
+class HoldPosition(AbstractPosition):
+    """
+        Just hold balance, negative or positive.
+        Used for research.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        x: float = None,
+        y: float = None,
+    ) -> None:
+        super().__init__(name)
+        self.x = x
+        self.y = y
+
+    def change_balance(self, dx: float, dy: float) -> None:
+        self.x += dx
+        self.y += dy
+
+    def to_x(self, price: float) -> float:
+        assert price > 1e-16, f"Incorrect price = {price}"
+        res = self.x + self.y / price
+        return res
+
+    def to_y(self, price: float) -> float:
+        assert price > 1e-16, f"Incorrect price = {price}"
+        res = self.x * price + self.y
+        return res
+
+    def to_xy(self, price: float) -> Tuple[float, float]:
+        return self.x, self.y
+
+    def snapshot(
+        self, timestamp: datetime, price: float, block_number: Optional[int]
+    ) -> dict:
+        snapshot = {
+            f"{self.name}_value_x": float(self.x),
+            f"{self.name}_value_y": float(self.y),
+        }
+        return snapshot
+
+
 class BiCurrencyPosition(AbstractPosition):
     """
     ``BiCurrencyPosition`` is a class corresponding to currency pair vault.
