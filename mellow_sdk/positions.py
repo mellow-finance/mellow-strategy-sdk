@@ -123,7 +123,6 @@ class HoldPosition(AbstractPosition):
 
 class HedgePosition(AbstractPosition):
     """
-        Just hold balance, negative or positive.
         Used for research.
     """
 
@@ -137,10 +136,21 @@ class HedgePosition(AbstractPosition):
         self.x = x
         self.y = y
 
+        self.
         self.hedge_positions = []
 
     def add_hedge(self, x, price):
         self.hedge_positions.append((x, price))
+
+    def rebalance_hedge(self, x, price):
+        total_hedge = 0
+
+        for hedge, _ in self.hedge_positions:
+            total_hedge += hedge
+
+        if (x - total_hedge) > 1e-6:
+            self.add_hedge(x=total_hedge - x, price=price)
+
 
     def to_x(self, price: float) -> float:
         return 0
