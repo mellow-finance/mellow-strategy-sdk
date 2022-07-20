@@ -91,16 +91,12 @@ class HoldPosition(AbstractPosition):
     def __init__(
         self,
         name: str,
-        x: float = None,
-        y: float = None,
     ) -> None:
         super().__init__(name)
-        self.x = x
-        self.y = y
+        self.x = 0
 
     def change_balance(self, dx: float, dy: float) -> None:
         self.x += dx
-        self.y += dy
 
     def to_x(self, price: float) -> float:
         assert price > 1e-16, f"Incorrect price = {price}"
@@ -121,6 +117,52 @@ class HoldPosition(AbstractPosition):
         snapshot = {
             f"{self.name}_value_x": float(self.x),
             f"{self.name}_value_y": float(self.y),
+        }
+        return snapshot
+
+
+class HedgePosition(AbstractPosition):
+    """
+        Just hold balance, negative or positive.
+        Used for research.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        x: float = None,
+        y: float = None,
+    ) -> None:
+        super().__init__(name)
+        self.x = x
+        self.y = y
+
+        self.hedge_positions = []
+
+    def add_hedge(self, x, price):
+        self.hedge_positions.append((x, price))
+
+    def to_x(self, price: float) -> float:
+        return 0
+
+    def to_y(self, price: float) -> float:
+        assert price > 1e-16, f"Incorrect price = {price}"
+        res = 0
+        for x, hedge_price in self.hedge_positions:
+            res += x * (hedge_price - price)
+
+        return res
+
+    def to_xy(self, price: float) -> Tuple[float, float]:
+        print('deprecated')
+        return self.x, self.y
+
+    def snapshot(
+        self, timestamp: datetime, price: float, block_number: Optional[int]
+    ) -> dict:
+        snapshot = {
+            f"{self.name}_value_x": 0,
+            f"{self.name}_value_y": self.to_y(price=price),
         }
         return snapshot
 
