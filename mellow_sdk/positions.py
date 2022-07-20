@@ -136,7 +136,6 @@ class HedgePosition(AbstractPosition):
         self.x = x
         self.y = y
 
-        self.
         self.hedge_positions = []
 
     def add_hedge(self, x, price):
