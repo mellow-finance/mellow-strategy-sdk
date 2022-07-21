@@ -94,9 +94,11 @@ class HoldPosition(AbstractPosition):
     ) -> None:
         super().__init__(name)
         self.x = 0
+        self.y = 0
 
     def change_balance(self, dx: float, dy: float) -> None:
         self.x += dx
+        self.y += dy
 
     def to_x(self, price: float) -> float:
         assert price > 1e-16, f"Incorrect price = {price}"
