@@ -91,10 +91,12 @@ class HoldPosition(AbstractPosition):
     def __init__(
         self,
         name: str,
+        x: float,
+        y: float
     ) -> None:
         super().__init__(name)
-        self.x = 0
-        self.y = 0
+        self.x = x
+        self.y = y
 
     def change_balance(self, dx: float, dy: float) -> None:
         self.x += dx
