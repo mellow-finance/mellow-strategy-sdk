@@ -54,6 +54,18 @@ class PortfolioHistory:
         df_y = df[value_of_y_cols].sum(axis=1).alias("total_value_y")
         return pl.DataFrame([df_x, df_y])
 
+    def calculate_futures_payments(self, df: pl.DataFrame):
+        payments_cols = [col for col in df.columns if "futures_payments" in col]
+
+        if payments_cols:
+            df_payments = (
+                df[payments_cols].fill_null("forward").sum(axis=1).alias("total_futures_payments")
+            )
+        else:
+            data = [0] * df.shape[0]
+            df_payments = pl.Series("total_futures_payments", data, dtype=pl.Float64)
+        return pl.DataFrame([df_payments])
+
     def calculate_ils(self, df: pl.DataFrame) -> pl.DataFrame:
         """
         | Calculate impermanent loss separately in X and Y currencies as sum of positions IL.
@@ -355,26 +367,30 @@ class PortfolioHistory:
 
     def calculate_stats(self) -> pl.DataFrame:
         """
-        Calculate all statistics for portfolio. Main function of class.
+            Calculate all statistics for portfolio. Main function of class.
 
-        Returns:
-            Portfolio statistics dataframe.
+            Returns:
+                Portfolio statistics dataframe.
         """
         df = self.to_df()
         df = (
             df
-            .with_column(
+                .with_column(
                 pl.col('timestamp').cast(pl.Date).alias('date')
             )
-            .with_column(
+                .with_column(
                 (pl.col('date').dt.year().cast(str) + '_' + (pl.col('date').dt.week()).cast(str)).alias('week')
             )
         )
         values = self.calculate_values(df)
+        futures_payments = self.calculate_futures_payments(df)
         ils = self.calculate_ils(df)
         fees = self.calculate_fees(df)
         df_prep = pl.concat(
-            [df[['week', 'date', "timestamp", "price", "block_number"]], values, ils, fees], how="horizontal"
+            [
+                df[['week', 'date', "timestamp", "price", "block_number"]],
+                values, ils, fees, futures_payments
+            ], how="horizontal"
         )
         df_to = self.calculate_value_to(df_prep)
         df_to_ext = pl.concat([df_prep, df_to], how="horizontal")
@@ -387,6 +403,17 @@ class PortfolioHistory:
         df_apy = pl.concat(
             [df_to_ext, prt_x, prt_y, hld_x, hld_y, g_apy], how="horizontal"
         )
+
+        return df_apy
+
+    def calculate_advanced_stats(self) -> pl.DataFrame:
+        """
+        Calculate all statistics for portfolio. Main function of class.
+
+        Returns:
+            Portfolio statistics dataframe.
+        """
+        df_apy = self.calculate_stats()
 
         ir_df = self.calculate_information_ratio(df_apy)
         ir_weekly_df = self.calculate_information_ratio_weekly(df_apy)
