@@ -191,7 +191,7 @@ class FuturesPosition(AbstractPosition):
             amount: float,
             open_price: float,
             long: bool,
-            timestamp: datetime,
+            # timestamp: datetime,
             # leverage: int = 1
     ) -> None:
         super().__init__(name)
