@@ -255,7 +255,7 @@ class FuturesPosition(AbstractPosition):
         self, timestamp: datetime, price: float, block_number: Optional[int]
     ) -> dict:
         snapshot = {
-            f"{self.name}_value_x": self.to_x(price=price) + self.payments,
+            f"{self.name}_value_x": self.to_x(price=price),
             f"{self.name}_value_y": self.to_y(price=price) + self.payments,
             f"{self.name}_futures_payments": self.payments
         }
