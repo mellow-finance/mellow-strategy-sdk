@@ -257,6 +257,7 @@ class FuturesPosition(AbstractPosition):
         snapshot = {
             f"{self.name}_value_x": self.to_x(price=price),
             f"{self.name}_value_y": self.to_y(price=price) + self.payments,
+            f"{self.name}_amount": self.amount,
             f"{self.name}_futures_payments": self.payments
         }
         return snapshot
