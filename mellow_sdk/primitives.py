@@ -218,7 +218,7 @@ class Pool:
         """
         return self._address
 
-    # @property
+    @property
     def token0(self) -> "Token":
         """
         Returns:
@@ -226,7 +226,7 @@ class Pool:
         """
         return self._token0
 
-    # @property
+    @property
     def token1(self) -> "Token":
         """
         Returns:
